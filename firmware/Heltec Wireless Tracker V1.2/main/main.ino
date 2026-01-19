@@ -1,113 +1,98 @@
 /*
-  Heltec Tracker - GPS + LoRa + ESP-NOW Firmware
-  Board: Heltec Tracker V1.2 (ESP32-S3)
-  
-  Revision: GPS module improved with better cold start handling + Time Display
+  Heltec Tracker - GPS + LoRaWAN (TTN) + TFT + IR (ESP-NOW receiver)
+  Mode: SENDER ke The Things Network (TTN)
 */
 
 #include "PinConfig.h"
 
+extern TinyGPSPlus gps;
+extern Adafruit_ST7735 tft;
+extern ir_data_t latestIr;
+extern unsigned long irTimestamp;
+extern String loraWanStatus;
+
 void setup() {
-  // Inisialisasi Serial untuk debugging
   Serial.begin(115200);
-  delay(200);
-  
-  Serial.println(F(""));
-  Serial.println(F("============================================="));
-  Serial.println(F("  Heltec Tracker: GPS + LoRa + ESP-NOW"));
-  Serial.println(F("============================================="));
-  Serial.println(F(""));
-  
-  // Power control - HARUS HIGH untuk menyalakan peripheral
+  delay(100);
+  Serial.println(F("\n=== Heltec Tracker: GPS + LoRaWAN (TTN) ==="));
+
   pinMode(VEXT_CTRL, OUTPUT);
   digitalWrite(VEXT_CTRL, HIGH);
   delay(100);
-  Serial.println(F("[Power] VEXT enabled"));
 
-  // Inisialisasi TFT display
   tftInit();
   tftShowStatus("Initializing...", "Please wait");
-  Serial.println(F("[TFT] Display initialized"));
 
-  // Inisialisasi GPS dengan fungsi khusus
-  gpsInit();
-  tftShowStatus("GPS Starting...", "Acquiring fix");
+  // === INISIALISASI GPS SESUAI PROGRAM DOSEN ===
+  pinMode(GNSS_RST, OUTPUT);
+  digitalWrite(GNSS_RST, HIGH);
+  Serial1.begin(115200, SERIAL_8N1, GPS_RX_PIN, GPS_TX_PIN); // <-- 115200, Serial1
+  delay(500);
+  Serial.println(F("[GPS] Initialized on Serial1 @ 115200"));
 
-  // Inisialisasi LoRa
-  if (!loraInit()) {
-    Serial.println(F("[ERROR] LoRa initialization failed!"));
-    tftShowStatus("ERROR", "LoRa Failed", "Check wiring");
-    
-    // Blink LED sebagai indikator error
-    while (1) {
-      digitalWrite(LORA_LED_PIN, HIGH);
-      delay(200);
-      digitalWrite(LORA_LED_PIN, LOW);
-      delay(200);
-    }
+  espNowInit();
+  Serial.println(F("[ESP-NOW] Ready for IR data"));
+
+  if (!loraWanInit()) {
+    Serial.println(F("[LoRaWAN] Initial join failed – will retry"));
   }
 
-  // Inisialisasi ESP-NOW untuk menerima data IR
-  espNowInit();
-  
-  Serial.println(F(""));
-  Serial.println(F("[System] All modules initialized"));
-  Serial.println(F("[System] Ready to operate"));
-  Serial.println(F("============================================="));
-  Serial.println(F(""));
-  
-  tftShowStatus("System Ready", "Waiting GPS...");
+  Serial.println(F("[System] Running"));
 }
 
 void loop() {
-  static unsigned long lastTx = 0;
-  static unsigned long backoff = 0;
+  static unsigned long lastUplink = 0;
   static unsigned long lastDisplay = 0;
-  static bool gpsFixReported = false;
+  static bool hasSentIr = false;
 
-  // Feed GPS data (parsing NMEA)
+  // === BACA GPS SETIAP ITERASI LOOP ===
   gpsFeed();
 
-  // Update display setiap 1 detik
-  if (millis() - lastDisplay > 1000) {
+  // Hapus IR setelah 7 detik
+  if (latestIr.address != 0 && (millis() - irTimestamp > 7000)) {
+    latestIr.address = 0;
+    latestIr.command = 0;
+    latestIr.seq = 0;
+    hasSentIr = false;
+  }
+
+  // Kirim ke TTN segera saat IR diterima
+  if (latestIr.address != 0 && !hasSentIr && loraWanStatus == "Joined") {
+    loraWanSendData();
+    hasSentIr = true;
+    lastUplink = millis();
+  }
+
+  // Update TFT tiap 100 ms
+  if (millis() - lastDisplay > 100) {
+    tftUpdateData(
+      latestIr.address,
+      latestIr.command,
+      currentLat,
+      currentLon,
+      currentSats,
+      currentHour,
+      currentMinute,
+      currentSecond,
+      timeValid,
+      loraWanStatus
+    );
     lastDisplay = millis();
-    
-    // Update TFT dengan data terbaru
-    tftUpdateData(latestIr.address, latestIr.command, currentLat, currentLon, currentSats);
-    
-    // Report ke Serial saat pertama kali dapat GPS fix
-    if (gpsValid && !gpsFixReported) {
-      Serial.println(F(""));
-      Serial.println(F("[Main] GPS fix acquired - starting LoRa transmission"));
-      Serial.println(F(""));
-      gpsFixReported = true;
-      tftShowStatus("GPS Fixed!", "Transmitting...");
-    }
   }
 
-  // Transmisi LoRa berkala
-  if (millis() - lastTx >= LORA_TX_INTERVAL_MS + backoff) {
-    lastTx = millis();
-    backoff = random(BACKOFF_MIN_MS, BACKOFF_MAX_MS);
-    
-    // Kirim data via LoRa
-    loraSendData();
-    
-    // Reset data IR jika sudah lebih dari 5 detik
-    if (millis() - lastIrUpdate > 5000) {
-      latestIr.address = 0;
-      latestIr.command = 0;
-      newIrData = false;
-    }
+  // Kirim reguler tiap 10 detik
+  if (loraWanStatus == "Joined" && millis() - lastUplink >= UPLINK_INTERVAL_MS) {
+    ir_data_t temp = latestIr;
+    latestIr = {0, 0, 0};
+    loraWanSendData();
+    latestIr = temp;
+    lastUplink = millis();
   }
 
-  // Transmisi LoRa segera saat ada data IR baru
-  if (newIrData && (millis() - lastIrUpdate < 100)) {
-    Serial.println(F("[Main] New IR data detected - immediate transmission"));
-    loraSendData();
-    newIrData = false;
+  // Coba join ulang tiap 15 detik
+  if (loraWanStatus == "JoinFailed" && (millis() % 15000 < 100)) {
+    loraWanInit();
   }
 
-  // Small delay untuk stability
-  delay(10);
+  delay(5); // Ringan, tidak mengganggu pembacaan GPS
 }
