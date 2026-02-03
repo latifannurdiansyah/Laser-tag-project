@@ -81,7 +81,7 @@ void checkAntiCheat() {
   // Output LOW ketika ada photodiode yang ditutup/terhalang
   int photodiodeStatus = digitalRead(PHOTODIODE_PIN);
   
-  if (photodiodeStatus == LOW) {
+  if (photodiodeStatus == LOW) {// LED BIASA LOW KALAU IR HIGH
     // Anti-cheat terdeteksi! (IR tertutup)
     if (antiCheatActive) {
       antiCheatActive = false;
