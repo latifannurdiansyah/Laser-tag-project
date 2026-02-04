@@ -480,6 +480,22 @@
             gap: 16px;
         }
 
+        .footer-center {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .footer-center i {
+            color: var(--accent-primary);
+        }
+
+        .footer-center strong {
+            color: var(--accent-primary);
+        }
+
         .footer-item {
             display: flex;
             align-items: center;
@@ -841,11 +857,15 @@
                 padding: 16px 20px;
             }
 
-            .footer {
-                flex-direction: column;
-                gap: 12px;
-                text-align: center;
-            }
+        .footer {
+            flex-direction: column;
+            gap: 16px;
+            text-align: center;
+        }
+
+        .footer-left, .footer-center, .footer-right {
+            justify-content: center;
+        }
 
             .btn-group {
                 flex-direction: column;
@@ -935,21 +955,24 @@
         </div>
     </div>
 
-    <div class="footer">
-        <div class="footer-left">
-            <div class="footer-item">
-                <i class="fas fa-clock"></i>
-                <span>Last update: <span id="lastUpdate">--</span></span>
+        <div class="footer">
+            <div class="footer-left">
+                <div class="footer-item">
+                    <i class="fas fa-clock"></i>
+                    <span>Last update: <span id="lastUpdate">--</span></span>
+                </div>
+                <div class="footer-item">
+                    <i class="fas fa-sync-alt"></i>
+                    <span id="updateStatus">Auto-refreshing</span>
+                </div>
             </div>
-            <div class="footer-item">
-                <i class="fas fa-sync-alt"></i>
-                <span id="updateStatus">Auto-refreshing</span>
+            <div class="footer-center">
+                <i class="fas fa-copyright"></i> 2025 Laser Tag GPS Tracker - by <strong>Latifan Nurdiansyah</strong>
+            </div>
+            <div class="footer-right">
+                <i class="fas fa-shield-alt"></i> System Active
             </div>
         </div>
-        <div class="footer-right">
-            <i class="fas fa-shield-alt"></i> System Active
-        </div>
-    </div>
 
     <div class="toast-container" id="toastContainer"></div>
 
