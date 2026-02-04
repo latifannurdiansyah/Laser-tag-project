@@ -1,111 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPS Tracker Code Display</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1e1e1e;
-            color: #d4d4d4;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        h1 {
-            color: #4fc3f7;
-            border-bottom: 2px solid #333;
-            padding-bottom: 10px;
-        }
-        .status-box {
-            background: #2d2d2d;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 5px solid #4caf50;
-        }
-        pre {
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            max-height: 600px;
-            overflow-y: auto !important;
-        }
-        code {
-            font-family: 'Consolas', 'Monaco', 'Andale Mono', monospace !important;
-            font-size: 14px !important;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <h1>Tes Koneksi Firebase Laser Tag</h1>
-        
-        <div class="status-box">
-            <p><strong>Status:</strong> Cek Console (F12) untuk melihat status pengiriman data.</p>
-        </div>
-
-        <h3>Source Code: GPS Tracker (SIM900A)</h3>
-        <pre><code class="language-cpp">/*
-  GPS Tracker - FIREBASE VERSION (SIM900A)
-  Menggunakan REST API Firebase melalui AT Commands
-*/
-
-#include &lt;Arduino.h&gt;
-#include &lt;SPI.h&gt;
-#include &lt;Adafruit_ST7735.h&gt;
-#include &lt;Adafruit_GFX.h&gt;
-#include &lt;TinyGPS++.h&gt;
-#include &lt;HardwareSerial.h&gt;
-
-// ===== PIN DEFINITIONS =====
-#define Vext_Ctrl  3
-#define LED_K      21
-#define TFT_CS     38
-#define TFT_DC     40
-#define TFT_RST    39
-#define TFT_SCLK   41
-#define TFT_MOSI   42
-#define GPS_RX     33
-#define GPS_TX     34
-#define GPRS_TX_PIN 17
-#define GPRS_RX_PIN 16
-#define GPRS_RST_PIN 15
-
-// ===== CONFIGURATION =====
-const char* APN = "indosatgprs";
-const char* FIREBASE_HOST = "gps-log-a1d90-default-rtdb.asia-southeast1.firebasedatabase.app";
-const char* FIREBASE_PATH = "/locations.json"; 
-const char* FIREBASE_AUTH = "AMTJsG2px3hwlumdLkvcpnFNQF3hybkw0WvwM9WI"; 
-const char* DEVICE_ID = "heltec-tracker-01";
-
-// ... (logika program setup dan loop) ...
-void setup() {
-  // Inisialisasi hardware
-  Serial.begin(115200);
-  sim900.begin(57600, SERIAL_8N1, GPRS_RX_PIN, GPRS_TX_PIN);
-  
-  if (activateGPRS()) {
-    showStatus("READY");
-  }
-}
-
-void loop() {
-  // Kirim data ke Firebase setiap 30 detik
-  if (gprsReady && gps.location.isValid()) {
-    sendToFirebase(gps.location.lat(), gps.location.lng());
-  }
-}
-</code></pre>
-    </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
-    <script type="module" src="index.js"></script>
-</body>
-</html>
+<div class="status-box" style="border-left-color: #4fc3f7; margin-top: 20px;">
+    <h3>Live Tracking Data</h3>
+    <table id="data-table" style="width:100%; border-collapse: collapse; color: white;">
+        <thead>
+            <tr style="border-bottom: 2px solid #444; text-align: left;">
+                <th style="padding: 10px;">Device ID</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody id="table-body">
+            <tr>
+                <td colspan="4" style="text-align:center; padding: 20px;">Menunggu data dari alat...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
