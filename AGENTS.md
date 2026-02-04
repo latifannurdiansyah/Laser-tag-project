@@ -26,47 +26,34 @@ npx http-server -p 8080
 # View at http://localhost:8080/
 ```
 
-### Arduino Firmware
+### Arduino Firmware (Arduino IDE Only)
 
-**Using Arduino IDE:**
-1. Open `.ino` file in Arduino IDE
+**Steps to Upload Firmware:**
+1. Open the `.ino` file in Arduino IDE
 2. Select correct board:
    - `Heltec Wireless Tracker V1.2` for GPS tracker firmware
    - `ESP32S3 Dev Module` for helmet/vest firmware
-3. Select appropriate port
-4. Click Upload (Ctrl+U)
+3. Select the correct port (USB/UART)
+4. Click Upload button (Ctrl+U)
+5. Open Serial Monitor (Ctrl+Shift+M) to view debug output at 115200 baud
 
-**Using PlatformIO (recommended):**
-```bash
-# Initialize PlatformIO project (one-time)
-cd firmware/Backup/Heltec\ Wireless\ Tracker\ V1.2/heltec-tracker-espnow-lora-gps
-pio project init
-
-# Build firmware
-pio run
-
-# Upload firmware
-pio run -t upload
-
-# Monitor serial output
-pio device monitor
-
-# Build for specific environment
-pio run -e esp32doit-devkit-v1
-```
+**Board Configuration:**
+- **Helmet Firmware**: `firmware/Backup/ESP32S3 Supermini/Helm_IR_Anticheating_espnow/Helm_IR_Anticheating_espnow.ino`
+- **GPS Tracker Firmware**: `firmware/LaserTagProjectFirmwareV1/LaserTagProjectFirmwareV1.ino`
+- **Full Tracker Firmware**: `firmware/Backup/Heltec Wireless Tracker V1.2/heltec-tracker-espnow-lora-gps/src/main.ino`
 
 ### Firmware Libraries Required
 
-Install via Arduino Library Manager or PlatformIO lib_deps:
+Install via Arduino Library Manager (Sketch → Include Library → Manage Libraries):
 
 ```
 IRremote.hpp
 TinyGPS++
-Adafruit ST7735
-Adafruit GFX
+Adafruit ST7735 and ST7789 Library
+Adafruit GFX Library
 RadioLib
-Firebase Arduino ESP32 Client
-ESP32 Arduino Core
+Firebase Arduino ESP32 Client (by Mobizt)
+ESP32 Arduino Core (installed via Board Manager)
 ```
 
 ---
@@ -93,13 +80,9 @@ DevTools.deleteData()           // Delete specific path
 
 Firmware outputs debug info at 115200 baud:
 
-```bash
-# PlatformIO monitor
-pio device monitor -b 115200
-
-# Arduino IDE Serial Monitor
-# Select 115200 baud
-```
+1. Open **Tools → Serial Monitor** in Arduino IDE
+2. Set baud rate to **115200**
+3. Or use a terminal program like PuTTY or TeraTerm
 
 ### GPS Testing
 
@@ -347,7 +330,20 @@ Laser-tag-project/
 │   │   └── LaserTagProjectFirmwareV1.ino
 │   └── Backup/
 │       ├── ESP32S3 Supermini/      # Helmet firmware
+│       │   └── Helm_IR_Anticheating_espnow/
+│       │       ├── Helm_IR_Anticheating_espnow.ino
+│       │       ├── ESPNowHandler.h
+│       │       ├── IRHandler.h
+│       │       └── Anticheat.h
 │       └── Heltec Wireless Tracker V1.2/  # GPS tracker
+│           └── heltec-tracker-espnow-lora-gps/
+│               └── src/
+│                   ├── main.ino
+│                   ├── PinConfig.h
+│                   ├── ESPNowModule.ino
+│                   ├── GPSModule.ino
+│                   ├── LoRaModule.ino
+│                   └── TFTDisplay.ino
 └── docs/
     └── Ujian Semhas/               # Thesis documents
 ```
