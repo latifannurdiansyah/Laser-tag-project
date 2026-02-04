@@ -1,30 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GPS Tracking Monitor</title>
     <style>
-        body { background-color: #1e1e1e; color: #d4d4d4; font-family: 'Courier New', monospace; padding: 20px; }
-        .tree-container { background-color: #252526; padding: 20px; border-radius: 8px; border: 1px solid #3c3c3c; width: fit-content; min-width: 300px; }
+        body { background-color: #1e1e1e; color: #d4d4d4; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; }
+        h1 { color: white; border-bottom: 1px solid #333; padding-bottom: 10px; }
         
-        .node-root { color: #4fc3f7; font-weight: bold; margin-bottom: 10px; display: block; }
-        .node-item { margin-left: 25px; border-left: 1px solid #444; padding-left: 15px; margin-bottom: 8px; position: relative; }
-        
-        /* Membuat garis siku seperti di Firebase */
-        .node-item::before { content: ""; position: absolute; left: 0; top: 12px; width: 10px; border-top: 1px solid #444; }
+        /* Gaya Tabel */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; background-color: #252526; }
+        th, td { border: 1px solid #3c3c3c; padding: 12px; text-align: left; }
+        th { background-color: #333; color: #4fc3f7; }
 
-        .key { color: #ce9178; } /* Warna coklat/orange untuk key */
-        .value { color: #b5cea8; font-weight: bold; margin-left: 5px; } /* Warna angka */
-        .highlight { background-color: rgba(79, 195, 247, 0.1); border: 1px solid #4fc3f7; border-radius: 4px; padding: 2px 5px; }
+        /* Gaya Firebase Tree View */
+        .tree-container { background-color: #1e1e1e; padding: 20px; border: 1px solid #3c3c3c; border-radius: 4px; font-family: 'Consolas', monospace; }
+        .node-root { color: #4fc3f7; font-weight: bold; display: block; margin-bottom: 5px; }
+        .node-item { margin-left: 20px; border-left: 1px solid #444; padding-left: 15px; position: relative; margin-top: 5px; }
+        .node-item::before { content: ""; position: absolute; left: 0; top: 10px; width: 10px; border-top: 1px solid #444; }
+        .key { color: #9cdcfe; }
+        .value { color: #ce9178; margin-left: 5px; }
+        .number { color: #b5cea8; }
+        .highlight { border: 1px solid #d18e00; padding: 0 4px; border-radius: 2px; }
     </style>
 </head>
 <body>
-    <h1>Firebase Live View</h1>
-    
+
+    <h1>Live Tracking GPS</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Device ID</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Altitude</th>
+                <th>Satellites</th>
+            </tr>
+        </thead>
+        <tbody id="table-body">
+            <tr><td colspan="5">Menghubungkan ke Firebase...</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Firebase Structure View</h3>
     <div class="tree-container">
         <span class="node-root">gps_tracking</span>
-        <div id="gps-content">
-            <div class="node-item">Memuat data...</div>
+        <div id="tree-content">
+            <div class="node-item">Menunggu data...</div>
         </div>
     </div>
 
