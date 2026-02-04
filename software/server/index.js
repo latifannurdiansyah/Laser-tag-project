@@ -1,38 +1,34 @@
-import { db } from "./firebase.js";
-import { ref, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.x.x/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.x.x/firebase-database.js";
 
+// Ganti dengan konfigurasi dari Firebase Console Anda
+const firebaseConfig = {
+  apiKey: "AIzaSyBknkRTKdVwZInvip3SrzWDIdpefDRoIWI",
+  databaseURL: "https://gps-log-a1d90-default-rtdb.asia-southeast1.firebasedatabase.app",
+  // ... rest of config
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 const tableBody = document.getElementById('table-body');
-const locationsRef = ref(db, 'locations');
 
-// Ambil 5 data terakhir agar tabel tidak terlalu panjang
-const latestQuery = query(locationsRef, limitToLast(5));
+// Referensi ke 'gps_tracking' sesuai gambar database Anda
+const gpsRef = ref(db, 'gps_tracking');
 
-onValue(latestQuery, (snapshot) => {
-    const data = snapshot.val();
-    
-    if (data) {
-        // Kosongkan tabel sebelum diisi data baru
-        tableBody.innerHTML = "";
-
-        // Firebase mengembalikan objek, kita ubah ke array dan urutkan terbaru di atas
-        const sortedData = Object.values(data).reverse();
-
-        sortedData.forEach(item => {
-            const row = document.createElement('tr');
-            row.style.borderBottom = "1px solid #333";
-            
-            // Konversi timestamp milidetik ke waktu lokal
-            const time = item.t ? new Date(item.t).toLocaleString('id-ID') : "N/A";
-
-            row.innerHTML = `
-                <td style="padding: 10px; color: #4fc3f7;">${item.device || 'Unknown'}</td>
-                <td>${item.lat}</td>
-                <td>${item.lng}</td>
-                <td style="color: #888;">${time}</td>
-            `;
-            tableBody.appendChild(row);
-        });
-    }
-}, (error) => {
-    console.error("Error membaca Firebase:", error);
+onValue(gpsRef, (snapshot) => {
+  const data = snapshot.val();
+  
+  if (data) {
+    // Jika data berbentuk objek tunggal (seperti di gambar pertama)
+    tableBody.innerHTML = `
+      <tr>
+        <td>Device_01</td>
+        <td>${data.latitude}</td>
+        <td>${data.longitude}</td>
+        <td>${new Date().toLocaleTimeString()}</td>
+      </tr>
+    `;
+  } else {
+    tableBody.innerHTML = '<tr><td colspan="4">Data tidak ditemukan.</td></tr>';
+  }
 });

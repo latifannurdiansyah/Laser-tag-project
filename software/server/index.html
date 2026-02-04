@@ -4,29 +4,29 @@
     <meta charset="UTF-8">
     <title>GPS Tracking Monitor</title>
     <style>
-        /* Tetap gunakan CSS agar tabel rapi */
-        body { background-color: #1e1e1e; color: white; font-family: sans-serif; padding: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #444; padding: 12px; text-align: left; }
-        th { background-color: #333; color: #4fc3f7; }
+        body { background-color: #1e1e1e; color: #d4d4d4; font-family: 'Courier New', monospace; padding: 20px; }
+        .tree-container { background-color: #252526; padding: 20px; border-radius: 8px; border: 1px solid #3c3c3c; width: fit-content; min-width: 300px; }
+        
+        .node-root { color: #4fc3f7; font-weight: bold; margin-bottom: 10px; display: block; }
+        .node-item { margin-left: 25px; border-left: 1px solid #444; padding-left: 15px; margin-bottom: 8px; position: relative; }
+        
+        /* Membuat garis siku seperti di Firebase */
+        .node-item::before { content: ""; position: absolute; left: 0; top: 12px; width: 10px; border-top: 1px solid #444; }
+
+        .key { color: #ce9178; } /* Warna coklat/orange untuk key */
+        .value { color: #b5cea8; font-weight: bold; margin-left: 5px; } /* Warna angka */
+        .highlight { background-color: rgba(79, 195, 247, 0.1); border: 1px solid #4fc3f7; border-radius: 4px; padding: 2px 5px; }
     </style>
 </head>
 <body>
-    <h1>Live Tracking GPS</h1>
+    <h1>Firebase Live View</h1>
     
-    <table>
-        <thead>
-            <tr>
-                <th>Device ID</th>
-                <th>Latitude</th>
-                <th>Longitude</th>
-                <th>Timestamp</th>
-            </tr>
-        </thead>
-        <tbody id="table-body">
-            <tr><td colspan="4">Menunggu data...</td></tr>
-        </tbody>
-    </table>
+    <div class="tree-container">
+        <span class="node-root">gps_tracking</span>
+        <div id="gps-content">
+            <div class="node-item">Memuat data...</div>
+        </div>
+    </div>
 
     <script type="module" src="index.js"></script>
 </body>
