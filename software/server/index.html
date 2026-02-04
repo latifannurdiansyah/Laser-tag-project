@@ -4,53 +4,1308 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GPS Tracking Monitor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #1e1e1e; color: #d4d4d4; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; }
-        h1 { color: white; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        
-        /* Gaya Tabel */
-        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; background-color: #252526; }
-        th, td { border: 1px solid #3c3c3c; padding: 12px; text-align: left; }
-        th { background-color: #333; color: #4fc3f7; }
+        :root {
+            --bg-primary: #0f0f23;
+            --bg-secondary: #1a1a2e;
+            --bg-card: rgba(30, 30, 50, 0.8);
+            --accent-primary: #6366f1;
+            --accent-secondary: #8b5cf6;
+            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-color: rgba(99, 102, 241, 0.2);
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            --shadow-glow: 0 0 40px rgba(99, 102, 241, 0.15);
+        }
 
-        /* Gaya Firebase Tree View */
-        .tree-container { background-color: #1e1e1e; padding: 20px; border: 1px solid #3c3c3c; border-radius: 4px; font-family: 'Consolas', monospace; }
-        .node-root { color: #4fc3f7; font-weight: bold; display: block; margin-bottom: 5px; }
-        .node-item { margin-left: 20px; border-left: 1px solid #444; padding-left: 15px; position: relative; margin-top: 5px; }
-        .node-item::before { content: ""; position: absolute; left: 0; top: 10px; width: 10px; border-top: 1px solid #444; }
-        .key { color: #9cdcfe; }
-        .value { color: #ce9178; margin-left: 5px; }
-        .number { color: #b5cea8; }
-        .highlight { border: 1px solid #d18e00; padding: 0 4px; border-radius: 2px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(ellipse at top, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(236, 72, 153, 0.05) 0%, transparent 50%);
+            padding-bottom: 420px;
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 24px 32px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--accent-gradient);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--accent-gradient);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3);
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3); }
+            50% { box-shadow: 0 8px 48px rgba(99, 102, 241, 0.5); }
+        }
+
+        .header-text h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-text p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--success);
+            transition: all 0.3s ease;
+        }
+
+        .status-badge.disconnected {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: var(--danger);
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: blink 1.5s ease-in-out infinite;
+        }
+
+        .status-badge.disconnected .status-dot {
+            background: var(--danger);
+            animation: blink-fast 0.8s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        @keyframes blink-fast {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .main-container {
+            display: grid;
+            gap: 24px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(99, 102, 241, 0.03);
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .card-title i {
+            color: var(--accent-primary);
+            font-size: 20px;
+        }
+
+        .device-count {
+            background: var(--accent-gradient);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 0;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        th {
+            padding: 16px 24px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        tbody tr {
+            transition: all 0.3s ease;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        tbody tr:hover {
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .device-id {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .device-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-primary);
+        }
+
+        .device-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .device-id-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .coordinate {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .coord-value {
+            font-family: 'SF Mono', 'Consolas', monospace;
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+
+        .coord-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .stat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .stat-badge.altitude {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+        }
+
+        .stat-badge.satellites {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, rgba(99, 102, 241, 0.05) 25%, rgba(99, 102, 241, 0.1) 50%, rgba(99, 102, 241, 0.05) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .loading-row td {
+            padding: 20px 24px;
+        }
+
+        .loading-row .skeleton {
+            height: 20px;
+            margin: 8px 0;
+        }
+
+        .loading-text {
+            text-align: center;
+            padding: 60px 24px;
+            color: var(--text-secondary);
+        }
+
+        .loading-text i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: var(--accent-primary);
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .tree-container {
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            font-family: 'SF Mono', 'Consolas', monospace;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .tree-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .tree-container::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+        }
+
+        .tree-container::-webkit-scrollbar-thumb {
+            background: var(--accent-primary);
+            border-radius: 4px;
+        }
+
+        .tree-root {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .tree-root-icon {
+            color: var(--accent-primary);
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+
+        .tree-content {
+            flex: 1;
+        }
+
+        .tree-node {
+            margin-left: 0;
+        }
+
+        .tree-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin: 4px 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tree-item:hover {
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .tree-toggle {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+            margin-top: 3px;
+        }
+
+        .tree-toggle.expanded {
+            transform: rotate(90deg);
+        }
+
+        .tree-key {
+            color: #9cdcfe;
+            word-break: break-all;
+        }
+
+        .tree-value {
+            color: #ce9178;
+            margin-left: 4px;
+            word-break: break-all;
+        }
+
+        .tree-value.string { color: #ce9178; }
+        .tree-value.number { color: #b5cea8; }
+        .tree-value.boolean { color: #569cd6; }
+        .tree-value.null { color: #569cd6; }
+
+        .tree-children {
+            margin-left: 24px;
+            border-left: 1px solid rgba(99, 102, 241, 0.2);
+            padding-left: 12px;
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+        }
+
+        .tree-children.collapsed {
+            max-height: 0 !important;
+            opacity: 0;
+        }
+
+        .footer {
+            margin-top: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .footer-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-item i {
+            color: var(--accent-primary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 24px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        /* Dev Tools Panel */
+        .devtools-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+            max-height: 400px;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+
+        .devtools-panel.collapsed {
+            max-height: 56px;
+        }
+
+        .devtools-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .devtools-header:hover {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15));
+        }
+
+        .devtools-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .devtools-title i {
+            color: var(--warning);
+        }
+
+        .devtools-toggle {
+            color: var(--text-secondary);
+            transition: transform 0.3s ease;
+        }
+
+        .devtools-panel.collapsed .devtools-toggle {
+            transform: rotate(180deg);
+        }
+
+        .devtools-content {
+            padding: 20px 24px;
+            overflow-y: auto;
+            max-height: 340px;
+        }
+
+        .devtools-section {
+            margin-bottom: 20px;
+        }
+
+        .devtools-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .devtools-section-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: var(--accent-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-success {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-success:hover {
+            background: rgba(34, 197, 94, 0.25);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.25);
+        }
+
+        .btn-info {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--info);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-info:hover {
+            background: rgba(59, 130, 246, 0.25);
+        }
+
+        .btn-warning {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-warning:hover {
+            background: rgba(245, 158, 11, 0.25);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .manual-edit-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto auto;
+            gap: 12px;
+            align-items: end;
+        }
+
+        @media (max-width: 768px) {
+            .manual-edit-form {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            padding: 10px 14px;
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 13px;
+            font-family: 'SF Mono', 'Consolas', monospace;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        textarea.form-input {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .json-editor {
+            grid-column: 1 / -1;
+        }
+
+        .json-preview {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'SF Mono', 'Consolas', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+            max-height: 200px;
+            overflow: auto;
+            margin-top: 12px;
+        }
+
+        .json-key { color: #9cdcfe; }
+        .json-string { color: #ce9178; }
+        .json-number { color: #b5cea8; }
+        .json-boolean { color: #569cd6; }
+
+        /* Toast Notification */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+            min-width: 280px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .toast.success { border-left: 4px solid var(--success); }
+        .toast.error { border-left: 4px solid var(--danger); }
+        .toast.warning { border-left: 4px solid var(--warning); }
+        .toast.info { border-left: 4px solid var(--info); }
+
+        .toast i {
+            font-size: 18px;
+        }
+
+        .toast.success i { color: var(--success); }
+        .toast.error i { color: var(--danger); }
+        .toast.warning i { color: var(--warning); }
+        .toast.info i { color: var(--info); }
+
+        .toast-message {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .toast-time {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+                padding-bottom: 380px;
+            }
+
+            .header {
+                padding: 16px 20px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-text h1 {
+                font-size: 22px;
+            }
+
+            th, td {
+                padding: 12px 16px;
+            }
+
+            .card-header {
+                padding: 16px 20px;
+            }
+
+            .footer {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
+    <div class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="header-icon">
+                    <i class="fas fa-satellite-dish"></i>
+                </div>
+                <div class="header-text">
+                    <h1>Live Tracking GPS</h1>
+                    <p>Real-time GPS device monitoring system</p>
+                </div>
+            </div>
+            <div class="status-badge" id="connectionStatus">
+                <div class="status-dot"></div>
+                <span id="statusText">Connecting...</span>
+            </div>
+        </div>
+    </div>
 
-    <h1>Live Tracking GPS</h1>
+    <div class="main-container">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Device Tracker
+                </div>
+                <div class="device-count" id="deviceCount">0 Devices</div>
+            </div>
+            <div class="card-body">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Device ID</th>
+                            <th>Latitude</th>
+                            <th>Longitude</th>
+                            <th>Altitude</th>
+                            <th>Satellites</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <tr class="loading-row">
+                            <td colspan="5">
+                                <div class="skeleton" style="height: 20px; width: 100%;"></div>
+                                <div class="skeleton" style="height: 20px; width: 80%; margin-top: 12px;"></div>
+                                <div class="skeleton" style="height: 20px; width: 90%; margin-top: 12px;"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Device ID</th>
-                <th>Latitude</th>
-                <th>Longitude</th>
-                <th>Altitude</th>
-                <th>Satellites</th>
-            </tr>
-        </thead>
-        <tbody id="table-body">
-            <tr><td colspan="5">Menghubungkan ke Firebase...</td></tr>
-        </tbody>
-    </table>
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fas fa-database"></i>
+                    Firebase Structure
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="tree-container">
+                    <div class="tree-root">
+                        <i class="fas fa-database tree-root-icon"></i>
+                        <div class="tree-content">
+                            <div class="tree-children" id="tree-content">
+                                <div class="loading-text">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    <p>Waiting for data...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <h3>Firebase Structure View</h3>
-    <div class="tree-container">
-        <span class="node-root">gps_tracking</span>
-        <div id="tree-content">
-            <div class="node-item">Menunggu data...</div>
+    <div class="footer">
+        <div class="footer-left">
+            <div class="footer-item">
+                <i class="fas fa-clock"></i>
+                <span>Last update: <span id="lastUpdate">--</span></span>
+            </div>
+            <div class="footer-item">
+                <i class="fas fa-sync-alt"></i>
+                <span id="updateStatus">Auto-refreshing</span>
+            </div>
+        </div>
+        <div class="footer-right">
+            <i class="fas fa-shield-alt"></i> System Active
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="devtools-panel collapsed" id="devtoolsPanel">
+        <div class="devtools-header" id="devtoolsToggle">
+            <div class="devtools-title">
+                <i class="fas fa-tools"></i>
+                Dev Tools - Firebase RTDB Editor
+            </div>
+            <div class="devtools-toggle">
+                <i class="fas fa-chevron-up"></i>
+            </div>
+        </div>
+        <div class="devtools-content">
+            <div class="devtools-section">
+                <div class="devtools-section-title">Quick Actions</div>
+                <div class="btn-group">
+                    <button class="btn btn-success" onclick="DevTools.setRandomCoords()">
+                        <i class="fas fa-random"></i> Set Random Coords
+                    </button>
+                    <button class="btn btn-info" onclick="DevTools.addTestDevice()">
+                        <i class="fas fa-plus-circle"></i> Add Test Device
+                    </button>
+                    <button class="btn btn-warning" onclick="DevTools.exportJSON()">
+                        <i class="fas fa-file-export"></i> Export JSON
+                    </button>
+                    <button class="btn btn-primary" onclick="DevTools.importJSON()">
+                        <i class="fas fa-file-import"></i> Import JSON
+                    </button>
+                    <button class="btn btn-danger" onclick="DevTools.clearAllData()">
+                        <i class="fas fa-trash-alt"></i> Clear All Data
+                    </button>
+                </div>
+            </div>
+
+            <div class="devtools-section">
+                <div class="devtools-section-title">Manual Edit</div>
+                <div class="manual-edit-form">
+                    <div class="form-group">
+                        <label>Path</label>
+                        <input type="text" class="form-input" id="editPath" placeholder="gps_tracking/device1">
+                    </div>
+                    <div class="form-group">
+                        <label>Value</label>
+                        <input type="text" class="form-input" id="editValue" placeholder="123.45">
+                    </div>
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select class="form-input" id="editType">
+                            <option value="string">String</option>
+                            <option value="number">Number</option>
+                            <option value="boolean">Boolean</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-primary" onclick="DevTools.setData()">
+                            <i class="fas fa-save"></i> Set
+                        </button>
+                    </div>
+                    <div class="form-group">
+                        <label>Update Path</label>
+                        <input type="text" class="form-input" id="updatePath" placeholder="gps_tracking/device1/altitude">
+                    </div>
+                    <div class="form-group">
+                        <label>New Value</label>
+                        <input type="text" class="form-input" id="updateValue" placeholder="99.9">
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-info" onclick="DevTools.updateData()">
+                            <i class="fas fa-edit"></i> Update
+                        </button>
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-danger" onclick="DevTools.deleteData()">
+                            <i class="fas fa-times"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="devtools-section">
+                <div class="devtools-section-title">Live Data Preview</div>
+                <div class="json-preview" id="jsonPreview">
+                    <span style="color: var(--text-secondary);">No data loaded...</span>
+                </div>
+            </div>
         </div>
     </div>
 
     <script type="module" src="index.js"></script>
+    <script>
+        const DevTools = {
+            panelCollapsed: true,
+            
+            togglePanel() {
+                const panel = document.getElementById('devtoolsPanel');
+                panel.classList.toggle('collapsed');
+                this.panelCollapsed = panel.classList.contains('collapsed');
+                console.log('[INFO] DevTools panel', this.panelCollapsed ? 'collapsed' : 'expanded');
+            },
+
+            showToast(message, type = 'info') {
+                console.log(`[${type.toUpperCase()}] ${message}`);
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                
+                const icons = {
+                    success: 'fas fa-check-circle',
+                    error: 'fas fa-exclamation-circle',
+                    warning: 'fas fa-exclamation-triangle',
+                    info: 'fas fa-info-circle'
+                };
+                
+                toast.innerHTML = `
+                    <i class="${icons[type]}"></i>
+                    <span class="toast-message">${message}</span>
+                    <span class="toast-time">${new Date().toLocaleTimeString()}</span>
+                `;
+                
+                container.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            },
+
+            async setRandomCoords() {
+                console.log('[INFO] DevTools: Setting random coordinates...');
+                try {
+                    const lat = (Math.random() * 180 - 90).toFixed(6);
+                    const lng = (Math.random() * 360 - 180).toFixed(6);
+                    const alt = Math.floor(Math.random() * 500);
+                    const sat = Math.floor(Math.random() * 20) + 1;
+                    
+                    console.log(`[INFO] Generated random coords: lat=${lat}, lng=${lng}, alt=${alt}, sat=${sat}`);
+                    
+                    window.firebaseSetData({
+                        latitude: parseFloat(lat),
+                        longitude: parseFloat(lng),
+                        altitude: alt,
+                        satellites: sat
+                    });
+                    
+                    this.showToast('Random coordinates set successfully!', 'success');
+                    console.log('[SUCCESS] Random coordinates set');
+                } catch (error) {
+                    console.error('[ERROR] setRandomCoords failed:', error);
+                    this.showToast('Error: ' + error.message, 'error');
+                }
+            },
+
+            async addTestDevice() {
+                console.log('[INFO] DevTools: Adding test device...');
+                try {
+                    const deviceId = 'TEST_' + Date.now().toString().slice(-6);
+                    const testData = {
+                        latitude: -6.2088 + (Math.random() * 0.01 - 0.005),
+                        longitude: 106.8456 + (Math.random() * 0.01 - 0.005),
+                        altitude: Math.floor(Math.random() * 200),
+                        satellites: Math.floor(Math.random() * 15) + 5
+                    };
+                    
+                    console.log(`[INFO] Creating test device: ${deviceId}`, testData);
+                    
+                    window.firebaseSetData(deviceId, testData);
+                    document.getElementById('editPath').value = deviceId;
+                    document.getElementById('editValue').value = JSON.stringify(testData);
+                    
+                    this.showToast(`Test device "${deviceId}" added!`, 'success');
+                    console.log('[SUCCESS] Test device added:', deviceId);
+                } catch (error) {
+                    console.error('[ERROR] addTestDevice failed:', error);
+                    this.showToast('Error: ' + error.message, 'error');
+                }
+            },
+
+            async clearAllData() {
+                console.log('[INFO] DevTools: Clearing all data...');
+                if (!confirm('Are you sure you want to clear all data? This cannot be undone!')) {
+                    console.log('[INFO] Clear all cancelled by user');
+                    return;
+                }
+                
+                try {
+                    window.firebaseClearAll();
+                    this.showToast('All data cleared successfully!', 'success');
+                    console.log('[SUCCESS] All data cleared');
+                } catch (error) {
+                    console.error('[ERROR] clearAllData failed:', error);
+                    this.showToast('Error: ' + error.message, 'error');
+                }
+            },
+
+            async setData() {
+                console.log('[INFO] DevTools: Setting data...');
+                const path = document.getElementById('editPath').value.trim();
+                const value = document.getElementById('editValue').value;
+                const type = document.getElementById('editType').value;
+                
+                if (!path) {
+                    console.warn('[WARNING] No path specified');
+                    this.showToast('Please enter a path!', 'warning');
+                    return;
+                }
+                
+                let parsedValue;
+                try {
+                    if (type === 'number') {
+                        parsedValue = parseFloat(value);
+                    } else if (type === 'boolean') {
+                        parsedValue = value.toLowerCase() === 'true';
+                    } else {
+                        parsedValue = value;
+                    }
+                    
+                    console.log(`[INFO] Setting data: path="${path}", value=${parsedValue} (${type})`);
+                    
+                    window.firebaseSetData(path, parsedValue);
+                    this.showToast(`Data set at "${path}"!`, 'success');
+                    console.log('[SUCCESS] Data set:', path);
+                } catch (error) {
+                    console.error('[ERROR] setData failed:', error);
+                    this.showToast('Error: ' + error.message, 'error');
+                }
+            },
+
+            async updateData() {
+                console.log('[INFO] DevTools: Updating data...');
+                const path = document.getElementById('updatePath').value.trim();
+                const value = document.getElementById('updateValue').value;
+                
+                if (!path) {
+                    console.warn('[WARNING] No path specified');
+                    this.showToast('Please enter a path!', 'warning');
+                    return;
+                }
+                
+                try {
+                    const parsedValue = parseFloat(value) || value;
+                    console.log(`[INFO] Updating data: path="${path}", value=${parsedValue}`);
+                    
+                    window.firebaseUpdateData(path, parsedValue);
+                    this.showToast(`Updated "${path}"!`, 'success');
+                    console.log('[SUCCESS] Data updated:', path);
+                } catch (error) {
+                    console.error('[ERROR] updateData failed:', error);
+                    this.showToast('Error: ' + error.message, 'error');
+                }
+            },
+
+            async deleteData() {
+                console.log('[INFO] DevTools: Deleting data...');
+                const path = document.getElementById('updatePath').value.trim();
+                
+                if (!path) {
+                    console.warn('[WARNING] No path specified');
+                    this.showToast('Please enter a path to delete!', 'warning');
+                    return;
+                }
+                
+                if (!confirm(`Delete "${path}"?`)) {
+                    console.log('[INFO] Delete cancelled by user');
+                    return;
+                }
+                
+                try {
+                    window.firebaseDeleteData(path);
+                    this.showToast(`Deleted "${path}"!`, 'success');
+                    console.log('[SUCCESS] Data deleted:', path);
+                } catch (error) {
+                    console.error('[ERROR] deleteData failed:', error);
+                    this.showToast('Error: ' + error.message, 'error');
+                }
+            },
+
+            async exportJSON() {
+                console.log('[INFO] DevTools: Exporting JSON...');
+                try {
+                    const data = window.firebaseGetData();
+                    if (data) {
+                        const json = JSON.stringify(data, null, 2);
+                        console.log('[INFO] Exported data size:', json.length, 'characters');
+                        
+                        const blob = new Blob([json], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `gps_data_${Date.now()}.json`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        this.showToast('Data exported successfully!', 'success');
+                        console.log('[SUCCESS] JSON exported');
+                    } else {
+                        console.warn('[WARNING] No data to export');
+                        this.showToast('No data to export!', 'warning');
+                    }
+                } catch (error) {
+                    console.error('[ERROR] exportJSON failed:', error);
+                    this.showToast('Error: ' + error.message, 'error');
+                }
+            },
+
+            async importJSON() {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json';
+                
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            try {
+                                const data = JSON.parse(event.target.result);
+                                window.firebaseImportData(data);
+                                this.showToast('Data imported successfully!', 'success');
+                            } catch (error) {
+                                this.showToast('Invalid JSON format!', 'error');
+                            }
+                        };
+                        reader.readAsText(file);
+                    }
+                };
+                
+                input.click();
+            },
+
+            updateJsonPreview(data) {
+                const preview = document.getElementById('jsonPreview');
+                if (data) {
+                    const json = JSON.stringify(data, null, 2);
+                    preview.innerHTML = this.syntaxHighlight(json);
+                } else {
+                    preview.innerHTML = '<span style="color: var(--text-secondary);">No data loaded...</span>';
+                }
+            },
+
+            syntaxHighlight(json) {
+                json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                return json.replace(/(".*?"):\s*(-?\d+\.?\d*)/g, '<span class="json-key">$1</span>: <span class="json-number">$2</span>')
+                           .replace(/(".*?"):\s*"(.*?)"/g, '<span class="json-key">$1</span>: <span class="json-string">"$2"</span>')
+                           .replace(/(".*?"):\s*(true|false)/g, '<span class="json-key">$1</span>: <span class="json-boolean">$2</span>')
+                           .replace(/(".*?"):\s*(null)/g, '<span class="json-key">$1</span>: <span class="json-boolean">$2</span>');
+            }
+        };
+
+        document.getElementById('devtoolsToggle').addEventListener('click', () => DevTools.togglePanel());
+
+        window.addEventListener('error', (event) => {
+            console.error('[UNHANDLED ERROR]', event.error);
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('[UNHANDLED PROMISE REJECTION]', event.reason);
+        });
+    </script>
 </body>
 </html>

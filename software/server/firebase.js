@@ -1,6 +1,6 @@
 // Menggunakan CDN agar bisa jalan di browser biasa
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, set, update, remove, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 const firebaseConfig = {
   // Langsung masukkan nilai dari gambar konfigurasi Anda

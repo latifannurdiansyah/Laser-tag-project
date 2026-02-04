@@ -11,19 +11,19 @@
 #include "addons/RTDBHelper.h"
 
 // --- KONFIGURASI PIN (Tetap Sama) ---
-#define Vext_Ctrl 3    
-#define LED_K     21   
-#define TFT_CS    38
-#define TFT_DC    40
-#define TFT_RST   39
-#define TFT_SCLK  41
-#define TFT_MOSI  42
-#define GPS_RX    33  
-#define GPS_TX    34  
+#define Vext_Ctrl 3
+#define LED_K 21
+#define TFT_CS 38
+#define TFT_DC 40
+#define TFT_RST 39
+#define TFT_SCLK 41
+#define TFT_MOSI 42
+#define GPS_RX 33
+#define GPS_TX 34
 
 // --- KREDENSIAL WIFI & FIREBASE (SESUAIKAN DI SINI) ---
-#define WIFI_SSID "UserAndroid:"
-#define WIFI_PASSWORD "55555550"
+#define WIFI_SSID "TIMEOSPACE"
+#define WIFI_PASSWORD "1234Saja"
 #define FIREBASE_HOST "gps-log-a1d90-default-rtdb.asia-southeast1.firebasedatabase.app"
 #define FIREBASE_AUTH "AMTJsG2px3hwlumdLkvcpnFNQF3hybkw0WvwM9WI"
 
@@ -40,15 +40,15 @@ void setup() {
   // 1. Power on Vext (GPS + TFT)
   pinMode(Vext_Ctrl, OUTPUT);
   digitalWrite(Vext_Ctrl, HIGH);
-  
+
   // 2. Aktifkan Backlight TFT
   pinMode(LED_K, OUTPUT);
-  digitalWrite(LED_K, HIGH); 
-  
+  digitalWrite(LED_K, HIGH);
+
   // 3. LED built-in
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
-  
+
   delay(100);
 
   // 4. Serial Debugging & GPS
@@ -108,12 +108,17 @@ void loop() {
 
       // Update Tampilan TFT
       framebuffer.setCursor(5, 20);
-      framebuffer.print("Lat:"); framebuffer.print(lat, 5);
+      framebuffer.print("Lat:");
+      framebuffer.print(lat, 5);
       framebuffer.setCursor(5, 35);
-      framebuffer.print("Lon:"); framebuffer.print(lng, 5);
+      framebuffer.print("Lon:");
+      framebuffer.print(lng, 5);
       framebuffer.setCursor(5, 50);
-      framebuffer.print("Sats:"); framebuffer.print(sats);
-      framebuffer.print(" Alt:"); framebuffer.print(alt); framebuffer.print("m");
+      framebuffer.print("Sats:");
+      framebuffer.print(sats);
+      framebuffer.print(" Alt:");
+      framebuffer.print(alt);
+      framebuffer.print("m");
 
       // Kirim ke Firebase (Hanya jika data valid)
       FirebaseJson json;
@@ -121,18 +126,18 @@ void loop() {
       json.set("longitude", lng);
       json.set("satellites", sats);
       json.set("altitude", alt);
-      
+
       if (Firebase.ready()) {
         if (Firebase.RTDB.setJSON(&fbdo, "/gps_tracking", &json)) {
-           Serial.println("Firebase: Data Sent");
+          Serial.println("Firebase: Data Sent");
         } else {
-           Serial.println("Firebase Error: " + fbdo.errorReason());
+          Serial.println("Firebase Error: " + fbdo.errorReason());
         }
       }
 
       // Serial Output
       Serial.printf("Lat: %.6f, Lon: %.6f, Sats: %d\n", lat, lng, sats);
-      
+
     } else {
       framebuffer.setCursor(25, 25);
       framebuffer.setTextColor(ST7735_RED, ST7735_BLACK);
