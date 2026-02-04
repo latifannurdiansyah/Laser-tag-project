@@ -27,5 +27,6 @@ This project also includes a real-time GPS tracking system for monitoring device
 
 ### Usage
 1. Upload firmware to Heltec Wireless Tracker
-2. Open `software/server/index.html` in browser
-3. View real-time GPS tracking data on dashboard
+2. Start dev server: `python -m http.server 8080`
+3. Open `http://localhost:8080` in browser
+4. View real-time GPS tracking data on dashboard
