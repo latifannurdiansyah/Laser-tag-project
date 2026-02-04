@@ -1,15 +1,17 @@
-import { initializeApp } from "firebase/app";
-import { getDatabase } from "firebase/database";
+// Menggunakan CDN agar bisa jalan di browser biasa
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY,
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-  databaseURL: process.env.FIREBASE_DATABASE_URL,
-  projectId: process.env.FIREBASE_PROJECT_ID,
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.FIREBASE_APP_ID,
-  measurementId: process.env.FIREBASE_MEASUREMENT_ID
+  // Langsung masukkan nilai dari gambar konfigurasi Anda
+  apiKey: "AIzaSyBknkRTKdVwZInvip3SrzWDidpefDRoIWI",
+  authDomain: "gps-log-a1d90.firebaseapp.com",
+  databaseURL: "https://gps-log-a1d90-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "gps-log-a1d90",
+  storageBucket: "gps-log-a1d90.firebasestorage.app",
+  messagingSenderId: "670421186715",
+  appId: "1:670421186715:web:d01f0c518b09f300de2e3e",
+  measurementId: "G-9VD5Y1MX6Z"
 };
 
 const app = initializeApp(firebaseConfig);
