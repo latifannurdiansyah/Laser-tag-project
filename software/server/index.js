@@ -45,180 +45,102 @@ onValue(gpsRef, (snapshot) => {
     }
     
     if (data) {
-        const devices = Object.keys(data);
-        console.log('[INFO] Found', devices.length, 'device(s):', devices);
-        deviceCount.textContent = `${devices.length} Device${devices.length !== 1 ? 's' : ''}`;
+        const keys = Object.keys(data);
+        console.log('[INFO] Data keys:', keys);
         
-        let tableHTML = '';
-        let treeHTML = '';
+        const flatFields = ['latitude', 'longitude', 'altitude', 'satellites'];
+        const isFlatFormat = flatFields.every(field => keys.includes(field)) &&
+                             !keys.some(k => typeof data[k] === 'object');
         
-        if (devices.length === 1 && devices[0] === 'latitude') {
-            const singleDevice = data;
+        if (isFlatFormat) {
+            console.log('[INFO] Rendering FLAT format (1 ESP32 Device)');
+            deviceCount.textContent = 'ESP32 Device';
+            
             tableBody.innerHTML = `
                 <tr>
                     <td>
                         <div class="device-id">
-                            <div class="device-icon">
-                                <i class="fas fa-microchip"></i>
-                            </div>
+                            <div class="device-icon"><i class="fas fa-microchip"></i></div>
                             <div>
                                 <div class="device-name">ESP32 Device</div>
                                 <div class="device-id-text">gps_tracking</div>
                             </div>
                         </div>
                     </td>
-                    <td>
-                        <div class="coordinate">
-                            <span class="coord-value">${singleDevice.latitude || '-'}</span>
-                            <span class="coord-label">Latitude</span>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="coordinate">
-                            <span class="coord-value">${singleDevice.longitude || '-'}</span>
-                            <span class="coord-label">Longitude</span>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="stat-badge altitude">
-                            <i class="fas fa-mountain"></i>
-                            ${singleDevice.altitude || '0'} m
-                        </span>
-                    </td>
-                    <td>
-                        <span class="stat-badge satellites">
-                            <i class="fas fa-satellite"></i>
-                            ${singleDevice.satellites || '0'}
-                        </span>
-                    </td>
+                    <td><div class="coordinate"><span class="coord-value">${data.latitude || '-'}</span></div></td>
+                    <td><div class="coordinate"><span class="coord-value">${data.longitude || '-'}</span></div></td>
+                    <td><span class="stat-badge altitude"><i class="fas fa-mountain"></i> ${data.altitude || '0'} m</span></td>
+                    <td><span class="stat-badge satellites"><i class="fas fa-satellite"></i> ${data.satellites || '0'}</span></td>
                 </tr>
             `;
             
-            treeHTML = `
-                <div class="tree-item">
-                    <i class="fas fa-chevron-right tree-toggle"></i>
-                    <span class="tree-key">altitude:</span>
-                    <span class="tree-value number">${singleDevice.altitude}</span>
-                </div>
-                <div class="tree-item">
-                    <i class="fas fa-chevron-right tree-toggle"></i>
-                    <span class="tree-key">latitude:</span>
-                    <span class="tree-value number">${singleDevice.latitude}</span>
-                </div>
-                <div class="tree-item">
-                    <i class="fas fa-chevron-right tree-toggle"></i>
-                    <span class="tree-key">longitude:</span>
-                    <span class="tree-value number">${singleDevice.longitude}</span>
-                </div>
-                <div class="tree-item">
-                    <i class="fas fa-chevron-right tree-toggle"></i>
-                    <span class="tree-key">satellites:</span>
-                    <span class="tree-value number">${singleDevice.satellites}</span>
-                </div>
+            treeContent.innerHTML = `
+                <div class="tree-item"><span class="key">latitude:</span> <span class="value">${data.latitude}</span></div>
+                <div class="tree-item"><span class="key">longitude:</span> <span class="value">${data.longitude}</span></div>
+                <div class="tree-item"><span class="key">altitude:</span> <span class="value">${data.altitude}</span></div>
+                <div class="tree-item"><span class="key">satellites:</span> <span class="value">${data.satellites}</span></div>
             `;
         } else {
-            devices.forEach((deviceId, index) => {
-                const device = data[deviceId];
+            console.log('[INFO] Rendering as multiple entries');
+            deviceCount.textContent = `${keys.length} Entry`;
+            
+            let tableHTML = '';
+            let treeHTML = '';
+            
+            keys.forEach((key, index) => {
+                const value = data[key];
                 const delay = index * 0.1;
+                const isObject = typeof value === 'object' && value !== null;
+                
+                const displayValue = isObject ? JSON.stringify(value) : value;
                 
                 tableHTML += `
                     <tr style="animation-delay: ${delay}s">
                         <td>
                             <div class="device-id">
-                                <div class="device-icon">
-                                    <i class="fas fa-microchip"></i>
-                                </div>
+                                <div class="device-icon"><i class="fas fa-database"></i></div>
                                 <div>
-                                    <div class="device-name">${deviceId}</div>
-                                    <div class="device-id-text">gps_tracking/${deviceId}</div>
+                                    <div class="device-name">${key}</div>
+                                    <div class="device-id-text">gps_tracking/${key}</div>
                                 </div>
                             </div>
                         </td>
-                        <td>
-                            <div class="coordinate">
-                                <span class="coord-value">${device.latitude || '-'}</span>
-                                <span class="coord-label">Latitude</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="coordinate">
-                                <span class="coord-value">${device.longitude || '-'}</span>
-                                <span class="coord-label">Longitude</span>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="stat-badge altitude">
-                                <i class="fas fa-mountain"></i>
-                                ${device.altitude || '0'} m
-                            </span>
-                        </td>
-                        <td>
-                            <span class="stat-badge satellites">
-                                <i class="fas fa-satellite"></i>
-                                ${device.satellites || '0'}
-                            </span>
-                        </td>
+                        <td colspan="4"><code>${displayValue}</code></td>
                     </tr>
-                `;
-                
-                treeHTML += `
-                    <div class="tree-item">
-                        <i class="fas fa-chevron-right tree-toggle" onclick="this.classList.toggle('expanded'); this.parentElement.querySelector('.tree-children').classList.toggle('collapsed');"></i>
-                        <span class="tree-key">${deviceId}</span>
-                        <div class="tree-children collapsed">
-                            <div class="tree-item">
-                                <span class="tree-key">altitude:</span>
-                                <span class="tree-value number">${device.altitude || 'null'}</span>
-                            </div>
-                            <div class="tree-item">
-                                <span class="tree-key">latitude:</span>
-                                <span class="tree-value number">${device.latitude || 'null'}</span>
-                            </div>
-                            <div class="tree-item">
-                                <span class="tree-key">longitude:</span>
-                                <span class="tree-value number">${device.longitude || 'null'}</span>
-                            </div>
-                            <div class="tree-item">
-                                <span class="tree-key">satellites:</span>
-                                <span class="tree-value number">${device.satellites || 'null'}</span>
-                            </div>
-                        </div>
-                    </div>
                 `;
             });
             
             tableBody.innerHTML = tableHTML;
+            
+            treeHTML = keys.map(key => {
+                const value = data[key];
+                const isObject = typeof value === 'object' && value !== null;
+                if (isObject) {
+                    const children = Object.entries(value).map(([k, v]) => 
+                        `<div class="tree-item"><span class="key">${k}:</span> <span class="value">${v}</span></div>`
+                    ).join('');
+                    return `<div class="tree-item"><span class="key">${key}:</span>${children}</div>`;
+                }
+                return `<div class="tree-item"><span class="key">${key}:</span> <span class="value">${value}</span></div>`;
+            }).join('');
+            
+            treeContent.innerHTML = treeHTML;
         }
-        
-        if (!tableHTML) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="5">
-                        <div class="empty-state">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <h3>No Devices Found</h3>
-                            <p>Add a test device using the Dev Tools panel below</p>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        }
-        
-        treeContent.innerHTML = treeHTML || '<div class="tree-item"><span class="tree-key">No data available</span></div>';
     } else {
+        console.log('[INFO] No data available');
+        deviceCount.textContent = 'No Data';
         tableBody.innerHTML = `
             <tr>
                 <td colspan="5">
                     <div class="empty-state">
                         <i class="fas fa-database"></i>
                         <h3>No Data</h3>
-                        <p>Waiting for GPS data from connected devices...</p>
+                        <p>Waiting for GPS data from ESP32...</p>
                     </div>
                 </td>
             </tr>
         `;
         treeContent.innerHTML = '<div class="tree-item"><span class="tree-key">No data available</span></div>';
-        deviceCount.textContent = '0 Devices';
     }
 }, (error) => {
     isConnected = false;
@@ -377,10 +299,9 @@ window.DevTools = {
         }
     },
 
-    async addTestDevice() {
-        console.log('[INFO] DevTools: Adding test device...');
+    async simulateGPSUpdate() {
+        console.log('[INFO] DevTools: Simulating GPS update...');
         try {
-            const deviceId = 'TEST_' + Date.now().toString().slice(-6);
             const testData = {
                 latitude: -6.2088 + (Math.random() * 0.01 - 0.005),
                 longitude: 106.8456 + (Math.random() * 0.01 - 0.005),
@@ -388,16 +309,14 @@ window.DevTools = {
                 satellites: Math.floor(Math.random() * 15) + 5
             };
             
-            console.log(`[INFO] Creating test device: ${deviceId}`, testData);
+            console.log('[INFO] Simulating GPS data:', testData);
+            window.firebaseSetData(testData);
             
-            window.firebaseSetData(deviceId, testData);
-            document.getElementById('editPath').value = deviceId;
-            document.getElementById('editValue').value = JSON.stringify(testData);
-            
-            this.showToast(`Test device "${deviceId}" added!`, 'success');
-            console.log('[SUCCESS] Test device added:', deviceId);
+            document.getElementById('editValue').value = JSON.stringify(testData, null, 2);
+            this.showToast('GPS data simulated!', 'success');
+            console.log('[SUCCESS] GPS simulation complete');
         } catch (error) {
-            console.error('[ERROR] addTestDevice failed:', error);
+            console.error('[ERROR] simulateGPSUpdate failed:', error);
             this.showToast('Error: ' + error.message, 'error');
         }
     },
@@ -420,35 +339,24 @@ window.DevTools = {
     },
 
     async setData() {
-        console.log('[INFO] DevTools: Setting data...');
-        const path = document.getElementById('editPath').value.trim();
+        console.log('[INFO] DevTools: Setting GPS data...');
         const value = document.getElementById('editValue').value;
-        const type = document.getElementById('editType').value;
         
-        if (!path) {
-            console.warn('[WARNING] No path specified');
-            this.showToast('Please enter a path!', 'warning');
+        if (!value) {
+            console.warn('[WARNING] No data specified');
+            this.showToast('Please enter GPS JSON data!', 'warning');
             return;
         }
         
-        let parsedValue;
         try {
-            if (type === 'number') {
-                parsedValue = parseFloat(value);
-            } else if (type === 'boolean') {
-                parsedValue = value.toLowerCase() === 'true';
-            } else {
-                parsedValue = value;
-            }
-            
-            console.log(`[INFO] Setting data: path="${path}", value=${parsedValue} (${type})`);
-            
-            window.firebaseSetData(path, parsedValue);
-            this.showToast(`Data set at "${path}"!`, 'success');
-            console.log('[SUCCESS] Data set:', path);
+            const parsedValue = JSON.parse(value);
+            console.log('[INFO] Setting flat GPS data:', parsedValue);
+            window.firebaseSetData(parsedValue);
+            this.showToast('GPS data set!', 'success');
+            console.log('[SUCCESS] GPS data set');
         } catch (error) {
-            console.error('[ERROR] setData failed:', error);
-            this.showToast('Error: ' + error.message, 'error');
+            console.error('[ERROR] Invalid JSON:', error);
+            this.showToast('Invalid JSON format!', 'error');
         }
     },
 

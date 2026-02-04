@@ -970,8 +970,8 @@
                     <button class="btn btn-success" onclick="DevTools.setRandomCoords()">
                         <i class="fas fa-random"></i> Set Random Coords
                     </button>
-                    <button class="btn btn-info" onclick="DevTools.addTestDevice()">
-                        <i class="fas fa-plus-circle"></i> Add Test Device
+                    <button class="btn btn-info" onclick="DevTools.simulateGPSUpdate()">
+                        <i class="fas fa-satellite"></i> Simulate GPS Update
                     </button>
                     <button class="btn btn-warning" onclick="DevTools.exportJSON()">
                         <i class="fas fa-file-export"></i> Export JSON
@@ -986,33 +986,21 @@
             </div>
 
             <div class="devtools-section">
-                <div class="devtools-section-title">Manual Edit</div>
+                <div class="devtools-section-title">Manual Edit (Flat Format)</div>
                 <div class="manual-edit-form">
-                    <div class="form-group">
-                        <label>Path</label>
-                        <input type="text" class="form-input" id="editPath" placeholder="gps_tracking/device1">
-                    </div>
-                    <div class="form-group">
-                        <label>Value</label>
-                        <input type="text" class="form-input" id="editValue" placeholder="123.45">
-                    </div>
-                    <div class="form-group">
-                        <label>Type</label>
-                        <select class="form-input" id="editType">
-                            <option value="string">String</option>
-                            <option value="number">Number</option>
-                            <option value="boolean">Boolean</option>
-                        </select>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>GPS Data (JSON)</label>
+                        <textarea class="form-input" id="editValue" rows="4" placeholder='{"latitude": -6.2088, "longitude": 106.8456, "altitude": 50, "satellites": 12}'></textarea>
                     </div>
                     <div class="form-group">
                         <label>&nbsp;</label>
                         <button class="btn btn-primary" onclick="DevTools.setData()">
-                            <i class="fas fa-save"></i> Set
+                            <i class="fas fa-save"></i> Set GPS Data
                         </button>
                     </div>
                     <div class="form-group">
                         <label>Update Path</label>
-                        <input type="text" class="form-input" id="updatePath" placeholder="gps_tracking/device1/altitude">
+                        <input type="text" class="form-input" id="updatePath" placeholder="gps_tracking/latitude">
                     </div>
                     <div class="form-group">
                         <label>New Value</label>
