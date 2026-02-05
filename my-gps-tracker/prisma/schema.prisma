@@ -1,0 +1,15 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model GpsLog {
+  id        Int      @id @default(autoincrement())
+  deviceId  String
+  latitude  Float
+  longitude Float
+  createdAt DateTime @default(now())
+}
