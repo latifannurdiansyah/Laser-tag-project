@@ -1,9 +1,7 @@
-import type { NextConfig } from "next";
-
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: {
-    // !! PERINGATAN !!
-    // Ini akan membiarkan build sukses meskipun ada error TypeScript
+    // Mengizinkan build selesai meskipun ada error TypeScript
     ignoreBuildErrors: true,
   },
 };
