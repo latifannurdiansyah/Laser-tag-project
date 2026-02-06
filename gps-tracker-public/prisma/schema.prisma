@@ -7,8 +7,14 @@ datasource db {
 }
 
 model GpsData {
-  id        Int      @id @default(autoincrement())
-  latitude  Float
-  longitude Float
-  createdAt DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  deviceId    String   @default("Heltec-1")
+  latitude    Float
+  longitude   Float
+  altitude    Float?
+  satellites  Int?
+  createdAt   DateTime @default(now())
+
+  @@index([deviceId])
+  @@index([createdAt])
 }
