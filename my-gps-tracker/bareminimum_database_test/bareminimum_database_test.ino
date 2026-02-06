@@ -4,7 +4,7 @@
 #define WIFI_SSID "Polinema Hostspot"
 #define WIFI_PASSWORD ""
 
-const char* serverName = "http://192.168.11.188:3000/api/track";
+const char* serverName = "http://192.168.11.18:3000/api/track";
 
 void setup() {
   Serial.begin(115200);
