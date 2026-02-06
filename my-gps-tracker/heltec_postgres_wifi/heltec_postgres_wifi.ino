@@ -19,7 +19,9 @@
 #define WIFI_SSID "Polinema Hostspot"
 #define WIFI_PASSWORD ""
 
-const char* serverName = "http://192.168.11.18:3000/api/track";
+// TODO: Ganti dengan URL Vercel Anda setelah deployment
+// Contoh: const char* serverName = "https://gps-tracker-xyz.vercel.app/api/track";
+const char* serverName = "https://your-vercel-app.vercel.app/api/track";
 
 TinyGPSPlus gps;
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
