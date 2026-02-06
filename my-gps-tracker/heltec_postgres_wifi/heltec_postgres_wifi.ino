@@ -21,7 +21,7 @@
 #define WIFI_SSID "Polinema Hostspot"
 #define WIFI_PASSWORD ""
 // IP Laptop kamu sesuai terminal tadi
-const char* serverName = "http://192.168.11.188:3000/api/track"; 
+const char* serverName = "http://192.168.11.18:3000/api/track"; 
 
 // Objek Global
 TinyGPSPlus gps;
