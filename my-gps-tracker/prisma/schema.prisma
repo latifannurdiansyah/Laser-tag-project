@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model GpsLog {
@@ -12,4 +13,6 @@ model GpsLog {
   latitude  Float
   longitude Float
   createdAt DateTime @default(now())
+
+  @@map("gps_logs")
 }
