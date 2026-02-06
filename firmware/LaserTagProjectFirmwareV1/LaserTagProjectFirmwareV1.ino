@@ -21,11 +21,21 @@
 #define GPS_RX 33
 #define GPS_TX 34
 
-// --- KREDENSIAL WIFI & FIREBASE (SESUAIKAN DI SINI) ---
-#define WIFI_SSID "TIMEOSPACE"
-#define WIFI_PASSWORD "1234Saja"
-#define FIREBASE_HOST "gps-log-a1d90-default-rtdb.asia-southeast1.firebasedatabase.app"
-#define FIREBASE_AUTH "AMTJsG2px3hwlumdLkvcpnFNQF3hybkw0WvwM9WI"
+// --- KREDENSIAL WIFI & FIREBASE ---
+// Untuk keamanan, gunakan file config.h
+// Salin config.h.template ke config.h dan isi dengan kredensial Anda
+#ifdef __has_include
+  #if __has_include("config.h")
+    #include "config.h"
+  #else
+    #error "config.h tidak ditemukan! Salin config.h.template ke config.h"
+  #endif
+#else
+  #error "Compiler tidak mendukung __has_include"
+#endif
+
+#define WIFI_TIMEOUT 15000
+#define WIFI_RETRY_INTERVAL 5000
 
 // Objek Global
 TinyGPSPlus gps;
@@ -35,6 +45,41 @@ GFXcanvas16 framebuffer = GFXcanvas16(160, 80);
 FirebaseData fbdo;
 FirebaseAuth auth;
 FirebaseConfig config;
+
+unsigned long lastWiFiReconnectAttempt = 0;
+bool wifiConnected = false;
+
+void connectWiFi() {
+  Serial.print("Connecting to WiFi");
+  unsigned long startAttemptTime = millis();
+
+  while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < WIFI_TIMEOUT) {
+    Serial.print(".");
+    delay(500);
+  }
+
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("\nWiFi Connected! IP: " + WiFi.localIP().toString());
+    wifiConnected = true;
+  } else {
+    Serial.println("\nWiFi connection failed - continuing anyway");
+    wifiConnected = false;
+  }
+}
+
+void checkWiFiConnection() {
+  if (WiFi.status() != WL_CONNECTED) {
+    wifiConnected = false;
+    if (millis() - lastWiFiReconnectAttempt >= WIFI_RETRY_INTERVAL) {
+      lastWiFiReconnectAttempt = millis();
+      Serial.println("WiFi disconnected, reconnecting...");
+      WiFi.reconnect();
+    }
+  } else if (!wifiConnected) {
+    wifiConnected = true;
+    Serial.println("WiFi reconnected! IP: " + WiFi.localIP().toString());
+  }
+}
 
 void setup() {
   // 1. Power on Vext (GPS + TFT)
@@ -60,14 +105,9 @@ void setup() {
   tft.invertDisplay(false);
   tft.setRotation(1);
 
-  // 6. Koneksi WiFi
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  Serial.print("Connecting to WiFi");
-  while (WiFi.status() != WL_CONNECTED) {
-    Serial.print(".");
-    delay(500);
-  }
-  Serial.println("\nWiFi Connected!");
+  // 6. Koneksi WiFi dengan timeout
+  WiFi.mode(WIFI_STA);
+  connectWiFi();
 
   // 7. Konfigurasi Firebase
   config.database_url = FIREBASE_HOST;
@@ -77,12 +117,16 @@ void setup() {
 
   // 8. Clear display awal
   framebuffer.fillScreen(ST7735_BLACK);
-  tft.drawRGBBitmap(0, 0, framebuffer.getBuffer(), 160, 80);
+  if (framebuffer.getBuffer() != NULL) {
+    tft.drawRGBBitmap(0, 0, framebuffer.getBuffer(), 160, 80);
+  }
 
   Serial.println("GPS + TFT + Firebase Ready");
 }
 
 void loop() {
+  checkWiFiConnection();
+
   // Baca data GPS
   while (Serial1.available() > 0) {
     gps.encode(Serial1.read());
@@ -127,7 +171,7 @@ void loop() {
       json.set("satellites", sats);
       json.set("altitude", alt);
 
-      if (Firebase.ready()) {
+      if (Firebase.ready() && wifiConnected) {
         if (Firebase.RTDB.setJSON(&fbdo, "/gps_tracking", &json)) {
           Serial.println("Firebase: Data Sent");
         } else {
@@ -148,6 +192,8 @@ void loop() {
     }
 
     // Push ke display fisik
-    tft.drawRGBBitmap(0, 0, framebuffer.getBuffer(), 160, 80);
+    if (framebuffer.getBuffer() != NULL) {
+      tft.drawRGBBitmap(0, 0, framebuffer.getBuffer(), 160, 80);
+    }
   }
 }

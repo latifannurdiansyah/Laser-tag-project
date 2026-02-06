@@ -1,0 +1,10 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+#define WIFI_SSID "TIMEOSPACE"
+#define WIFI_PASSWORD "1234Saja"
+
+#define FIREBASE_HOST "https://gps-log-a1d90-default-rtdb.asia-southeast1.firebasedatabase.app"
+#define FIREBASE_AUTH "AMTJsG2px3hwlumdLkvcpnFNQF3hybkw0WvwM9WI"
+
+#endif

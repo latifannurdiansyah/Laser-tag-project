@@ -38,9 +38,8 @@ npx http-server -p 8080
 5. Open Serial Monitor (Ctrl+Shift+M) to view debug output at 115200 baud
 
 **Board Configuration:**
-- **Helmet Firmware**: `firmware/Backup/ESP32S3 Supermini/Helm_IR_Anticheating_espnow/Helm_IR_Anticheating_espnow.ino`
 - **GPS Tracker Firmware**: `firmware/LaserTagProjectFirmwareV1/LaserTagProjectFirmwareV1.ino`
-- **Full Tracker Firmware**: `firmware/Backup/Heltec Wireless Tracker V1.2/heltec-tracker-espnow-lora-gps/src/main.ino`
+- **Firmware Configuration**: Copy `firmware/config.h.template` to `firmware/config.h` and fill in credentials
 
 ### Firmware Libraries Required
 
@@ -321,29 +320,16 @@ When modifying protocols:
 ```
 Laser-tag-project/
 ├── README.md                    # Project documentation
+├── AGENTS.md                    # Development guide for agents
 ├── src/
 │   ├── index.html             # Dashboard UI
 │   ├── index.js               # Dashboard logic
 │   └── firebase.js            # Firebase config
 ├── firmware/
+│   ├── config.h.template      # Credentials template (copy to config.h)
 │   ├── LaserTagProjectFirmwareV1/
 │   │   └── LaserTagProjectFirmwareV1.ino
-│   └── Backup/
-│       ├── ESP32S3 Supermini/      # Helmet firmware
-│       │   └── Helm_IR_Anticheating_espnow/
-│       │       ├── Helm_IR_Anticheating_espnow.ino
-│       │       ├── ESPNowHandler.h
-│       │       ├── IRHandler.h
-│       │       └── Anticheat.h
-│       └── Heltec Wireless Tracker V1.2/  # GPS tracker
-│           └── heltec-tracker-espnow-lora-gps/
-│               └── src/
-│                   ├── main.ino
-│                   ├── PinConfig.h
-│                   ├── ESPNowModule.ino
-│                   ├── GPSModule.ino
-│                   ├── LoRaModule.ino
-│                   └── TFTDisplay.ino
+│   └── Backup/               # Backup/experimental firmware (future use)
 └── docs/
     └── Ujian Semhas/               # Thesis documents
 ```
@@ -365,3 +351,5 @@ Laser-tag-project/
 - Firebase project is already configured - do not change credentials unless instructed
 - Always test firmware changes with serial output enabled
 - Web dashboard DevTools can simulate GPS data for testing without hardware
+- **IMPORTANT**: Never commit `firmware/config.h` - it contains sensitive credentials
+- Before compiling firmware, copy `firmware/config.h.template` to `firmware/config.h` and fill in your credentials

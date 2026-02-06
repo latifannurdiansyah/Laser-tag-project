@@ -284,7 +284,7 @@ window.DevTools = {
             
             console.log(`[INFO] Generated random coords: lat=${lat}, lng=${lng}, alt=${alt}, sat=${sat}`);
             
-            window.firebaseSetData({
+            await window.firebaseSetData({
                 latitude: parseFloat(lat),
                 longitude: parseFloat(lng),
                 altitude: alt,
@@ -310,7 +310,7 @@ window.DevTools = {
             };
             
             console.log('[INFO] Simulating GPS data:', testData);
-            window.firebaseSetData(testData);
+            await window.firebaseSetData(testData);
             
             document.getElementById('editValue').value = JSON.stringify(testData, null, 2);
             this.showToast('GPS data simulated!', 'success');
@@ -329,7 +329,7 @@ window.DevTools = {
         }
         
         try {
-            window.firebaseClearAll();
+            await window.firebaseClearAll();
             this.showToast('All data cleared successfully!', 'success');
             console.log('[SUCCESS] All data cleared');
         } catch (error) {
@@ -351,7 +351,7 @@ window.DevTools = {
         try {
             const parsedValue = JSON.parse(value);
             console.log('[INFO] Setting flat GPS data:', parsedValue);
-            window.firebaseSetData(parsedValue);
+            await window.firebaseSetData(parsedValue);
             this.showToast('GPS data set!', 'success');
             console.log('[SUCCESS] GPS data set');
         } catch (error) {
@@ -375,7 +375,7 @@ window.DevTools = {
             const parsedValue = parseFloat(value) || value;
             console.log(`[INFO] Updating data: path="${path}", value=${parsedValue}`);
             
-            window.firebaseUpdateData(path, parsedValue);
+            await window.firebaseUpdateData(path, parsedValue);
             this.showToast(`Updated "${path}"!`, 'success');
             console.log('[SUCCESS] Data updated:', path);
         } catch (error) {
@@ -400,7 +400,7 @@ window.DevTools = {
         }
         
         try {
-            window.firebaseDeleteData(path);
+            await window.firebaseDeleteData(path);
             this.showToast(`Deleted "${path}"!`, 'success');
             console.log('[SUCCESS] Data deleted:', path);
         } catch (error) {
@@ -442,15 +442,15 @@ window.DevTools = {
         input.type = 'file';
         input.accept = '.json';
         
-        input.onchange = (e) => {
+        input.onchange = async (e) => {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = (event) => {
+                reader.onload = async (event) => {
                     try {
                         const data = JSON.parse(event.target.result);
                         console.log('[INFO] Parsed JSON data:', data);
-                        window.firebaseImportData(data);
+                        await window.firebaseImportData(data);
                         this.showToast('Data imported successfully!', 'success');
                         console.log('[SUCCESS] JSON imported');
                     } catch (error) {

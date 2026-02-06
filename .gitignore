@@ -399,3 +399,7 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# Laser Tag Project - Sensitive files
+firmware/config.h
+
