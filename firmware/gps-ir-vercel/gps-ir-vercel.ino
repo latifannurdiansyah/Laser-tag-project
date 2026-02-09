@@ -8,8 +8,8 @@
 #include <HTTPClient.h>
 #include <IRremote.hpp>
 
-#define WIFI_SSID       "Polinema Hostspot"
-#define WIFI_PASSWORD   ""
+#define WIFI_SSID       "UserAndroid"
+#define WIFI_PASSWORD   "55555550"
 #define API_URL         "https://laser-tag-project.vercel.app/api/track"
 #define DEVICE_ID       "Heltec-IR-V1"
 
