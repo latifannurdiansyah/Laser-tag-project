@@ -8,7 +8,7 @@
 #include <HTTPClient.h>
 #include <IRremote.hpp>
 
-#define WIFI_SSID       "Polinema Hostpot"
+#define WIFI_SSID       "Polinema Hostspot"
 #define WIFI_PASSWORD   ""
 #define API_URL         "https://laser-tag-project.vercel.app/api/track"
 #define DEVICE_ID       "Heltec-IR-V1"
@@ -246,10 +246,16 @@ void sendToAPI(float lat, float lng) {
   http.addHeader("Content-Type", "application/json");
   http.setTimeout(5000);
 
+  // Format IR Status: "HIT: 0xXXXX-0xXX" atau "-"
+  String irStatus = irDataReceived ? 
+    String("HIT: 0x") + String(lastIRAddress, HEX) + String("-0x") + String(lastIRCommand, HEX) : 
+    "-";
+
   String payload = String("{") +
     "\"id\":\"" DEVICE_ID "\"," +
     "\"lat\":" + String(lat, 6) + "," +
-    "\"lng\":" + String(lng, 6) +
+    "\"lng\":" + String(lng, 6) + "," +
+    "\"irStatus\":\"" + irStatus + "\"" +
     "}";
 
   Serial.print("[API] Sending: ");

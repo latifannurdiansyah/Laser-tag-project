@@ -12,6 +12,7 @@ model GpsLog {
   deviceId  String
   latitude  Float
   longitude Float
+  irStatus  String?  // Format: "HIT: 0xXXXX-0xXX" atau "-"
   createdAt DateTime @default(now())
 
   @@map("gps_logs")

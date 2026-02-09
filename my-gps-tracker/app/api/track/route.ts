@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { id, lat, lng } = body
+    const { id, lat, lng, irStatus } = body
 
     console.log('[API] Received GPS data:', body)
 
@@ -16,7 +16,8 @@ export async function POST(request: Request) {
       data: {
         deviceId: id,
         latitude: parseFloat(lat),
-        longitude: parseFloat(lng)
+        longitude: parseFloat(lng),
+        irStatus: irStatus || '-'
       }
     })
 

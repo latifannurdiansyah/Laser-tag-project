@@ -7,6 +7,7 @@ interface GpsLog {
   deviceId: string
   latitude: number
   longitude: number
+  irStatus: string | null
   createdAt: string
 }
 
@@ -85,7 +86,7 @@ export default function Dashboard() {
   }
 
   const contentStyle: React.CSSProperties = {
-    maxWidth: isMobile ? '100%' : '1000px',
+    maxWidth: isMobile ? '100%' : '1200px',
     margin: '0 auto',
   }
 
@@ -190,6 +191,15 @@ export default function Dashboard() {
                     Lng: {log.longitude.toFixed(6)}
                   </span>
                 </div>
+                <div style={{ marginTop: '8px' }}>
+                  <span style={{ 
+                    fontSize: '14px', 
+                    fontWeight: '600',
+                    color: log.irStatus && log.irStatus !== '-' ? '#ef4444' : '#737373'
+                  }}>
+                    STATUS: {log.irStatus || '-'}
+                  </span>
+                </div>
               </div>
             ))}
             {logs.length === 0 && !error && (
@@ -208,11 +218,12 @@ export default function Dashboard() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: '#262626' }}>
-                  <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', fontSize: '13px', color: '#a3a3a3', width: '60px' }}>ID</th>
-                  <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', fontSize: '13px', color: '#a3a3a3', width: '140px' }}>DEVICE ID</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', fontSize: '13px', color: '#a3a3a3', width: '50px' }}>ID</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', fontSize: '13px', color: '#a3a3a3', width: '120px' }}>DEVICE ID</th>
                   <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', fontSize: '13px', color: '#22c55e' }}>LATITUDE</th>
                   <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', fontSize: '13px', color: '#3b82f6' }}>LONGITUDE</th>
-                  <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', fontSize: '13px', color: '#a3a3a3' }}>TIMESTAMP</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', fontSize: '13px', color: '#a3a3a3', width: '150px' }}>TIMESTAMP</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', fontSize: '13px', color: '#ef4444', width: '150px' }}>STATUS</th>
                 </tr>
               </thead>
               <tbody>
@@ -230,6 +241,9 @@ export default function Dashboard() {
                     <td style={{ padding: '12px 16px', fontSize: '14px', fontFamily: 'monospace', color: '#3b82f6' }}>{log.longitude.toFixed(6)}</td>
                     <td style={{ padding: '12px 16px', fontSize: '13px', color: '#737373' }}>
                       {new Date(log.createdAt).toLocaleString()}
+                    </td>
+                    <td style={{ padding: '12px 16px', fontSize: '13px', fontWeight: '600', color: log.irStatus && log.irStatus !== '-' ? '#ef4444' : '#737373' }}>
+                      {log.irStatus || '-'}
                     </td>
                   </tr>
                 ))}
