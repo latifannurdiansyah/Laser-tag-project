@@ -3,14 +3,13 @@
 #include <Adafruit_ST7735.h>
 #include <Adafruit_GFX.h>
 #include <TinyGPS++.h>
-
-// --- LIBRARY TAMBAHAN UNTUK FIREBASE & WIFI ---
 #include <WiFi.h>
+#include <HTTPClient.h>
+
 #include <Firebase_ESP_Client.h>
 #include "addons/TokenHelper.h"
 #include "addons/RTDBHelper.h"
 
-// --- KONFIGURASI PIN (Tetap Sama) ---
 #define Vext_Ctrl 3
 #define LED_K 21
 #define TFT_CS 38
@@ -21,9 +20,6 @@
 #define GPS_RX 33
 #define GPS_TX 34
 
-// --- KREDENSIAL WIFI & FIREBASE ---
-// Untuk keamanan, gunakan file config.h
-// Salin config.h.template ke config.h dan isi dengan kredensial Anda
 #ifdef __has_include
   #if __has_include("config.h")
     #include "config.h"
@@ -37,7 +33,6 @@
 #define WIFI_TIMEOUT 15000
 #define WIFI_RETRY_INTERVAL 5000
 
-// Objek Global
 TinyGPSPlus gps;
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
 GFXcanvas16 framebuffer = GFXcanvas16(160, 80);
@@ -48,6 +43,8 @@ FirebaseConfig config;
 
 unsigned long lastWiFiReconnectAttempt = 0;
 bool wifiConnected = false;
+unsigned long lastAPISend = 0;
+#define API_SEND_INTERVAL 1000
 
 void connectWiFi() {
   Serial.print("Connecting to WiFi");
@@ -79,6 +76,34 @@ void checkWiFiConnection() {
     wifiConnected = true;
     Serial.println("WiFi reconnected! IP: " + WiFi.localIP().toString());
   }
+}
+
+void sendToAPIDualMode(float lat, float lng, int alt, int sats) {
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("[API] WiFi not connected, skipping...");
+    return;
+  }
+
+  HTTPClient http;
+  http.begin(API_URL);
+  http.addHeader("Content-Type", "application/json");
+
+  String payload = String("{") +
+    "\"deviceId\":\"" DEVICE_ID "\"," +
+    "\"lat\":" + String(lat, 6) + "," +
+    "\"lng\":" + String(lng, 6) + "," +
+    "\"alt\":" + String(alt) + "," +
+    "\"sats\":" + String(sats) +
+    "}";
+
+  int httpResponseCode = http.POST(payload);
+  if (httpResponseCode > 0) {
+    String response = http.getString();
+    Serial.println("[API] Success! Response: " + String(httpResponseCode));
+  } else {
+    Serial.println("[API] Error: " + String(httpResponseCode));
+  }
+  http.end();
 }
 
 void setup() {
@@ -127,17 +152,14 @@ void setup() {
 void loop() {
   checkWiFiConnection();
 
-  // Baca data GPS
   while (Serial1.available() > 0) {
     gps.encode(Serial1.read());
   }
 
-  // Update tiap 1 detik (Gunakan interval agar tidak spam Firebase)
   static unsigned long lastUpdate = 0;
   if (millis() - lastUpdate >= 1000) {
     lastUpdate = millis();
 
-    // Render ke framebuffer
     framebuffer.fillScreen(ST7735_BLACK);
     framebuffer.setTextColor(ST7735_WHITE, ST7735_BLACK);
     framebuffer.setTextSize(1);
@@ -150,7 +172,6 @@ void loop() {
       int sats = gps.satellites.value();
       int alt = (int)gps.altitude.meters();
 
-      // Update Tampilan TFT
       framebuffer.setCursor(5, 20);
       framebuffer.print("Lat:");
       framebuffer.print(lat, 5);
@@ -164,7 +185,6 @@ void loop() {
       framebuffer.print(alt);
       framebuffer.print("m");
 
-      // Kirim ke Firebase (Hanya jika data valid)
       FirebaseJson json;
       json.set("latitude", lat);
       json.set("longitude", lng);
@@ -179,7 +199,11 @@ void loop() {
         }
       }
 
-      // Serial Output
+      if (millis() - lastAPISend >= API_SEND_INTERVAL) {
+        lastAPISend = millis();
+        sendToAPIDualMode(lat, lng, alt, sats);
+      }
+
       Serial.printf("Lat: %.6f, Lon: %.6f, Sats: %d\n", lat, lng, sats);
 
     } else {
@@ -191,7 +215,6 @@ void loop() {
       Serial.println("Searching for GPS Fix...");
     }
 
-    // Push ke display fisik
     if (framebuffer.getBuffer() != NULL) {
       tft.drawRGBBitmap(0, 0, framebuffer.getBuffer(), 160, 80);
     }

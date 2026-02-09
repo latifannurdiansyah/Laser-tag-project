@@ -7,4 +7,7 @@
 #define FIREBASE_HOST "https://gps-log-a1d90-default-rtdb.asia-southeast1.firebasedatabase.app"
 #define FIREBASE_AUTH "AMTJsG2px3hwlumdLkvcpnFNQF3hybkw0WvwM9WI"
 
+#define API_URL "http://YOUR_DOMAIN.com/api/track"
+#define DEVICE_ID "Heltec-1"
+
 #endif

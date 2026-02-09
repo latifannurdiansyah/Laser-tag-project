@@ -1,1 +1,1 @@
-cd Documents\Github_Latipan\Laser-tag-project>my-gps-tracker
+cd Documents\Github_Latipan\Laser-tag-project\my-gps-tracker
