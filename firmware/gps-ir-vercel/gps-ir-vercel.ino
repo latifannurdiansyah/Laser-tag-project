@@ -8,15 +8,10 @@
 #include <HTTPClient.h>
 #include <IRremote.hpp>
 
-#ifdef __has_include
-  #if __has_include("config.h")
-    #include "config.h"
-  #else
-    #error "config.h tidak ditemukan! Salin config.h.template ke config.h"
-  #endif
-#else
-  #error "Compiler tidak mendukung __has_include"
-#endif
+#define WIFI_SSID       "Polinema Hostpot"
+#define WIFI_PASSWORD   ""
+#define API_URL         "https://laser-tag-project.vercel.app/api/track"
+#define DEVICE_ID       "Heltec-IR-V1"
 
 #define Vext_Ctrl 3
 #define LED_K 21
@@ -503,9 +498,14 @@ void setup() {
 
   framebuffer.fillScreen(ST7735_BLACK);
   framebuffer.setCursor(5, 5);
-  framebuffer.setTextColor(wifiConnected ? ST7735_GREEN : ST7735_RED, ST7735_BLACK);
-  framebuffer.print("WiFi: ");
-  framebuffer.print(wifiIP ? wifiConnected : "FAILED");
+  if (wifiConnected) {
+    framebuffer.setTextColor(ST7735_GREEN, ST7735_BLACK);
+    framebuffer.print("WiFi: ");
+    framebuffer.print(wifiIP);
+  } else {
+    framebuffer.setTextColor(ST7735_RED, ST7735_BLACK);
+    framebuffer.print("WiFi: FAILED");
+  }
   tft.drawRGBBitmap(0, 0, framebuffer.getBuffer(), 160, 80);
   delay(1500);
 
