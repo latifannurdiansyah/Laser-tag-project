@@ -10,6 +10,7 @@ function generateRandomIndonesia(): { lat: number; lng: number } {
 export async function POST() {
   try {
     const { lat, lng } = generateRandomIndonesia()
+    console.log('[API] Generating random coords:', lat, lng)
 
     const log = await prisma.gpsLog.create({
       data: {
@@ -19,8 +20,10 @@ export async function POST() {
       }
     })
 
+    console.log('[API] Random log created:', log.id)
     return NextResponse.json(log)
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to generate random log' }, { status: 500 })
+  } catch (error: any) {
+    console.error('[API] Error generating random log:', error)
+    return NextResponse.json({ error: error.message || 'Failed to generate random log' }, { status: 500 })
   }
 }

@@ -12,32 +12,58 @@ interface GpsLog {
 
 export default function Dashboard() {
   const [logs, setLogs] = useState<GpsLog[]>([])
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
 
   const fetchLogs = async () => {
     try {
       const res = await fetch('/api/logs')
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`)
+      }
       const data = await res.json()
       setLogs(data)
-    } catch (error) {
-      console.error('Failed to fetch logs:', error)
+      setError(null)
+    } catch (err: any) {
+      console.error('Failed to fetch logs:', err)
+      setError('Failed to connect to database. Please check Vercel logs.')
     }
   }
 
   useEffect(() => {
     fetchLogs()
-    const interval = setInterval(fetchLogs, 1000)
+    const interval = setInterval(fetchLogs, 2000)
     return () => clearInterval(interval)
   }, [])
 
   const handleRandom = async () => {
-    await fetch('/api/random', { method: 'POST' })
-    fetchLogs()
+    setLoading(true)
+    try {
+      const res = await fetch('/api/random', { method: 'POST' })
+      if (!res.ok) {
+        throw new Error('Failed to generate random')
+      }
+      fetchLogs()
+    } catch (err: any) {
+      console.error('Generate random error:', err)
+      alert('Error: ' + err.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleClear = async () => {
     if (!confirm('Delete all logs?')) return
-    await fetch('/api/logs', { method: 'DELETE' })
-    fetchLogs()
+    try {
+      const res = await fetch('/api/logs', { method: 'DELETE' })
+      if (!res.ok) {
+        throw new Error('Failed to clear logs')
+      }
+      fetchLogs()
+    } catch (err: any) {
+      console.error('Clear error:', err)
+      alert('Error: ' + err.message)
+    }
   }
 
   return (
@@ -47,20 +73,27 @@ export default function Dashboard() {
           GPS Tracker Dashboard
         </h1>
 
+        {error && (
+          <div style={{ background: '#dc2626', padding: '12px', borderRadius: '6px', marginBottom: '20px' }}>
+            {error}
+          </div>
+        )}
+
         <div style={{ display: 'flex', gap: '10px', marginBottom: '30px' }}>
           <button
             onClick={handleRandom}
+            disabled={loading}
             style={{
-              background: '#16a34a',
+              background: loading ? '#666' : '#16a34a',
               color: 'white',
               padding: '12px 24px',
               border: 'none',
               borderRadius: '6px',
-              cursor: 'pointer',
+              cursor: loading ? 'not-allowed' : 'pointer',
               fontSize: '14px'
             }}
           >
-            + Generate Random
+            {loading ? 'Loading...' : '+ Generate Random'}
           </button>
           <button
             onClick={handleClear}
@@ -110,7 +143,7 @@ export default function Dashboard() {
             </tbody>
           </table>
 
-          {logs.length === 0 && (
+          {logs.length === 0 && !error && (
             <div style={{ padding: '40px', textAlign: 'center', color: '#737373' }}>
               No GPS logs found
             </div>
