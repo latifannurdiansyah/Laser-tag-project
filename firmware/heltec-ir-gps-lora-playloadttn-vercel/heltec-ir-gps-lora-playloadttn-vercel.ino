@@ -99,11 +99,14 @@ const int TFT_LINE_HEIGHT  = 10;
 // TIMING & BEHAVIOR
 // ============================================
 const uint32_t UPLINK_INTERVAL_MS = 30000;  // 30 sec (Fair Use Policy)
-const uint8_t  MAX_JOIN_ATTEMPTS  = 10;
-const uint32_t JOIN_RETRY_DELAY_MS = 8000;
+const uint8_t  MAX_JOIN_ATTEMPTS  = 20;    // Increased from 10
+const uint32_t JOIN_RETRY_DELAY_MS = 15000; // Increased from 8 seconds (better for AS923)
 const uint32_t SD_WRITE_INTERVAL_MS = 2000;
 const size_t   LOG_QUEUE_SIZE = 20;
 const TickType_t MUTEX_TIMEOUT = pdMS_TO_TICKS(100);
+
+// Enable automatic session restore after power cycle
+#define LORAWAN_SESSION_RESTORE true
 
 // RadioLib Region – CHANGE TO YOUR REGION!
 const LoRaWANBand_t Region = AS923;  // AS923 untuk Indonesia
@@ -290,6 +293,15 @@ void setup()
     tft.print(DEVICE_ID);
     tft.setCursor(5, 35);
     tft.print("Initializing...");
+
+    // Button for manual OTAA reset (Pin 0 = BOOT button on Heltec)
+    pinMode(0, INPUT_PULLUP);
+    delay(100);
+    if (digitalRead(0) == LOW) {
+        Serial.println("\n!!! MANUAL OTAA RESET TRIGGERED !!!");
+        Serial.println("Delete old session and retry join...");
+        logToSd("Manual OTAA reset triggered");
+    }
     delay(1500);
 
     // Create mutexes
@@ -405,6 +417,15 @@ void loraTask(void *pv)
         vTaskDelete(NULL);
     }
 
+    Serial.println("\n========================================");
+    Serial.println("LoRaWAN Credentials Check:");
+    Serial.printf("JoinEUI:  %016llX\n", joinEUI);
+    Serial.printf("DevEUI:   %016llX\n", devEUI);
+    Serial.printf("AppKey:   ");
+    for (int i = 0; i < 16; i++) Serial.printf("%02X", appKey[i]);
+    Serial.println();
+    Serial.println("========================================\n");
+
     // Initialize LoRaWAN node
     state = node.beginOTAA(joinEUI, devEUI, nwkKey, appKey);
     if (state != RADIOLIB_ERR_NONE) {
@@ -421,9 +442,8 @@ void loraTask(void *pv)
     uint8_t attempts = 0;
     while (attempts++ < MAX_JOIN_ATTEMPTS)
     {
-        String msg = "OTAA attempt " + String(attempts);
-        Serial.println(msg);
-        logToSd(msg);
+        Serial.printf("OTAA attempt %d/%d...\n", attempts, MAX_JOIN_ATTEMPTS);
+        logToSd("OTAA attempt " + String(attempts));
 
         state = node.activateOTAA();
         if (state == RADIOLIB_LORAWAN_NEW_SESSION) {
@@ -438,6 +458,16 @@ void loraTask(void *pv)
         } else {
             String err = "Join failed: " + stateDecode(state);
             Serial.println(err);
+            
+            // Troubleshooting hints
+            if (state == RADIOLIB_ERR_NO_JOIN_ACCEPT) {
+                Serial.println(">>> TROUBLESHOOTING:");
+                Serial.println(">>> 1. Check DevEUI/JoinEUI format (must be LSB)");
+                Serial.println(">>> 2. Check AppKey format (must be MSB)");
+                Serial.println(">>> 3. Press BOOT button (Pin 0) during startup to force fresh join");
+                Serial.println(">>> 4. Delete device in TTN Console and re-register");
+            }
+            
             logToSd(err);
             delay(JOIN_RETRY_DELAY_MS);
         }
@@ -446,14 +476,37 @@ void loraTask(void *pv)
     if (!g_loraStatus.joined) {
         logToSd("❌ Max join attempts reached.");
         Serial.println("❌ Max join attempts reached.");
-        vTaskDelete(NULL);
+        Serial.println(">>> Try pressing BOOT button during startup for fresh join");
+        // Don't delete task - keep trying in background
+        Serial.println(">>> Will retry join every 60 seconds...");
     }
 
-    // Periodic Uplink
-    uint32_t lastUplink = 0;
+    // Retry join periodically even after max attempts
+    uint32_t lastJoinRetry = millis();
     for (;;)
     {
-        if (millis() - lastUplink >= UPLINK_INTERVAL_MS)
+        // Periodic retry join if not joined
+        if (!g_loraStatus.joined && millis() - lastJoinRetry >= 60000) {
+            Serial.println("\n>>> Retrying OTAA join (periodic)...");
+            logToSd("Retrying OTAA join...");
+            
+            int16_t retryState = node.activateOTAA();
+            if (retryState == RADIOLIB_LORAWAN_NEW_SESSION) {
+                Serial.println("✅ RETRY SUCCESS! OTAA Join successful!");
+                logToSd("✅ Retry OTAA Join successful!");
+                if (xSemaphoreTake(xLoraMutex, MUTEX_TIMEOUT) == pdTRUE) {
+                    g_loraStatus.joined = true;
+                    g_loraStatus.lastEvent = "JOINED";
+                    xSemaphoreGive(xLoraMutex);
+                }
+            } else {
+                Serial.printf("Retry failed: %s\n", stateDecode(retryState));
+            }
+            lastJoinRetry = millis();
+        }
+
+        // Only send uplink if joined
+        if (g_loraStatus.joined && millis() - lastUplink >= UPLINK_INTERVAL_MS)
         {
             // Prepare payload with all sensor data
             DataPayload payload;
