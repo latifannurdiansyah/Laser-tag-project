@@ -483,6 +483,7 @@ void loraTask(void *pv)
 
     // Retry join periodically even after max attempts
     uint32_t lastJoinRetry = millis();
+    uint32_t lastUplink = millis();
     for (;;)
     {
         // Periodic retry join if not joined
