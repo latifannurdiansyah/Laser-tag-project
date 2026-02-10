@@ -4,16 +4,16 @@ import { useEffect, useState } from 'react'
 
 interface GpsLog {
   id: number
-  source: string
+  source?: string | null
   deviceId: string
   latitude: number
   longitude: number
-  altitude: number | null
-  irStatus: string | null
-  battery: number | null
-  satellites: number | null
-  rssi: number | null
-  snr: number | null
+  altitude?: number | null
+  irStatus?: string | null
+  battery?: number | null
+  satellites?: number | null
+  rssi?: number | null
+  snr?: number | null
   createdAt: string
 }
 

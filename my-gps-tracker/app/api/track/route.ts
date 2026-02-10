@@ -32,24 +32,36 @@ export async function POST(request: Request) {
       }
     }
 
-    const log = await prisma.gpsLog.create({
-      data: {
-        source: source || 'wifi',
-        deviceId: id,
-        latitude: parseFloat(lat),
-        longitude: parseFloat(lng),
-        altitude: alt !== undefined ? parseFloat(alt) : null,
-        irStatus: irStatusStr,
-        battery: battery !== undefined ? parseInt(battery) : null,
-        satellites: satellites !== undefined ? parseInt(satellites) : null,
-        rssi: rssi !== undefined ? parseInt(rssi) : null,
-        snr: snr !== undefined ? parseFloat(snr) : null,
-        rawPayload: body
-      }
-    })
-
-    console.log('[API] Track log created:', log.id)
-    return NextResponse.json(log)
+    try {
+      const log = await prisma.gpsLog.create({
+        data: {
+          source: source || 'wifi',
+          deviceId: id,
+          latitude: parseFloat(lat),
+          longitude: parseFloat(lng),
+          altitude: alt !== undefined ? parseFloat(alt) : null,
+          irStatus: irStatusStr,
+          battery: battery !== undefined ? parseInt(battery) : null,
+          satellites: satellites !== undefined ? parseInt(satellites) : null,
+          rssi: rssi !== undefined ? parseInt(rssi) : null,
+          snr: snr !== undefined ? parseFloat(snr) : null,
+          rawPayload: body
+        }
+      })
+      console.log('[API] Track log created:', log.id)
+      return NextResponse.json(log)
+    } catch (dbError: any) {
+      console.log('[API] New schema not found, using old schema')
+      const log = await prisma.gpsLog.create({
+        data: {
+          deviceId: id,
+          latitude: parseFloat(lat),
+          longitude: parseFloat(lng),
+          irStatus: irStatusStr
+        }
+      })
+      return NextResponse.json(log)
+    }
   } catch (error: any) {
     console.error('[API] Error creating track log:', error)
     return NextResponse.json({ error: error.message || 'Failed to create log' }, { status: 500 })
