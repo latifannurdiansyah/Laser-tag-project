@@ -242,7 +242,7 @@ void logToSd(const String &msg);
 String formatLogLine();
 void sendToAPI(float lat, float lng);
 void saveToSDOffline(float lat, float lng, float alt, uint8_t satellites,
-                    uint16_t battery, const String &irStatus);
+                    uint16_t battery, int16_t rssi, float snr, const String &irStatus);
 bool uploadFromSD();
 String stateDecode(const int16_t result);
 
@@ -791,7 +791,7 @@ void logToSd(const String &msg)
 // OFFLINE SD CARD FUNCTIONS
 // ============================================
 void saveToSDOffline(float lat, float lng, float alt, uint8_t satellites,
-                    uint16_t battery, const String &irStatus)
+                    uint16_t battery, int16_t rssi, float snr, const String &irStatus)
 {
     if (!SD.begin(SD_CS, SPI, 8000000)) {
         Serial.println("[SD-OFFLINE] SD not available");
@@ -810,6 +810,8 @@ void saveToSDOffline(float lat, float lng, float alt, uint8_t satellites,
                   String(alt, 1) + "," +
                   String(satellites) + "," +
                   String(battery) + "," +
+                  String(rssi) + "," +
+                  String(snr, 1) + "," +
                   irStatus;
     
     file.println(line);
@@ -844,22 +846,25 @@ bool uploadFromSD()
         
         if (line.length() < 10) continue;
         
-        // Parse CSV: millis,lat,lng,alt,satellites,battery,irStatus
-        int firstComma = line.indexOf(',');
-        int secondComma = line.indexOf(',', firstComma + 1);
-        int thirdComma = line.indexOf(',', secondComma + 1);
-        int fourthComma = line.indexOf(',', thirdComma + 1);
-        int fifthComma = line.indexOf(',', fourthComma + 1);
-        int sixthComma = line.indexOf(',', fifthComma + 1);
+        // Parse CSV: millis,lat,lng,alt,satellites,battery,rssi,snr,irStatus
+        int commas[8];
+        int commaCount = 0;
+        for (int i = 0; i < line.length() && commaCount < 8; i++) {
+            if (line.charAt(i) == ',') {
+                commas[commaCount++] = i;
+            }
+        }
         
-        if (firstComma < 0 || sixthComma < 0) continue;
+        if (commaCount < 7) continue;
         
-        String irStatus = line.substring(sixthComma + 1);
-        float lat = line.substring(firstComma + 1, secondComma).toFloat();
-        float lng = line.substring(secondComma + 1, thirdComma).toFloat();
-        float alt = line.substring(thirdComma + 1, fourthComma).toFloat();
-        uint8_t satellites = line.substring(fourthComma + 1, fifthComma).toInt();
-        uint16_t battery = line.substring(fifthComma + 1, sixthComma).toInt();
+        String irStatus = line.substring(commas[7] + 1);
+        float lat = line.substring(commas[0] + 1, commas[1]).toFloat();
+        float lng = line.substring(commas[1] + 1, commas[2]).toFloat();
+        float alt = line.substring(commas[2] + 1, commas[3]).toFloat();
+        uint8_t satellites = line.substring(commas[3] + 1, commas[4]).toInt();
+        uint16_t battery = line.substring(commas[4] + 1, commas[5]).toInt();
+        int16_t rssi = line.substring(commas[5] + 1, commas[6]).toInt();
+        float snr = line.substring(commas[6] + 1, commas[7]).toFloat();
         
         // Kirim ke API
         HTTPClient http;
@@ -873,7 +878,9 @@ bool uploadFromSD()
                         "\"alt\":" + String(alt, 1) + ","
                         "\"irStatus\":\"" + irStatus + "\","
                         "\"battery\":" + String(battery) + ","
-                        "\"satellites\":" + String(satellites) + "}";
+                        "\"satellites\":" + String(satellites) + ","
+                        "\"rssi\":" + String(rssi) + ","
+                        "\"snr\":" + String(snr, 1) + "}";
         
         int httpCode = http.POST(payload);
         http.end();
@@ -917,6 +924,8 @@ void sendToAPI(float lat, float lng)
     uint16_t battery = 0;
     uint8_t satellites = 0;
     float alt = 0.0f;
+    int16_t rssi = 0;
+    float snr = 0.0f;
 
     if (xSemaphoreTake(xIrMutex, MUTEX_TIMEOUT) == pdTRUE) {
         if (g_irStatus.dataReceived) {
@@ -933,6 +942,12 @@ void sendToAPI(float lat, float lng)
         xSemaphoreGive(xGpsMutex);
     }
 
+    if (xSemaphoreTake(xLoraMutex, MUTEX_TIMEOUT) == pdTRUE) {
+        rssi = g_loraStatus.rssi;
+        snr = g_loraStatus.snr;
+        xSemaphoreGive(xLoraMutex);
+    }
+
     HTTPClient http;
     http.begin(API_URL);
     http.addHeader("Content-Type", "application/json");
@@ -944,17 +959,19 @@ void sendToAPI(float lat, float lng)
                      "\"alt\":" + String(alt, 1) + ","
                      "\"irStatus\":\"" + irStatus + "\","
                      "\"battery\":" + String(battery) + ","
-                     "\"satellites\":" + String(satellites) + "}";
+                     "\"satellites\":" + String(satellites) + ","
+                     "\"rssi\":" + String(rssi) + ","
+                     "\"snr\":" + String(snr, 1) + "}";
 
     int httpCode = http.POST(payload);
     http.end();
 
     if (httpCode == 200 || httpCode == 201) {
-        Serial.printf("[API] Success | Code: %d | Batt: %d mV | Sat: %d\n",
-                      httpCode, battery, satellites);
+        Serial.printf("[API] Success | Code: %d | Batt: %d mV | Sat: %d | RSSI: %d | SNR: %.1f\n",
+                      httpCode, battery, satellites, rssi, snr);
     } else {
-        Serial.printf("[API] Failed | Code: %d | Saving to SD...\n", httpCode);
-        saveToSDOffline(lat, lng, alt, satellites, battery, irStatus);
+        Serial.printf("[API] Failed | Code: %d\n", httpCode);
+        saveToSDOffline(lat, lng, alt, satellites, battery, rssi, snr, irStatus);
     }
 }
 
