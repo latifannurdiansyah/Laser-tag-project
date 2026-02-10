@@ -219,7 +219,7 @@ export default function Dashboard() {
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                   <span style={{ fontSize: '12px', color: '#737373' }}>#{log.id}</span>
-                  <span style={sourceBadgeStyle(log.source)}>{log.source}</span>
+                  <span style={sourceBadgeStyle(log.source || 'wifi')}>{log.source || 'wifi'}</span>
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
@@ -283,16 +283,16 @@ export default function Dashboard() {
                 </div>
 
                 <div style={{
-                  background: isIrHit(log.irStatus) ? '#7f1d1d' : '#0a0a0a',
+                  background: isIrHit(log.irStatus || '-') ? '#7f1d1d' : '#0a0a0a',
                   padding: '10px',
                   borderRadius: '6px',
                   textAlign: 'center',
-                  border: isIrHit(log.irStatus) ? '1px solid #ef4444' : '1px solid #262626'
+                  border: isIrHit(log.irStatus || '-') ? '1px solid #ef4444' : '1px solid #262626'
                 }}>
                   <span style={{
                     fontSize: '12px',
                     fontWeight: '600',
-                    color: isIrHit(log.irStatus) ? '#ef4444' : '#737373'
+                    color: isIrHit(log.irStatus || '-') ? '#ef4444' : '#737373'
                   }}>
                     STATUS: {log.irStatus || '-'}
                   </span>
@@ -341,7 +341,7 @@ export default function Dashboard() {
                     >
                       <td style={{ padding: '10px 12px', fontSize: '12px', color: '#737373' }}>{log.id}</td>
                       <td style={{ padding: '10px 12px' }}>
-                        <span style={sourceBadgeStyle(log.source)}>{log.source}</span>
+                        <span style={sourceBadgeStyle(log.source || 'wifi')}>{log.source || 'wifi'}</span>
                       </td>
                       <td style={{ padding: '10px 12px', fontSize: '13px', color: '#e5e5e5' }}>{log.deviceId}</td>
                       <td style={{ padding: '10px 12px', fontSize: '13px', fontFamily: 'monospace', color: '#22c55e' }}>{log.latitude.toFixed(6)}</td>
@@ -366,8 +366,8 @@ export default function Dashboard() {
                         fontSize: '12px',
                         fontWeight: 600,
                         textAlign: 'center',
-                        color: isIrHit(log.irStatus) ? '#ef4444' : '#737373',
-                        background: isIrHit(log.irStatus) ? 'rgba(239, 68, 68, 0.1)' : 'transparent'
+                        color: isIrHit(log.irStatus || '-') ? '#ef4444' : '#737373',
+                        background: isIrHit(log.irStatus || '-') ? 'rgba(239, 68, 68, 0.1)' : 'transparent'
                       }}>
                         {log.irStatus || '-'}
                       </td>
