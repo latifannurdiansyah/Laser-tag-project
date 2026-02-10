@@ -241,6 +241,9 @@ void irTask(void *pv);
 void logToSd(const String &msg);
 String formatLogLine();
 void sendToAPI(float lat, float lng);
+void saveToSDOffline(float lat, float lng, float alt, uint8_t satellites,
+                    uint16_t battery, const String &irStatus);
+bool uploadFromSD();
 String stateDecode(const int16_t result);
 
 // ============================================
@@ -572,12 +575,18 @@ void wifiTask(void *pv)
         Serial.print("IP Address: ");
         Serial.println(g_wifiStatus.ip);
         logToSd("WiFi connected: " + g_wifiStatus.ip);
+        
+        // Upload data dari SD card jika ada
+        Serial.println("[WiFi] Checking for offline data...");
+        uploadFromSD();
     } else {
         Serial.println("\nWiFi connection failed");
         logToSd("WiFi connection failed");
     }
 
     uint32_t lastAPIUpload = 0;
+    uint32_t lastSDCheck = 0;
+    
     for (;;)
     {
         // Check WiFi connection
@@ -596,12 +605,15 @@ void wifiTask(void *pv)
                 if (!g_wifiStatus.connected) {
                     g_wifiStatus.connected = true;
                     Serial.println("WiFi reconnected!");
+                    // Upload dari SD saat WiFi tersambung ulang
+                    Serial.println("[WiFi] Reconnected - uploading offline data...");
+                    uploadFromSD();
                 }
                 xSemaphoreGive(xWifiMutex);
             }
         }
 
-        // Send API data every 10 seconds
+        // Kirim data GPS setiap 10 detik
         if (g_wifiStatus.connected && millis() - lastAPIUpload >= 10000) {
             if (xSemaphoreTake(xGpsMutex, MUTEX_TIMEOUT) == pdTRUE) {
                 if (g_gpsData.valid && GPS.location.isValid()) {
@@ -610,6 +622,13 @@ void wifiTask(void *pv)
                 xSemaphoreGive(xGpsMutex);
             }
             lastAPIUpload = millis();
+        }
+
+        // Cek dan upload data dari SD setiap 30 detik
+        if (g_wifiStatus.connected && millis() - lastSDCheck >= 30000) {
+            Serial.println("[WiFi] Periodic SD check...");
+            uploadFromSD();
+            lastSDCheck = millis();
         }
 
         vTaskDelay(pdMS_TO_TICKS(1000));
@@ -768,17 +787,135 @@ void logToSd(const String &msg)
     }
 }
 
+// ============================================
+// OFFLINE SD CARD FUNCTIONS
+// ============================================
+void saveToSDOffline(float lat, float lng, float alt, uint8_t satellites,
+                    uint16_t battery, const String &irStatus)
+{
+    if (!SD.begin(SD_CS, SPI, 8000000)) {
+        Serial.println("[SD-OFFLINE] SD not available");
+        return;
+    }
+    
+    File file = SD.open("/offline_queue.csv", FILE_APPEND);
+    if (!file) {
+        Serial.println("[SD-OFFLINE] Failed to open queue file");
+        return;
+    }
+    
+    String line = String(millis()) + "," +
+                  String(lat, 6) + "," +
+                  String(lng, 6) + "," +
+                  String(alt, 1) + "," +
+                  String(satellites) + "," +
+                  String(battery) + "," +
+                  irStatus;
+    
+    file.println(line);
+    file.close();
+    Serial.println("[SD-OFFLINE] Data saved to queue");
+}
+
+bool uploadFromSD()
+{
+    if (!SD.begin(SD_CS, SPI, 8000000)) {
+        Serial.println("[SD-UPLOAD] SD not available");
+        return false;
+    }
+    
+    if (!SD.exists("/offline_queue.csv")) {
+        return false;
+    }
+    
+    File file = SD.open("/offline_queue.csv", FILE_READ);
+    if (!file) {
+        Serial.println("[SD-UPLOAD] Failed to open queue file");
+        return false;
+    }
+    
+    int uploadCount = 0;
+    int failCount = 0;
+    String tempFileContent = "";
+    
+    while (file.available()) {
+        String line = file.readStringUntil('\n');
+        line.trim();
+        
+        if (line.length() < 10) continue;
+        
+        // Parse CSV: millis,lat,lng,alt,satellites,battery,irStatus
+        int firstComma = line.indexOf(',');
+        int secondComma = line.indexOf(',', firstComma + 1);
+        int thirdComma = line.indexOf(',', secondComma + 1);
+        int fourthComma = line.indexOf(',', thirdComma + 1);
+        int fifthComma = line.indexOf(',', fourthComma + 1);
+        int sixthComma = line.indexOf(',', fifthComma + 1);
+        
+        if (firstComma < 0 || sixthComma < 0) continue;
+        
+        String irStatus = line.substring(sixthComma + 1);
+        float lat = line.substring(firstComma + 1, secondComma).toFloat();
+        float lng = line.substring(secondComma + 1, thirdComma).toFloat();
+        float alt = line.substring(thirdComma + 1, fourthComma).toFloat();
+        uint8_t satellites = line.substring(fourthComma + 1, fifthComma).toInt();
+        uint16_t battery = line.substring(fifthComma + 1, sixthComma).toInt();
+        
+        // Kirim ke API
+        HTTPClient http;
+        http.begin(API_URL);
+        http.addHeader("Content-Type", "application/json");
+        
+        String payload = "{\"source\":\"wifi\","
+                        "\"id\":\"" + String(DEVICE_ID) + "\","
+                        "\"lat\":" + String(lat, 6) + ","
+                        "\"lng\":" + String(lng, 6) + ","
+                        "\"alt\":" + String(alt, 1) + ","
+                        "\"irStatus\":\"" + irStatus + "\","
+                        "\"battery\":" + String(battery) + ","
+                        "\"satellites\":" + String(satellites) + "}";
+        
+        int httpCode = http.POST(payload);
+        http.end();
+        
+        if (httpCode == 200 || httpCode == 201) {
+            uploadCount++;
+            Serial.printf("[SD-UPLOAD] Uploaded line: %s | HTTP: %d\n", line.substring(0, 30).c_str(), httpCode);
+        } else {
+            failCount++;
+            tempFileContent += line + "\n";
+            Serial.printf("[SD-UPLOAD] Failed line: %s | HTTP: %d\n", line.substring(0, 30).c_str(), httpCode);
+        }
+        
+        delay(100);
+    }
+    
+    file.close();
+    
+    if (uploadCount > 0) {
+        Serial.printf("[SD-UPLOAD] Uploaded: %d, Failed: %d\n", uploadCount, failCount);
+    }
+    
+    if (failCount > 0) {
+        File tempFile = SD.open("/offline_queue.csv", FILE_WRITE);
+        if (tempFile) {
+            tempFile.print(tempFileContent);
+            tempFile.close();
+            Serial.println("[SD-UPLOAD] Queue updated with failed entries");
+        }
+        return false;
+    } else {
+        SD.remove("/offline_queue.csv");
+        Serial.println("[SD-UPLOAD] Queue cleared - all uploaded");
+        return true;
+    }
+}
+
 void sendToAPI(float lat, float lng)
 {
-    HTTPClient http;
-    http.begin(API_URL);
-    http.addHeader("Content-Type", "application/json");
-
     String irStatus = "-";
     uint16_t battery = 0;
     uint8_t satellites = 0;
-    int16_t rssi = 0;
-    float snr = 0.0f;
     float alt = 0.0f;
 
     if (xSemaphoreTake(xIrMutex, MUTEX_TIMEOUT) == pdTRUE) {
@@ -796,11 +933,9 @@ void sendToAPI(float lat, float lng)
         xSemaphoreGive(xGpsMutex);
     }
 
-    if (xSemaphoreTake(xLoraMutex, MUTEX_TIMEOUT) == pdTRUE) {
-        rssi = g_loraStatus.rssi;
-        snr = g_loraStatus.snr;
-        xSemaphoreGive(xLoraMutex);
-    }
+    HTTPClient http;
+    http.begin(API_URL);
+    http.addHeader("Content-Type", "application/json");
 
     String payload = "{\"source\":\"wifi\","
                      "\"id\":\"" + String(DEVICE_ID) + "\","
@@ -809,14 +944,18 @@ void sendToAPI(float lat, float lng)
                      "\"alt\":" + String(alt, 1) + ","
                      "\"irStatus\":\"" + irStatus + "\","
                      "\"battery\":" + String(battery) + ","
-                     "\"satellites\":" + String(satellites) + ","
-                     "\"rssi\":" + String(rssi) + ","
-                     "\"snr\":" + String(snr, 1) + "}";
+                     "\"satellites\":" + String(satellites) + "}";
 
     int httpCode = http.POST(payload);
-    Serial.printf("[API] Code: %d | RSSI: %d dBm | SNR: %.1f dB | Batt: %d mV | Sat: %d\n",
-                  httpCode, rssi, snr, battery, satellites);
     http.end();
+
+    if (httpCode == 200 || httpCode == 201) {
+        Serial.printf("[API] Success | Code: %d | Batt: %d mV | Sat: %d\n",
+                      httpCode, battery, satellites);
+    } else {
+        Serial.printf("[API] Failed | Code: %d | Saving to SD...\n", httpCode);
+        saveToSDOffline(lat, lng, alt, satellites, battery, irStatus);
+    }
 }
 
 String formatLogLine()
