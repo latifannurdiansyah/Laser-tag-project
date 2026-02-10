@@ -915,7 +915,6 @@ bool uploadFromSD()
     }
     
     int uploadCount = 0;
-    int failCount = 0;
     String tempFileContent = "";
     
     while (file.available()) {
@@ -965,11 +964,8 @@ bool uploadFromSD()
         
         if (httpCode == 200 || httpCode == 201) {
             uploadCount++;
-            Serial.printf("[SD-UPLOAD] Uploaded line: %s | HTTP: %d\n", line.substring(0, 30).c_str(), httpCode);
         } else {
-            failCount++;
             tempFileContent += line + "\n";
-            Serial.printf("[SD-UPLOAD] Failed line: %s | HTTP: %d\n", line.substring(0, 30).c_str(), httpCode);
         }
         
         delay(100);
@@ -978,10 +974,6 @@ bool uploadFromSD()
     file.close();
     
     if (uploadCount > 0) {
-        Serial.printf("[SD-UPLOAD] Uploaded: %d, Failed: %d\n", uploadCount, failCount);
-    }
-    
-    if (failCount > 0) {
         File tempFile = SD.open("/offline_queue.csv", FILE_WRITE);
         if (tempFile) {
             tempFile.print(tempFileContent);
