@@ -34,6 +34,15 @@ function decodeUplink(input) {
     var data = {};
     var bytes = input.bytes;
     
+    function readFloat32LE(b, o) {
+        var sign = (b[o + 3] & 0x80) !== 0 ? -1 : 1;
+        var exp = ((b[o + 3] & 0x7F) << 1) | ((b[o + 2] & 0x80) !== 0 ? 1 : 0);
+        var mant = ((b[o + 2] & 0x7F) << 16) | (b[o + 1] << 8) | b[o];
+        if (exp === 0) return sign * mant * Math.pow(2, -126);
+        if (exp === 255) return mant !== 0 ? NaN : sign * Infinity;
+        return sign * (1 + mant / 8388608) * Math.pow(2, exp - 127);
+    }
+    
     data.lat = readFloat32LE(bytes, 11);
     data.lng = readFloat32LE(bytes, 15);
     data.alt = readFloat32LE(bytes, 19);
@@ -48,13 +57,17 @@ function decodeUplink(input) {
     data.rssi = (bytes[27] << 8) | bytes[26];
     data.snr = bytes[28];
     
+    // Device ID: Heltec-P1, Heltec-P2, Heltec-P3... (based on address_id)
+    var playerNum = data.address_id + 1;
+    data.deviceId = "Heltec-P" + playerNum.toString();
+    
     data.irStatus = data.status === 1 
         ? "HIT: 0x" + data.shooter_address_id.toString(16).toUpperCase() + "-0x" + data.sub_address_id.toString(16).toUpperCase()
         : "-";
     
     return {
         data: {
-            deviceId: "HELTEC-" + data.address_id.toString(16).toUpperCase(),
+            deviceId: data.deviceId,
             lat: data.lat,
             lng: data.lng,
             alt: data.alt,
@@ -67,21 +80,6 @@ function decodeUplink(input) {
         warnings: [],
         errors: []
     };
-}
-
-function readFloat32LE(bytes, offset) {
-    var sign = (bytes[offset + 3] & 0x80) !== 0 ? -1 : 1;
-    var exponent = ((bytes[offset + 3] & 0x7F) << 1) | ((bytes[offset + 2] & 0x80) !== 0 ? 1 : 0);
-    var mantissa = ((bytes[offset + 2] & 0x7F) << 16) | (bytes[offset + 1] << 8) | bytes[offset];
-    
-    if (exponent === 0) {
-        return sign * mantissa * Math.pow(2, -126);
-    }
-    if (exponent === 255) {
-        return mantissa !== 0 ? NaN : sign * Infinity;
-    }
-    
-    return sign * (1 + mantissa / 8388608) * Math.pow(2, exponent - 127);
 }
 ```
 
