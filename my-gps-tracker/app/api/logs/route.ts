@@ -5,7 +5,8 @@ export async function GET() {
   try {
     console.log('[API] Fetching logs from database...')
     const logs = await prisma.gpsLog.findMany({
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      take: 100
     })
     console.log('[API] Logs found:', logs.length)
     return NextResponse.json(logs)

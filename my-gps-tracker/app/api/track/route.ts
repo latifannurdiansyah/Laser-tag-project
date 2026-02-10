@@ -4,20 +4,47 @@ import { prisma } from '@/lib/prisma'
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { id, lat, lng, irStatus } = body
+    const {
+      source,
+      id,
+      lat,
+      lng,
+      alt,
+      irStatus,
+      battery,
+      satellites,
+      rssi,
+      snr
+    } = body
 
     console.log('[API] Received GPS data:', body)
 
     if (!id || lat === undefined || lng === undefined) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+      return NextResponse.json({ error: 'Missing required fields (id, lat, lng)' }, { status: 400 })
+    }
+
+    let irStatusStr = '-'
+    if (irStatus !== undefined && irStatus !== null) {
+      if (typeof irStatus === 'string') {
+        irStatusStr = irStatus
+      } else if (typeof irStatus === 'number') {
+        irStatusStr = irStatus === 1 ? 'HIT' : '-'
+      }
     }
 
     const log = await prisma.gpsLog.create({
       data: {
+        source: source || 'wifi',
         deviceId: id,
         latitude: parseFloat(lat),
         longitude: parseFloat(lng),
-        irStatus: irStatus || '-'
+        altitude: alt !== undefined ? parseFloat(alt) : null,
+        irStatus: irStatusStr,
+        battery: battery !== undefined ? parseInt(battery) : null,
+        satellites: satellites !== undefined ? parseInt(satellites) : null,
+        rssi: rssi !== undefined ? parseInt(rssi) : null,
+        snr: snr !== undefined ? parseFloat(snr) : null,
+        rawPayload: body
       }
     })
 

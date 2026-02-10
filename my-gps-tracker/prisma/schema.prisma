@@ -8,12 +8,19 @@ datasource db {
 }
 
 model GpsLog {
-  id        Int      @id @default(autoincrement())
-  deviceId  String
-  latitude  Float
-  longitude Float
-  irStatus  String?  // Format: "HIT: 0xXXXX-0xXX" atau "-"
-  createdAt DateTime @default(now())
+  id              Int      @id @default(autoincrement())
+  source          String   @default("wifi")  // "ttn" atau "wifi"
+  deviceId        String
+  latitude        Float
+  longitude       Float
+  altitude        Float?   @db.Real
+  irStatus        String?  @default("-")
+  battery         Int?     // millivolts
+  satellites      Int?
+  rssi            Int?
+  snr             Float?   @db.Real
+  rawPayload      Json?    // Full payload untuk debugging
+  createdAt       DateTime @default(now())
 
   @@map("gps_logs")
 }
