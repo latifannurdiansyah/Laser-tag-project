@@ -100,7 +100,7 @@ const int TFT_LINE_HEIGHT  = 10;
 // ============================================
 const uint32_t UPLINK_INTERVAL_MS = 30000;  // 30 sec (Fair Use Policy)
 const uint8_t  MAX_JOIN_ATTEMPTS  = 10;
-const uint32_t JOIN_RETRY_DELAY_MS = 8000;
+const uint32_t JOIN_RETRY_DELAY_MS = 3000;  // 3 seconds (faster join)
 const uint32_t SD_WRITE_INTERVAL_MS = 2000;
 const size_t   LOG_QUEUE_SIZE = 20;
 const TickType_t MUTEX_TIMEOUT = pdMS_TO_TICKS(100);
