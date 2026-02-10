@@ -176,6 +176,7 @@ AppKey:     DB51EB2C50138482E2FBD264E7876427
 
 ```javascript
 function decodeUplink(input) {
+    var data = {};
     var bytes = input.bytes;
     
     function readFloat32LE(b, o) {
@@ -187,10 +188,10 @@ function decodeUplink(input) {
         return sign * (1 + mant / 8388608) * Math.pow(2, exp - 127);
     }
     
-    var data = {};
     data.lat = readFloat32LE(bytes, 11);
     data.lng = readFloat32LE(bytes, 15);
     data.alt = readFloat32LE(bytes, 19);
+    
     data.address_id = (bytes[3] << 24) | (bytes[2] << 16) | (bytes[1] << 8) | bytes[0];
     data.sub_address_id = bytes[4];
     data.shooter_address_id = (bytes[8] << 24) | (bytes[7] << 16) | (bytes[6] << 8) | bytes[5];
@@ -200,13 +201,17 @@ function decodeUplink(input) {
     data.rssi = (bytes[27] << 8) | bytes[26];
     data.snr = bytes[28];
     
+    // Device ID: Heltec-P1, Heltec-P2, Heltec-P3... (based on address_id)
+    var playerNum = data.address_id + 1;
+    data.deviceId = "Heltec-P" + playerNum.toString();
+    
     data.irStatus = data.status === 1 
         ? "HIT: 0x" + data.shooter_address_id.toString(16).toUpperCase() + "-0x" + data.sub_address_id.toString(16).toUpperCase()
         : "-";
     
     return {
         data: {
-            deviceId: "HELTEC-" + data.address_id.toString(16).toUpperCase(),
+            deviceId: data.deviceId,
             lat: data.lat,
             lng: data.lng,
             alt: data.alt,
@@ -221,6 +226,14 @@ function decodeUplink(input) {
 ```
 
 3. Klik **"Save payload function"**
+
+### Device ID Berdasarkan address_id
+
+| address_id (di firmware) | Device ID (di dashboard) |
+|---------------------------|---------------------------|
+| `0x00000000` | Heltec-P1 |
+| `0x00000001` | Heltec-P2 |
+| `0x00000002` | Heltec-P3 |
 
 ### 2.6 Configure Firmware
 
