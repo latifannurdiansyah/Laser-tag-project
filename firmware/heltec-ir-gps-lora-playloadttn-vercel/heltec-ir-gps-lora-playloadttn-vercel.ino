@@ -21,7 +21,7 @@
 #define WIFI_SSID       "UserAndroid"        // Ubah SSID WiFi
 #define WIFI_PASSWORD   "55555550"          // Ubah Password WiFi
 #define API_URL         "https://laser-tag-project.vercel.app/api/track"
-#define DEVICE_ID       "Player 1"
+#define DEVICE_ID       "Heltec-P1"
 #define IR_RECEIVE_PIN  5
 
 // ============================================
@@ -457,7 +457,7 @@ void loraTask(void *pv)
         {
             // Prepare payload with all sensor data
             DataPayload payload;
-            payload.address_id = 0x12345678;
+            payload.address_id = 0x00000000;  // Device ID: 0=P1, 1=P2, 2=P3...
             payload.battery_mv = analogReadMilliVolts(0);
 
             if (xSemaphoreTake(xGpsMutex, MUTEX_TIMEOUT) == pdTRUE) {
