@@ -83,23 +83,23 @@ export default function Dashboard() {
     }
   }
 
-  const getBatteryColor = (mV: number | null) => {
-    if (mV === null) return '#737373'
+  const getBatteryColor = (mV: number | null | undefined) => {
+    if (mV == null) return '#737373'
     if (mV > 4200) return '#22c55e'
     if (mV > 3800) return '#eab308'
     return '#ef4444'
   }
 
-  const getBatteryIcon = (mV: number | null) => {
-    if (mV === null) return '🔋'
+  const getBatteryIcon = (mV: number | null | undefined) => {
+    if (mV == null) return '🔋'
     if (mV > 4200) return '🟢'
     if (mV > 3800) return '🟡'
     if (mV > 3400) return '🟠'
     return '🔴'
   }
 
-  const getSignalColor = (rssi: number | null) => {
-    if (rssi === null) return '#737373'
+  const getSignalColor = (rssi: number | null | undefined) => {
+    if (rssi == null) return '#737373'
     if (rssi >= -100) return '#22c55e'
     if (rssi >= -110) return '#eab308'
     return '#ef4444'
