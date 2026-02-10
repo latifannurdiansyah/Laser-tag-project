@@ -626,7 +626,6 @@ void wifiTask(void *pv)
 
         // Cek dan upload data dari SD setiap 30 detik
         if (g_wifiStatus.connected && millis() - lastSDCheck >= 30000) {
-            Serial.println("[WiFi] Periodic SD check...");
             uploadFromSD();
             lastSDCheck = millis();
         }
@@ -788,19 +787,15 @@ void logToSd(const String &msg)
 }
 
 // ============================================
-// OFFLINE SD CARD FUNCTIONS
-// ============================================
 void saveToSDOffline(float lat, float lng, float alt, uint8_t satellites,
                     uint16_t battery, int16_t rssi, float snr, const String &irStatus)
 {
     if (!SD.begin(SD_CS, SPI, 8000000)) {
-        Serial.println("[SD-OFFLINE] SD not available");
         return;
     }
     
     File file = SD.open("/offline_queue.csv", FILE_APPEND);
     if (!file) {
-        Serial.println("[SD-OFFLINE] Failed to open queue file");
         return;
     }
     
@@ -816,15 +811,98 @@ void saveToSDOffline(float lat, float lng, float alt, uint8_t satellites,
     
     file.println(line);
     file.close();
-    Serial.println("[SD-OFFLINE] Data saved to queue");
 }
 
 bool uploadFromSD()
 {
     if (!SD.begin(SD_CS, SPI, 8000000)) {
-        Serial.println("[SD-UPLOAD] SD not available");
         return false;
     }
+    
+    if (!SD.exists("/offline_queue.csv")) {
+        return false;
+    }
+    
+    File file = SD.open("/offline_queue.csv", FILE_READ);
+    if (!file) {
+        return false;
+    }
+    
+    int uploadCount = 0;
+    String tempFileContent = "";
+    
+    while (file.available()) {
+        String line = file.readStringUntil('\n');
+        line.trim();
+        
+        if (line.length() < 10) continue;
+        
+        // Parse CSV: millis,lat,lng,alt,satellites,battery,rssi,snr,irStatus
+        int commas[8];
+        int commaCount = 0;
+        for (int i = 0; i < line.length() && commaCount < 8; i++) {
+            if (line.charAt(i) == ',') {
+                commas[commaCount++] = i;
+            }
+        }
+        
+        if (commaCount < 7) continue;
+        
+        String irStatus = line.substring(commas[7] + 1);
+        float lat = line.substring(commas[0] + 1, commas[1]).toFloat();
+        float lng = line.substring(commas[1] + 1, commas[2]).toFloat();
+        float alt = line.substring(commas[2] + 1, commas[3]).toFloat();
+        uint8_t satellites = line.substring(commas[3] + 1, commas[4]).toInt();
+        uint16_t battery = line.substring(commas[4] + 1, commas[5]).toInt();
+        int16_t rssi = line.substring(commas[5] + 1, commas[6]).toInt();
+        float snr = line.substring(commas[6] + 1, commas[7]).toFloat();
+        
+        // Kirim ke API
+        HTTPClient http;
+        http.begin(API_URL);
+        http.addHeader("Content-Type", "application/json");
+        
+        String payload = "{\"source\":\"wifi\","
+                        "\"id\":\"" + String(DEVICE_ID) + "\","
+                        "\"lat\":" + String(lat, 6) + ","
+                        "\"lng\":" + String(lng, 6) + ","
+                        "\"alt\":" + String(alt, 1) + ","
+                        "\"irStatus\":\"" + irStatus + "\","
+                        "\"battery\":" + String(battery) + ","
+                        "\"satellites\":" + String(satellites) + ","
+                        "\"rssi\":" + String(rssi) + ","
+                        "\"snr\":" + String(snr, 1) + "}";
+        
+        int httpCode = http.POST(payload);
+        http.end();
+        
+        if (httpCode == 200 || httpCode == 201) {
+            uploadCount++;
+        } else {
+            tempFileContent += line + "\n";
+        }
+        
+        delay(100);
+    }
+    
+    file.close();
+    
+    if (uploadCount > 0) {
+        File tempFile = SD.open("/offline_queue.csv", FILE_WRITE);
+        if (tempFile) {
+            tempFile.print(tempFileContent);
+            tempFile.close();
+            SD.remove("/offline_queue.csv");
+            File renameFile = SD.open("/offline_queue.csv", FILE_WRITE);
+            renameFile.print(tempFileContent);
+            renameFile.close();
+        }
+    } else if (tempFileContent.length() == 0) {
+        SD.remove("/offline_queue.csv");
+    }
+    
+    return uploadCount > 0;
+}
     
     if (!SD.exists("/offline_queue.csv")) {
         return false;
@@ -966,11 +1044,7 @@ void sendToAPI(float lat, float lng)
     int httpCode = http.POST(payload);
     http.end();
 
-    if (httpCode == 200 || httpCode == 201) {
-        Serial.printf("[API] Success | Code: %d | Batt: %d mV | Sat: %d | RSSI: %d | SNR: %.1f\n",
-                      httpCode, battery, satellites, rssi, snr);
-    } else {
-        Serial.printf("[API] Failed | Code: %d\n", httpCode);
+    if (httpCode != 200 && httpCode != 201) {
         saveToSDOffline(lat, lng, alt, satellites, battery, rssi, snr, irStatus);
     }
 }
