@@ -2,9 +2,107 @@
 
 ## Daftar Isi
 
+0. [Setup my-gps-tracker Project](#0-setup-my-gps-tracker-project)
 1. [NeonDB → Vercel Connection](#1-neondb--vercel-connection)
 2. [TTN Integration](#2-ttn-integration)
 3. [TFT Display 3 Pages Scrolling](#3-tft-display-3-pages-scrolling)
+
+---
+
+## 0. Setup my-gps-tracker Project
+
+### 0.1 Clone dari GitHub (Jika Baru)
+
+Jika Anda belum punya folder `my-gps-tracker`, clone dari GitHub:
+
+```bash
+# Buka terminal/command prompt
+cd C:\Users\aldi\Documents\Github_Latipan
+
+# Clone repository
+git clone https://github.com/latifannurdiansyah/Laser-tag-project.git
+
+# Masuk ke folder project
+cd Laser-tag-project
+```
+
+### 0.2 Setup dari Awal (Jika Ingin Buat Baru)
+
+Jika ingin buat project Next.js baru dari nol:
+
+```bash
+# Buat project Next.js baru
+npx create-next-app@latest my-gps-tracker
+
+# Masuk ke folder
+cd my-gps-tracker
+
+# Install dependencies
+npm install
+
+# Install Prisma
+npm install prisma @prisma/client
+npx prisma init
+```
+
+### 0.3 File yang Harus Ada di my-gps-tracker/
+
+```
+my-gps-tracker/
+├── app/
+│   ├── api/
+│   │   ├── logs/route.ts
+│   │   ├── random/route.ts
+│   │   ├── track/route.ts
+│   │   └── ttn/route.ts
+│   ├── dashboard/
+│   │   └── page.tsx
+│   ├── layout.tsx
+│   └── page.tsx
+├── lib/
+│   └── prisma.ts
+├── prisma/
+│   └── schema.prisma
+├── .env
+├── package.json
+├── tsconfig.json
+└── next.config.ts
+```
+
+### 0.4 Install Dependencies
+
+```bash
+cd my-gps-tracker
+npm install
+```
+
+### 0.5 Generate Prisma Client
+
+```bash
+npx prisma generate
+```
+
+### 0.6 Setup Environment Variables
+
+Buat file `.env` di folder `my-gps-tracker/`:
+
+```env
+DATABASE_URL="postgresql://neondb_owner:PASSWORD@ep-xyz.us-east-1.aws.neon.tech/neondb?sslmode=require"
+```
+
+### 0.7 Push Schema ke Database
+
+```bash
+npx prisma db push
+```
+
+### 0.8 Run Development Server
+
+```bash
+npm run dev
+```
+
+Buka http://localhost:3000 untuk test lokal.
 
 ---
 
@@ -57,6 +155,7 @@ DATABASE_URL="postgresql://neondb_owner:PASSWORD@ep-xyz.us-east-1.aws.neon.tech/
 3. Generate Prisma client:
 
 ```bash
+cd my-gps-tracker
 npx prisma generate
 ```
 
@@ -77,10 +176,13 @@ npx prisma studio
 **Cara 1: Via GitHub Auto-deploy**
 - Setiap kali push ke GitHub, Vercel auto-deploy
 - Pastikan branch `main` aktif di Vercel Settings
+- Pastikan folder root project di GitHub adalah `Laser-tag-project/`
 
 **Cara 2: Via CLI**
 
 ```bash
+cd my-gps-tracker
+
 # Install Vercel CLI
 npm i -g vercel
 
