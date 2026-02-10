@@ -250,19 +250,19 @@ export default function Dashboard() {
                   <div style={{ background: '#0a0a0a', padding: '8px', borderRadius: '6px', textAlign: 'center' }}>
                     <div style={{ fontSize: '9px', color: '#737373' }}>ALT</div>
                     <div style={{ fontSize: '12px', color: '#a3a3a3' }}>
-                      {log.altitude !== null ? `${log.altitude.toFixed(1)}m` : '-'}
+                      {log.altitude != null ? `${log.altitude.toFixed(1)}m` : '-'}
                     </div>
                   </div>
                   <div style={{ background: '#0a0a0a', padding: '8px', borderRadius: '6px', textAlign: 'center' }}>
                     <div style={{ fontSize: '9px', color: '#737373' }}>SAT</div>
                     <div style={{ fontSize: '12px', color: '#a3a3a3' }}>
-                      {log.satellites !== null ? log.satellites : '-'}
+                      {log.satellites != null ? log.satellites : '-'}
                     </div>
                   </div>
                   <div style={{ background: '#0a0a0a', padding: '8px', borderRadius: '6px', textAlign: 'center' }}>
                     <div style={{ fontSize: '9px', color: '#737373' }}>BATT</div>
                     <div style={{ fontSize: '12px', color: getBatteryColor(log.battery) }}>
-                      {log.battery !== null ? `${(log.battery / 1000).toFixed(2)}V` : '-'}
+                      {log.battery != null ? `${(log.battery / 1000).toFixed(2)}V` : '-'}
                     </div>
                   </div>
                 </div>
@@ -271,13 +271,13 @@ export default function Dashboard() {
                   <div style={{ background: '#0a0a0a', padding: '8px', borderRadius: '6px', textAlign: 'center' }}>
                     <div style={{ fontSize: '9px', color: '#737373' }}>RSSI</div>
                     <div style={{ fontSize: '12px', color: getSignalColor(log.rssi) }}>
-                      {log.rssi !== null ? `${log.rssi} dBm` : '-'}
+                      {log.rssi != null ? `${log.rssi} dBm` : '-'}
                     </div>
                   </div>
                   <div style={{ background: '#0a0a0a', padding: '8px', borderRadius: '6px', textAlign: 'center' }}>
                     <div style={{ fontSize: '9px', color: '#737373' }}>SNR</div>
-                    <div style={{ fontSize: '12px', color: log.snr !== null && log.snr >= 0 ? '#22c55e' : '#737373' }}>
-                      {log.snr !== null ? `${log.snr.toFixed(1)} dB` : '-'}
+                    <div style={{ fontSize: '12px', color: log.snr != null && log.snr >= 0 ? '#22c55e' : '#737373' }}>
+                      {log.snr != null ? `${log.snr.toFixed(1)} dB` : '-'}
                     </div>
                   </div>
                 </div>
@@ -347,19 +347,19 @@ export default function Dashboard() {
                       <td style={{ padding: '10px 12px', fontSize: '13px', fontFamily: 'monospace', color: '#22c55e' }}>{log.latitude.toFixed(6)}</td>
                       <td style={{ padding: '10px 12px', fontSize: '13px', fontFamily: 'monospace', color: '#3b82f6' }}>{log.longitude.toFixed(6)}</td>
                       <td style={{ padding: '10px 12px', fontSize: '13px', textAlign: 'center', color: '#a3a3a3' }}>
-                        {log.altitude !== null ? log.altitude.toFixed(1) : '-'}
+                        {log.altitude != null ? log.altitude.toFixed(1) : '-'}
                       </td>
                       <td style={{ padding: '10px 12px', fontSize: '13px', textAlign: 'center', color: '#a3a3a3' }}>
-                        {log.satellites !== null ? log.satellites : '-'}
+                        {log.satellites != null ? log.satellites : '-'}
                       </td>
                       <td style={{ padding: '10px 12px', fontSize: '13px', textAlign: 'center', color: getBatteryColor(log.battery) }}>
-                        {log.battery !== null ? `${(log.battery / 1000).toFixed(2)}V` : '-'}
+                        {log.battery != null ? `${(log.battery / 1000).toFixed(2)}V` : '-'}
                       </td>
                       <td style={{ padding: '10px 12px', fontSize: '13px', textAlign: 'center', color: getSignalColor(log.rssi) }}>
-                        {log.rssi !== null ? `${log.rssi} dBm` : '-'}
+                        {log.rssi != null ? `${log.rssi} dBm` : '-'}
                       </td>
-                      <td style={{ padding: '10px 12px', fontSize: '13px', textAlign: 'center', color: log.snr !== null && log.snr >= 0 ? '#22c55e' : '#737373' }}>
-                        {log.snr !== null ? `${log.snr.toFixed(1)} dB` : '-'}
+                      <td style={{ padding: '10px 12px', fontSize: '13px', textAlign: 'center', color: log.snr != null && log.snr >= 0 ? '#22c55e' : '#737373' }}>
+                        {log.snr != null ? `${log.snr.toFixed(1)} dB` : '-'}
                       </td>
                       <td style={{
                         padding: '10px 12px',
