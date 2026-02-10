@@ -517,3 +517,20 @@ Developed as a final year project (Proyek Akhir) for JTE (Jurusan Teknik Elektro
 - RadioLib Library
 - TinyGPS++ Library
 - Adafruit Libraries
+
+---
+
+## 📚 Setup Guide (Indonesia)
+
+Untuk panduan lengkap setup dalam bahasa Indonesia:
+
+- **[docs/SETUP-GUIDE.md](docs/SETUP-GUIDE.md)** - Panduan lengkap NeonDB, TTN, dan TFT Display
+
+### Quick Links dari Setup Guide:
+
+| Topic | Section |
+|-------|---------|
+| NeonDB → Vercel | [docs/SETUP-GUIDE.md#1-neondb--vercel-connection](docs/SETUP-GUIDE.md#1-neondb--vercel-connection) |
+| TTN Integration | [docs/SETUP-GUIDE.md#2-ttn-integration](docs/SETUP-GUIDE.md#2-ttn-integration) |
+| TFT Display | [docs/SETUP-GUIDE.md#3-tft-display-3-pages-scrolling](docs/SETUP-GUIDE.md#3-tft-display-3-pages-scrolling) |
+| URLs Penting | [docs/SETUP-GUIDE.md#quick-reference](docs/SETUP-GUIDE.md#quick-reference) |
