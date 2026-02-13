@@ -31,19 +31,19 @@
 // DevEUI dan JoinEUI harus dalam format LSB (Least Significant Byte)
 // AppKey dan NwkKey tetap dalam format MSB (Most Significant Byte)
 
-const uint64_t joinEUI = 0x0000000000000011;  // JoinEUI dari TTN (LSB)
-const uint64_t devEUI  = 0x70B3D57ED00739E0;  // DevEUI dari TTN (LSB)
+const uint64_t joinEUI = 0x0000000000000003;  // JoinEUI dari TTN (LSB)
+const uint64_t devEUI  = 0x70B3D57ED0075AC0;  // DevEUI dari TTN (LSB)
 
 // AppKey dari TTN (MSB)
 const uint8_t appKey[] = {
-    0xDB, 0x51, 0xEB, 0x2C, 0x50, 0x13, 0x84, 0x82,
-    0xE2, 0xFB, 0xD2, 0x64, 0xE7, 0x87, 0x64, 0x27
+    0x48, 0xF0, 0x3F, 0xDD, 0x9C, 0x5A, 0x9E, 0xBA,
+    0x42, 0x83, 0x01, 0x1D, 0x7D, 0xBB, 0xF3, 0xF8
 };
 
 // NwkKey dari TTN (MSB)
 const uint8_t nwkKey[] = {
-    0x84, 0x0E, 0x4C, 0x4C, 0xD0, 0x87, 0xC8, 0x39,
-    0x56, 0x58, 0x04, 0xE0, 0x39, 0xA7, 0x36, 0x16
+    0x9B, 0xF6, 0x12, 0xF4, 0xAA, 0x33, 0xDB, 0x73,
+    0xAA, 0x1B, 0x7A, 0xC6, 0x4D, 0x70, 0x02, 0x26
 };
 
 // ============================================
@@ -229,7 +229,19 @@ TaskHandle_t xSdTaskHandle = NULL;
 TaskHandle_t xWifiTaskHandle = NULL;
 TaskHandle_t xIrTaskHandle = NULL;
 
-// ============================================
+// SD Card initialization flag
+bool sdInitialized = false;
+
+// ====================================
+// SD CARD HELPERS
+// ====================================
+void ensureSDInit() {
+    if (!sdInitialized) {
+        sdInitialized = SD.begin(SD_CS, SPI, 8000000);
+    }
+}
+
+// ====================================
 // FORWARD DECLARATIONS
 // ============================================
 void gpsTask(void *pv);
@@ -263,20 +275,17 @@ void setup()
     while (!Serial && millis() < 3000) delay(10);
 
     Serial.println("\n\n========================================");
+    Serial.println("========================================");
     Serial.println("GPS Tracker + IR + LoRaWAN + WiFi + SD");
     Serial.print("Device ID: ");
     Serial.println(DEVICE_ID);
-    Serial.print("API URL: ");
-    Serial.println(API_URL);
     Serial.println("========================================\n");
 
     // Initialize GPS UART
     Serial1.begin(115200, SERIAL_8N1, GPS_RX_PIN, GPS_TX_PIN);
-    Serial.println("GNSS module powered and Serial1 started.");
 
     // Initialize IR Receiver
     IrReceiver.begin(IR_RECEIVE_PIN, DISABLE_LED_FEEDBACK);
-    Serial.println("IR Receiver Ready on Pin 5");
 
     // Initialize TFT
     tft.initR(INITR_MINI160x80);
@@ -302,19 +311,16 @@ void setup()
     // Create log queue
     xLogQueue = xQueueCreate(LOG_QUEUE_SIZE, sizeof(String *));
     if (!xLogQueue) {
-        Serial.println("❌ Failed to create log queue!");
         while (1) delay(1000);
     }
 
     // Create tasks
-    xTaskCreatePinnedToCore(gpsTask, "GPS", 4096, NULL, 2, &xGpsTaskHandle, 1);
+    xTaskCreatePinnedToCore(gpsTask, "GPS", 8192, NULL, 2, &xGpsTaskHandle, 1);
     xTaskCreatePinnedToCore(loraTask, "LoRa", 8192, NULL, 2, &xLoraTaskHandle, 1);
-    xTaskCreatePinnedToCore(tftTask, "TFT", 4096, NULL, 1, &xTftTaskHandle, 0);
-    xTaskCreatePinnedToCore(sdCardTask, "SD", 4096, NULL, 1, &xSdTaskHandle, 0);
-    xTaskCreatePinnedToCore(wifiTask, "WiFi", 4096, NULL, 1, &xWifiTaskHandle, 0);
+    xTaskCreatePinnedToCore(tftTask, "TFT", 8192, NULL, 1, &xTftTaskHandle, 0);
+    xTaskCreatePinnedToCore(sdCardTask, "SD", 8192, NULL, 1, &xSdTaskHandle, 0);
+    xTaskCreatePinnedToCore(wifiTask, "WiFi", 8192, NULL, 1, &xWifiTaskHandle, 0);
     xTaskCreatePinnedToCore(irTask, "IR", 2048, NULL, 1, &xIrTaskHandle, 0);
-
-    logToSd("=== System Boot ===");
 }
 
 // ============================================
@@ -415,20 +421,16 @@ void loraTask(void *pv)
     }
 
     // OTAA Join
-    logToSd("Starting OTAA join...");
-    Serial.println("Starting OTAA join...");
-
     uint8_t attempts = 0;
     while (attempts++ < MAX_JOIN_ATTEMPTS)
     {
-        String msg = "OTAA attempt " + String(attempts);
-        Serial.println(msg);
-        logToSd(msg);
+        Serial.printf("[LoRa] Join: ATTEMPT %d/%d\n", attempts, MAX_JOIN_ATTEMPTS);
+        logToSd("Join attempt " + String(attempts));
 
         state = node.activateOTAA();
         if (state == RADIOLIB_LORAWAN_NEW_SESSION) {
-            logToSd("✅ OTAA Join successful!");
-            Serial.println("✅ OTAA Join successful!");
+            Serial.println("[LoRa] Join: SUCCESS");
+            logToSd("Join successful!");
             if (xSemaphoreTake(xLoraMutex, MUTEX_TIMEOUT) == pdTRUE) {
                 g_loraStatus.joined = true;
                 g_loraStatus.lastEvent = "JOINED";
@@ -436,16 +438,13 @@ void loraTask(void *pv)
             }
             break;
         } else {
-            String err = "Join failed: " + stateDecode(state);
-            Serial.println(err);
-            logToSd(err);
+            Serial.printf("[LoRa] Join: FAILED (%s)\n", stateDecode(state).c_str());
             delay(JOIN_RETRY_DELAY_MS);
         }
     }
 
     if (!g_loraStatus.joined) {
-        logToSd("❌ Max join attempts reached.");
-        Serial.println("❌ Max join attempts reached.");
+        Serial.println("[LoRa] Join: MAX ATTEMPTS");
         vTaskDelete(NULL);
     }
 
@@ -504,6 +503,7 @@ void loraTask(void *pv)
 
             if (state < RADIOLIB_ERR_NONE) {
                 eventStr = "TX_FAIL";
+                Serial.printf("[LoRa] TX: FAILED\n");
             } else {
                 if (state > 0) {
                     snr = radio.getSNR();
@@ -512,6 +512,7 @@ void loraTask(void *pv)
                 } else {
                     eventStr = "TX_OK";
                 }
+                Serial.printf("[LoRa] TX: SUCCESS | RSSI: %d | SNR: %.1f\n", rssi, snr);
                 
                 // Reset IR flag after successful transmission
                 if (xSemaphoreTake(xIrMutex, MUTEX_TIMEOUT) == pdTRUE) {
@@ -553,35 +554,27 @@ void loraTask(void *pv)
 // ============================================
 void wifiTask(void *pv)
 {
-    Serial.print("Connecting to WiFi: ");
-    Serial.println(WIFI_SSID);
+    Serial.printf("[WiFi] Connecting: %s\n", WIFI_SSID);
     
     WiFi.mode(WIFI_STA);
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
     
     unsigned long startAttempt = millis();
     while (WiFi.status() != WL_CONNECTED && millis() - startAttempt < 15000) {
-        Serial.print(".");
         delay(500);
     }
 
     if (WiFi.status() == WL_CONNECTED) {
-        Serial.println("\nWiFi Connected!");
+        String ip = WiFi.localIP().toString();
+        Serial.printf("[WiFi] Connected | IP: %s\n", ip.c_str());
         if (xSemaphoreTake(xWifiMutex, MUTEX_TIMEOUT) == pdTRUE) {
             g_wifiStatus.connected = true;
-            g_wifiStatus.ip = WiFi.localIP().toString();
+            g_wifiStatus.ip = ip;
             xSemaphoreGive(xWifiMutex);
         }
-        Serial.print("IP Address: ");
-        Serial.println(g_wifiStatus.ip);
-        logToSd("WiFi connected: " + g_wifiStatus.ip);
-        
-        // Upload data dari SD card jika ada
-        Serial.println("[WiFi] Checking for offline data...");
         uploadFromSD();
     } else {
-        Serial.println("\nWiFi connection failed");
-        logToSd("WiFi connection failed");
+        Serial.println("[WiFi] Failed");
     }
 
     uint32_t lastAPIUpload = 0;
@@ -597,16 +590,14 @@ void wifiTask(void *pv)
             }
             if (millis() - g_wifiStatus.lastReconnect >= 5000) {
                 g_wifiStatus.lastReconnect = millis();
-                Serial.println("WiFi disconnected, reconnecting...");
+                Serial.println("[WiFi] Reconnecting...");
                 WiFi.reconnect();
             }
         } else {
             if (xSemaphoreTake(xWifiMutex, MUTEX_TIMEOUT) == pdTRUE) {
                 if (!g_wifiStatus.connected) {
                     g_wifiStatus.connected = true;
-                    Serial.println("WiFi reconnected!");
-                    // Upload dari SD saat WiFi tersambung ulang
-                    Serial.println("[WiFi] Reconnected - uploading offline data...");
+                    Serial.printf("[WiFi] Connected | IP: %s\n", WiFi.localIP().toString().c_str());
                     uploadFromSD();
                 }
                 xSemaphoreGive(xWifiMutex);
@@ -739,18 +730,23 @@ void tftTask(void *pv)
 // ============================================
 void sdCardTask(void *pv)
 {
+    // Wait for ESP32 to stabilize
+    delay(500);
+    
     // Initialize SD
-    if (!SD.begin(SD_CS, SPI, 8000000)) {
-        Serial.println("SD Mount Failed!");
+    sdInitialized = SD.begin(SD_CS, SPI, 8000000);
+    if (!sdInitialized) {
+        Serial.println("[SD] Failed");
         vTaskDelete(NULL);
     }
 
-    Serial.println("SD Card initialized successfully");
+    // Get SD card size
+    uint32_t cardSize = SD.cardSize() / (1024 * 1024);
+    Serial.printf("[SD] Connected | Size: %luMB\n", cardSize);
 
     // Delete old log file on boot
     if (SD.exists("/tracker.log")) {
         SD.remove("/tracker.log");
-        Serial.println("Old tracker.log deleted.");
     }
 
     File file;
@@ -790,7 +786,8 @@ void logToSd(const String &msg)
 void saveToSDOffline(float lat, float lng, float alt, uint8_t satellites,
                     uint16_t battery, int16_t rssi, float snr, const String &irStatus)
 {
-    if (!SD.begin(SD_CS, SPI, 8000000)) {
+    ensureSDInit();
+    if (!sdInitialized) {
         return;
     }
     
@@ -815,7 +812,8 @@ void saveToSDOffline(float lat, float lng, float alt, uint8_t satellites,
 
 bool uploadFromSD()
 {
-    if (!SD.begin(SD_CS, SPI, 8000000)) {
+    ensureSDInit();
+    if (!sdInitialized) {
         return false;
     }
     
@@ -829,6 +827,7 @@ bool uploadFromSD()
     }
     
     int uploadCount = 0;
+    int failCount = 0;
     String tempFileContent = "";
     
     while (file.available()) {
@@ -879,6 +878,7 @@ bool uploadFromSD()
         if (httpCode == 200 || httpCode == 201) {
             uploadCount++;
         } else {
+            failCount++;
             tempFileContent += line + "\n";
         }
         
@@ -886,6 +886,10 @@ bool uploadFromSD()
     }
     
     file.close();
+    
+    if (uploadCount > 0 || failCount > 0) {
+        Serial.printf("[WiFi] Upload: %d success, %d failed\n", uploadCount, failCount);
+    }
     
     if (uploadCount > 0) {
         File tempFile = SD.open("/offline_queue.csv", FILE_WRITE);
@@ -902,90 +906,6 @@ bool uploadFromSD()
     }
     
     return uploadCount > 0;
-}
-    
-    if (!SD.exists("/offline_queue.csv")) {
-        return false;
-    }
-    
-    File file = SD.open("/offline_queue.csv", FILE_READ);
-    if (!file) {
-        Serial.println("[SD-UPLOAD] Failed to open queue file");
-        return false;
-    }
-    
-    int uploadCount = 0;
-    String tempFileContent = "";
-    
-    while (file.available()) {
-        String line = file.readStringUntil('\n');
-        line.trim();
-        
-        if (line.length() < 10) continue;
-        
-        // Parse CSV: millis,lat,lng,alt,satellites,battery,rssi,snr,irStatus
-        int commas[8];
-        int commaCount = 0;
-        for (int i = 0; i < line.length() && commaCount < 8; i++) {
-            if (line.charAt(i) == ',') {
-                commas[commaCount++] = i;
-            }
-        }
-        
-        if (commaCount < 7) continue;
-        
-        String irStatus = line.substring(commas[7] + 1);
-        float lat = line.substring(commas[0] + 1, commas[1]).toFloat();
-        float lng = line.substring(commas[1] + 1, commas[2]).toFloat();
-        float alt = line.substring(commas[2] + 1, commas[3]).toFloat();
-        uint8_t satellites = line.substring(commas[3] + 1, commas[4]).toInt();
-        uint16_t battery = line.substring(commas[4] + 1, commas[5]).toInt();
-        int16_t rssi = line.substring(commas[5] + 1, commas[6]).toInt();
-        float snr = line.substring(commas[6] + 1, commas[7]).toFloat();
-        
-        // Kirim ke API
-        HTTPClient http;
-        http.begin(API_URL);
-        http.addHeader("Content-Type", "application/json");
-        
-        String payload = "{\"source\":\"wifi\","
-                        "\"id\":\"" + String(DEVICE_ID) + "\","
-                        "\"lat\":" + String(lat, 6) + ","
-                        "\"lng\":" + String(lng, 6) + ","
-                        "\"alt\":" + String(alt, 1) + ","
-                        "\"irStatus\":\"" + irStatus + "\","
-                        "\"battery\":" + String(battery) + ","
-                        "\"satellites\":" + String(satellites) + ","
-                        "\"rssi\":" + String(rssi) + ","
-                        "\"snr\":" + String(snr, 1) + "}";
-        
-        int httpCode = http.POST(payload);
-        http.end();
-        
-        if (httpCode == 200 || httpCode == 201) {
-            uploadCount++;
-        } else {
-            tempFileContent += line + "\n";
-        }
-        
-        delay(100);
-    }
-    
-    file.close();
-    
-    if (uploadCount > 0) {
-        File tempFile = SD.open("/offline_queue.csv", FILE_WRITE);
-        if (tempFile) {
-            tempFile.print(tempFileContent);
-            tempFile.close();
-            Serial.println("[SD-UPLOAD] Queue updated with failed entries");
-        }
-        return false;
-    } else {
-        SD.remove("/offline_queue.csv");
-        Serial.println("[SD-UPLOAD] Queue cleared - all uploaded");
-        return true;
-    }
 }
 
 void sendToAPI(float lat, float lng)
@@ -1035,9 +955,15 @@ void sendToAPI(float lat, float lng)
 
     int httpCode = http.POST(payload);
     http.end();
+    
+    Serial.printf("[WiFi] Upload: %s | Code: %d\n", 
+                  (httpCode == 200 || httpCode == 201) ? "SUCCESS" : "FAILED", httpCode);
+
+    // Selalu simpan ke SD setiap kali mengirim
+    saveToSDOffline(lat, lng, alt, satellites, battery, rssi, snr, irStatus);
 
     if (httpCode != 200 && httpCode != 201) {
-        saveToSDOffline(lat, lng, alt, satellites, battery, rssi, snr, irStatus);
+        // WiFi gagal, data sudah disimpan ke SD di atas
     }
 }
 
