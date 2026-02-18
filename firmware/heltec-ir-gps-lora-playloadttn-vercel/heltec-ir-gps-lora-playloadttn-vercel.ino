@@ -461,7 +461,7 @@ void loraTask(void *pv)
             // Prepare payload with all sensor data
             DataPayload payload;
             payload.address_id = 0x00000000;  // Device ID: 0=P1, 1=P2, 2=P3...
-            payload.battery_mv = analogReadMilliVolts(0);
+            payload.battery_mv = 0;  // Disabled: ESP32-S3 ADC not compatible
 
             if (xSemaphoreTake(xGpsMutex, MUTEX_TIMEOUT) == pdTRUE) {
                 payload.satellites = g_gpsData.satellites;
@@ -539,7 +539,7 @@ void loraTask(void *pv)
                 g_TftPageData[0].rows[1] = "Event: " + eventStr;
                 g_TftPageData[0].rows[2] = "RSSI: " + String(rssi) + " dBm";
                 g_TftPageData[0].rows[3] = "SNR: " + String(snr, 1) + " dB";
-                g_TftPageData[0].rows[4] = "Batt: " + String(analogReadMilliVolts(0)) + " mV";
+                g_TftPageData[0].rows[4] = "Batt: N/A";
                 g_TftPageData[0].rows[5] = "Joined: YES";
                 xSemaphoreGive(xTftMutex);
             }
@@ -929,7 +929,7 @@ void sendToAPI(float lat, float lng)
         xSemaphoreGive(xIrMutex);
     }
 
-    battery = analogReadMilliVolts(0);
+    battery = 0;  // Disabled: ESP32-S3 ADC not compatible
 
     if (xSemaphoreTake(xGpsMutex, MUTEX_TIMEOUT) == pdTRUE) {
         satellites = g_gpsData.satellites;
