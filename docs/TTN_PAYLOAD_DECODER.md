@@ -4,10 +4,10 @@
 
 | Offset | Size | Type | Field | Description |
 |--------|------|------|-------|-------------|
-| 0 | 4 | uint32 | address_id | Device identifier |
-| 4 | 1 | uint8 | sub_address_id | IR Command received |
-| 5 | 4 | uint32 | shooter_address_id | IR Address (shooter) |
-| 9 | 1 | uint8 | shooter_sub_address_id | IR hit flag |
+| 0 | 4 | uint32 | address_id | Device identifier (0=P1, 1=P2, etc) |
+| 4 | 1 | uint8 | sub_address_id | IR Command/Button received |
+| 5 | 4 | uint32 | shooter_address_id | IR Address (shooter ID) |
+| 9 | 1 | uint8 | shooter_sub_address_id | IR hit flag (1=hit) |
 | 10 | 1 | uint8 | status | 0=inactive, 1=hit |
 | 11 | 4 | float | lat | GPS latitude |
 | 15 | 4 | float | lng | GPS longitude |
@@ -27,51 +27,75 @@ https://laser-tag-project.vercel.app/api/ttn
 
 ### 2. Payload Decoder (JavaScript)
 
-Copy this to your TTN Console → Application → Payload Formats → Uplink:
+**SALIN KODE DIBAWAH INI ke TTN Console → Application → Payload Formats → Uplink:**
 
 ```javascript
 function decodeUplink(input) {
-    var data = {};
     var bytes = input.bytes;
+    var data = {};
     
+    // Helper: Read Float32 Little Endian
     function readFloat32LE(b, o) {
-        var sign = (b[o + 3] & 0x80) !== 0 ? -1 : 1;
-        var exp = ((b[o + 3] & 0x7F) << 1) | ((b[o + 2] & 0x80) !== 0 ? 1 : 0);
-        var mant = ((b[o + 2] & 0x7F) << 16) | (b[o + 1] << 8) | b[o];
-        if (exp === 0) return sign * mant * Math.pow(2, -126);
-        if (exp === 255) return mant !== 0 ? NaN : sign * Infinity;
-        return sign * (1 + mant / 8388608) * Math.pow(2, exp - 127);
+        var buffer = new ArrayBuffer(4);
+        var view = new DataView(buffer);
+        for (var i = 0; i < 4; i++) {
+            view.setUint8(i, b[o + i]);
+        }
+        return view.getFloat32(0, true);
     }
     
+    // Helper: Read UInt16 Little Endian
+    function readUInt16LE(b, o) {
+        return b[o] | (b[o + 1] << 8);
+    }
+    
+    // Helper: Read Int16 Little Endian (signed)
+    function readInt16LE(b, o) {
+        var val = b[o] | (b[o + 1] << 8);
+        return val > 32767 ? val - 65536 : val;
+    }
+    
+    // GPS Data (offset 11-26)
     data.lat = readFloat32LE(bytes, 11);
     data.lng = readFloat32LE(bytes, 15);
     data.alt = readFloat32LE(bytes, 19);
     
+    // IR Data (offset 0-10)
     data.address_id = (bytes[3] << 24) | (bytes[2] << 16) | (bytes[1] << 8) | bytes[0];
-    data.sub_address_id = bytes[4];
-    data.shooter_address_id = (bytes[8] << 24) | (bytes[7] << 16) | (bytes[6] << 8) | bytes[5];
-    data.shooter_sub_address_id = bytes[9];
-    data.status = bytes[10];
-    data.battery_mv = (bytes[24] << 8) | bytes[23];
+    data.sub_address_id = bytes[4];              // IR Command (button)
+    data.shooter_address_id = (bytes[8] << 24) | (bytes[7] << 16) | (bytes[6] << 8) | bytes[5];  // Shooter ID
+    data.shooter_sub_address_id = bytes[9];     // IR hit flag
+    data.status = bytes[10];                    // 0=no hit, 1=hit
+    
+    // Device Info
+    data.battery_mv = readUInt16LE(bytes, 23);
     data.satellites = bytes[25];
-    data.rssi = (bytes[27] << 8) | bytes[26];
+    data.rssi = readInt16LE(bytes, 26);
     data.snr = bytes[28];
     
-    // Device ID: Heltec-P1, Heltec-P2, Heltec-P3... (based on address_id)
+    // Create Device ID
     var playerNum = data.address_id + 1;
     data.deviceId = "Heltec-P" + playerNum.toString();
     
-    data.irStatus = data.status === 1 
-        ? "HIT: 0x" + data.shooter_address_id.toString(16).toUpperCase() + "-0x" + data.sub_address_id.toString(16).toUpperCase()
-        : "-";
+    // Create IR Status String - PENTING!
+    // Jika status=1 (ada HIT), tampilkan: HIT: 0xSHOOTER-0xCOMMAND
+    // Jika status=0 (tidak ada HIT), tampilkan: -
+    if (data.status === 1) {
+        data.irStatus = "HIT: 0x" + data.shooter_address_id.toString(16).toUpperCase() + "-0x" + data.sub_address_id.toString(16).toUpperCase();
+    } else {
+        data.irStatus = "-";
+    }
     
+    // Return data untuk webhook - PENTING: Semua field ini akan dikirim ke Vercel!
     return {
         data: {
             deviceId: data.deviceId,
             lat: data.lat,
             lng: data.lng,
             alt: data.alt,
-            irStatus: data.irStatus,
+            irStatus: data.irStatus,           // <-- Field ini wajib ada!
+            address: data.shooter_address_id,  // <-- Untuk backup parsing
+            command: data.sub_address_id,       // <-- Untuk backup parsing
             battery: data.battery_mv,
             satellites: data.satellites,
             rssi: data.rssi,
@@ -132,4 +156,5 @@ function encodeDownlink(input) {
 2. Configure TTN webhook with your Vercel URL
 3. Power on your Heltec tracker
 4. Watch the dashboard at `https://laser-tag-project.vercel.app/dashboard`
-5. Data should appear within 30 seconds (uplink interval)
+5. Data should appear within 10 seconds (uplink interval)
+6. **Test IR**: Send IR signal to receiver, then check dashboard - should show `HIT (0xABCD - 0x12)`
