@@ -232,6 +232,9 @@ TaskHandle_t xIrTaskHandle = NULL;
 // SD Card initialization flag
 bool sdInitialized = false;
 
+// Immediate trigger flags
+bool g_sendImmediately = false;
+
 // ====================================
 // SD CARD HELPERS
 // ====================================
@@ -456,8 +459,9 @@ void loraTask(void *pv)
     uint32_t lastUplink = 0;
     for (;;)
     {
-        if (millis() - lastUplink >= UPLINK_INTERVAL_MS)
+        if (g_sendImmediately || millis() - lastUplink >= UPLINK_INTERVAL_MS)
         {
+            g_sendImmediately = false;  // Reset trigger flag
             // Prepare payload with all sensor data
             DataPayload payload;
             payload.address_id = 0x00000000;  // Device ID: 0=P1, 1=P2, 2=P3...
@@ -644,6 +648,7 @@ void irTask(void *pv)
                     g_irStatus.command = IrReceiver.decodedIRData.command;
                     g_irStatus.dataReceived = true;
                     g_irStatus.lastTime = millis();
+                    g_sendImmediately = true;  // Trigger LoRa send immediately
                     xSemaphoreGive(xIrMutex);
                 }
                 
