@@ -98,7 +98,7 @@ const int TFT_LINE_HEIGHT  = 10;
 // ============================================
 // TIMING & BEHAVIOR
 // ============================================
-const uint32_t UPLINK_INTERVAL_MS = 10000;  // 10 sec (faster response)
+const uint32_t UPLINK_INTERVAL_MS = 5000;  // 5 sec (fast response)
 const uint8_t  MAX_JOIN_ATTEMPTS  = 10;
 const uint32_t JOIN_RETRY_DELAY_MS = 3000;  // 3 seconds (faster join)
 const uint32_t SD_WRITE_INTERVAL_MS = 2000;
@@ -916,10 +916,14 @@ void sendToAPI(float lat, float lng)
     float alt = 0.0f;
     int16_t rssi = 0;
     float snr = 0.0f;
+    uint16_t irAddress = 0;
+    uint8_t irCommand = 0;
 
     if (xSemaphoreTake(xIrMutex, MUTEX_TIMEOUT) == pdTRUE) {
         if (g_irStatus.dataReceived) {
             irStatus = "HIT: 0x" + String(g_irStatus.address, HEX) + "-0x" + String(g_irStatus.command, HEX);
+            irAddress = g_irStatus.address;
+            irCommand = g_irStatus.command;
         }
         xSemaphoreGive(xIrMutex);
     }
@@ -948,6 +952,8 @@ void sendToAPI(float lat, float lng)
                      "\"lng\":" + String(lng, 6) + ","
                      "\"alt\":" + String(alt, 1) + ","
                      "\"irStatus\":\"" + irStatus + "\","
+                     "\"address\":" + irAddress + ","
+                     "\"command\":" + irCommand + ","
                      "\"battery\":" + String(battery) + ","
                      "\"satellites\":" + String(satellites) + ","
                      "\"rssi\":" + String(rssi) + ","
