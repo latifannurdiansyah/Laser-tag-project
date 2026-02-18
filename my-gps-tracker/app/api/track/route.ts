@@ -32,6 +32,12 @@ export async function POST(request: Request) {
       }
     }
 
+    const command = body.command
+    const address = body.address
+    if (command !== undefined && address !== undefined) {
+      irStatusStr = `HIT: 0x${parseInt(address).toString(16).toUpperCase()}-0x${parseInt(command).toString(16).toUpperCase()}`
+    }
+
     try {
       const log = await prisma.gpsLog.create({
         data: {
