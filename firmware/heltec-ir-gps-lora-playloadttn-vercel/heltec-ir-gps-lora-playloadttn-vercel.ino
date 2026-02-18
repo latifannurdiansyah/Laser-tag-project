@@ -98,9 +98,9 @@ const int TFT_LINE_HEIGHT  = 10;
 // ============================================
 // TIMING & BEHAVIOR
 // ============================================
-const uint32_t UPLINK_INTERVAL_MS = 5000;  // 5 sec (fast response)
+const uint32_t UPLINK_INTERVAL_MS = 1000;  // 1 sec (fast response)
 const uint8_t  MAX_JOIN_ATTEMPTS  = 10;
-const uint32_t JOIN_RETRY_DELAY_MS = 3000;  // 3 seconds (faster join)
+const uint32_t JOIN_RETRY_DELAY_MS = 1000;  // 1 second (faster join)
 const uint32_t SD_WRITE_INTERVAL_MS = 2000;
 const size_t   LOG_QUEUE_SIZE = 20;
 const TickType_t MUTEX_TIMEOUT = pdMS_TO_TICKS(100);
@@ -250,11 +250,11 @@ void tftTask(void *pv);
 void sdCardTask(void *pv);
 void wifiTask(void *pv);
 void irTask(void *pv);
-void logToSd(const String &msg);
-String formatLogLine();
+void logToSd(const char* msg);
+const char* formatLogLine();
 void sendToAPI(float lat, float lng);
 void saveToSDOffline(float lat, float lng, float alt, uint8_t satellites,
-                    uint16_t battery, int16_t rssi, float snr, const String &irStatus);
+                    uint16_t battery, int16_t rssi, float snr, const char* irStatus);
 bool uploadFromSD();
 String stateDecode(const int16_t result);
 
@@ -314,13 +314,13 @@ void setup()
         while (1) delay(1000);
     }
 
-    // Create tasks
-    xTaskCreatePinnedToCore(gpsTask, "GPS", 8192, NULL, 2, &xGpsTaskHandle, 1);
-    xTaskCreatePinnedToCore(loraTask, "LoRa", 8192, NULL, 2, &xLoraTaskHandle, 1);
-    xTaskCreatePinnedToCore(tftTask, "TFT", 8192, NULL, 1, &xTftTaskHandle, 0);
-    xTaskCreatePinnedToCore(sdCardTask, "SD", 8192, NULL, 1, &xSdTaskHandle, 0);
-    xTaskCreatePinnedToCore(wifiTask, "WiFi", 8192, NULL, 1, &xWifiTaskHandle, 0);
-    xTaskCreatePinnedToCore(irTask, "IR", 2048, NULL, 1, &xIrTaskHandle, 0);
+    // Create tasks (increased stack size to prevent crash)
+    xTaskCreatePinnedToCore(gpsTask, "GPS", 16384, NULL, 2, &xGpsTaskHandle, 1);
+    xTaskCreatePinnedToCore(loraTask, "LoRa", 16384, NULL, 2, &xLoraTaskHandle, 1);
+    xTaskCreatePinnedToCore(tftTask, "TFT", 16384, NULL, 1, &xTftTaskHandle, 0);
+    xTaskCreatePinnedToCore(sdCardTask, "SD", 16384, NULL, 1, &xSdTaskHandle, 0);
+    xTaskCreatePinnedToCore(wifiTask, "WiFi", 16384, NULL, 1, &xWifiTaskHandle, 0);
+    xTaskCreatePinnedToCore(irTask, "IR", 4096, NULL, 1, &xIrTaskHandle, 0);
 }
 
 // ============================================
@@ -405,7 +405,8 @@ void loraTask(void *pv)
     SPI.begin(RADIO_SCLK_PIN, RADIO_MISO_PIN, RADIO_MOSI_PIN, RADIO_CS_PIN);
     int16_t state = radio.begin();
     if (state != RADIOLIB_ERR_NONE) {
-        String err = "Radio init failed: " + stateDecode(state);
+        char err[64];
+        snprintf(err, sizeof(err), "Radio init failed: %s", stateDecode(state).c_str());
         Serial.println(err);
         logToSd(err);
         vTaskDelete(NULL);
@@ -414,7 +415,8 @@ void loraTask(void *pv)
     // Initialize LoRaWAN node
     state = node.beginOTAA(joinEUI, devEUI, nwkKey, appKey);
     if (state != RADIOLIB_ERR_NONE) {
-        String err = "LoRaWAN init failed: " + stateDecode(state);
+        char err[64];
+        snprintf(err, sizeof(err), "LoRaWAN init failed: %s", stateDecode(state).c_str());
         Serial.println(err);
         logToSd(err);
         vTaskDelete(NULL);
@@ -425,7 +427,9 @@ void loraTask(void *pv)
     while (attempts++ < MAX_JOIN_ATTEMPTS)
     {
         Serial.printf("[LoRa] Join: ATTEMPT %d/%d\n", attempts, MAX_JOIN_ATTEMPTS);
-        logToSd("Join attempt " + String(attempts));
+        char joinMsg[32];
+        snprintf(joinMsg, sizeof(joinMsg), "Join attempt %d", attempts);
+        logToSd(joinMsg);
 
         state = node.activateOTAA();
         if (state == RADIOLIB_LORAWAN_NEW_SESSION) {
@@ -604,8 +608,8 @@ void wifiTask(void *pv)
             }
         }
 
-        // Kirim data GPS setiap 10 detik
-        if (g_wifiStatus.connected && millis() - lastAPIUpload >= 10000) {
+        // Kirim data GPS setiap 1 detik
+        if (g_wifiStatus.connected && millis() - lastAPIUpload >= 1000) {
             if (xSemaphoreTake(xGpsMutex, MUTEX_TIMEOUT) == pdTRUE) {
                 if (g_gpsData.valid && GPS.location.isValid()) {
                     sendToAPI(g_gpsData.lat, g_gpsData.lng);
@@ -645,8 +649,10 @@ void irTask(void *pv)
                 
                 Serial.printf("IR Received | Addr: 0x%04X | Cmd: 0x%02X\n", 
                              g_irStatus.address, g_irStatus.command);
-                logToSd("IR: Addr=" + String(g_irStatus.address, HEX) + 
-                       " Cmd=" + String(g_irStatus.command, HEX));
+                char irLog[48];
+                snprintf(irLog, sizeof(irLog), "IR: Addr=0x%04X Cmd=0x%02X", 
+                        g_irStatus.address, g_irStatus.command);
+                logToSd(irLog);
             }
             IrReceiver.resume();
         }
@@ -758,10 +764,10 @@ void sdCardTask(void *pv)
         if (now - lastWrite >= SD_WRITE_INTERVAL_MS) {
             file = SD.open("/tracker.log", FILE_APPEND);
             if (file) {
-                String *msg;
+                char *msg;
                 while (xQueueReceive(xLogQueue, &msg, 0) == pdTRUE) {
-                    file.println(*msg);
-                    delete msg;
+                    file.println(msg);
+                    delete[] msg;
                 }
                 file.close();
                 lastWrite = now;
@@ -774,17 +780,18 @@ void sdCardTask(void *pv)
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
-void logToSd(const String &msg)
+void logToSd(const char* msg)
 {
-    String *copy = new String(msg);
+    char *copy = new char[strlen(msg) + 1];
+    strcpy(copy, msg);
     if (xQueueSendToBack(xLogQueue, &copy, pdMS_TO_TICKS(10)) != pdTRUE) {
-        delete copy;
+        delete[] copy;
     }
 }
 
 // ============================================
 void saveToSDOffline(float lat, float lng, float alt, uint8_t satellites,
-                    uint16_t battery, int16_t rssi, float snr, const String &irStatus)
+                    uint16_t battery, int16_t rssi, float snr, const char* irStatus)
 {
     ensureSDInit();
     if (!sdInitialized) {
@@ -796,15 +803,9 @@ void saveToSDOffline(float lat, float lng, float alt, uint8_t satellites,
         return;
     }
     
-    String line = String(millis()) + "," +
-                  String(lat, 6) + "," +
-                  String(lng, 6) + "," +
-                  String(alt, 1) + "," +
-                  String(satellites) + "," +
-                  String(battery) + "," +
-                  String(rssi) + "," +
-                  String(snr, 1) + "," +
-                  irStatus;
+    char line[200];
+    snprintf(line, sizeof(line), "%lu,%.6f,%.6f,%.1f,%u,%u,%d,%.1f,%s",
+             millis(), lat, lng, alt, satellites, battery, rssi, snr, irStatus);
     
     file.println(line);
     file.close();
@@ -910,7 +911,7 @@ bool uploadFromSD()
 
 void sendToAPI(float lat, float lng)
 {
-    String irStatus = "-";
+    char irStatus[32] = "-";
     uint16_t battery = 0;
     uint8_t satellites = 0;
     float alt = 0.0f;
@@ -921,7 +922,7 @@ void sendToAPI(float lat, float lng)
 
     if (xSemaphoreTake(xIrMutex, MUTEX_TIMEOUT) == pdTRUE) {
         if (g_irStatus.dataReceived) {
-            irStatus = "HIT: 0x" + String(g_irStatus.address, HEX) + "-0x" + String(g_irStatus.command, HEX);
+            snprintf(irStatus, sizeof(irStatus), "HIT: 0x%X-0x%X", g_irStatus.address, g_irStatus.command);
             irAddress = g_irStatus.address;
             irCommand = g_irStatus.command;
         }
@@ -946,18 +947,22 @@ void sendToAPI(float lat, float lng)
     http.begin(API_URL);
     http.addHeader("Content-Type", "application/json");
 
-    String payload = "{\"source\":\"wifi\","
-                     "\"id\":\"" + String(DEVICE_ID) + "\","
-                     "\"lat\":" + String(lat, 6) + ","
-                     "\"lng\":" + String(lng, 6) + ","
-                     "\"alt\":" + String(alt, 1) + ","
-                     "\"irStatus\":\"" + irStatus + "\","
-                     "\"address\":" + irAddress + ","
-                     "\"command\":" + irCommand + ","
-                     "\"battery\":" + String(battery) + ","
-                     "\"satellites\":" + String(satellites) + ","
-                     "\"rssi\":" + String(rssi) + ","
-                     "\"snr\":" + String(snr, 1) + "}";
+    char payload[350];
+    snprintf(payload, sizeof(payload),
+        "{\"source\":\"wifi\","
+        "\"id\":\"%s\","
+        "\"lat\":%.6f,"
+        "\"lng\":%.6f,"
+        "\"alt\":%.1f,"
+        "\"irStatus\":\"%s\","
+        "\"address\":%u,"
+        "\"command\":%u,"
+        "\"battery\":%u,"
+        "\"satellites\":%u,"
+        "\"rssi\":%d,"
+        "\"snr\":%.1f}",
+        DEVICE_ID, lat, lng, alt, irStatus, irAddress, irCommand,
+        battery, satellites, rssi, snr);
 
     int httpCode = http.POST(payload);
     http.end();
@@ -965,17 +970,15 @@ void sendToAPI(float lat, float lng)
     Serial.printf("[WiFi] Upload: %s | Code: %d\n", 
                   (httpCode == 200 || httpCode == 201) ? "SUCCESS" : "FAILED", httpCode);
 
-    // Selalu simpan ke SD setiap kali mengirim
     saveToSDOffline(lat, lng, alt, satellites, battery, rssi, snr, irStatus);
 
     if (httpCode != 200 && httpCode != 201) {
-        // WiFi gagal, data sudah disimpan ke SD di atas
     }
 }
 
-String formatLogLine()
+const char* formatLogLine()
 {
-    char timeBuf[9];
+    static char timeBuf[9];
     if (xSemaphoreTake(xGpsMutex, MUTEX_TIMEOUT) == pdTRUE) {
         int8_t logHour = g_gpsData.hour + TIMEZONE_OFFSET_HOURS;
         if (logHour >= 24) logHour -= 24;
@@ -990,11 +993,12 @@ String formatLogLine()
         strcpy(timeBuf, "00:00:00");
     }
 
-    String event = "IDLE";
+    static char event[32] = "IDLE";
     float snr = 0.0f;
     int16_t rssi = 0;
     if (xSemaphoreTake(xLoraMutex, MUTEX_TIMEOUT) == pdTRUE) {
-        event = g_loraStatus.lastEvent;
+        strncpy(event, g_loraStatus.lastEvent.c_str(), sizeof(event) - 1);
+        event[sizeof(event) - 1] = '\0';
         snr = g_loraStatus.snr;
         rssi = g_loraStatus.rssi;
         xSemaphoreGive(xLoraMutex);
@@ -1010,11 +1014,11 @@ String formatLogLine()
         xSemaphoreGive(xGpsMutex);
     }
 
-    char logLine[150];
+    static char logLine[150];
     snprintf(logLine, sizeof(logLine),
              "%s,%s,%.1f,%d,%s,%s,%s",
-             timeBuf, event.c_str(), snr, rssi, latBuf, lonBuf, altBuf);
-    return String(logLine);
+             timeBuf, event, snr, rssi, latBuf, lonBuf, altBuf);
+    return logLine;
 }
 
 String stateDecode(const int16_t result) {
