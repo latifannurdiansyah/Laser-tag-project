@@ -98,7 +98,7 @@ const int TFT_LINE_HEIGHT  = 10;
 // ============================================
 // TIMING & BEHAVIOR
 // ============================================
-const uint32_t UPLINK_INTERVAL_MS = 30000;  // 30 sec (Fair Use Policy)
+const uint32_t UPLINK_INTERVAL_MS = 10000;  // 10 sec (faster response)
 const uint8_t  MAX_JOIN_ATTEMPTS  = 10;
 const uint32_t JOIN_RETRY_DELAY_MS = 3000;  // 3 seconds (faster join)
 const uint32_t SD_WRITE_INTERVAL_MS = 2000;

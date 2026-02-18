@@ -165,6 +165,18 @@ export default function Dashboard() {
     color: 'white',
   })
 
+  const formatIrStatus = (status: string | null | undefined): string => {
+    if (!status || status === '-') return '-'
+    const upper = status.toUpperCase()
+    if (upper.startsWith('HIT:')) {
+      const parts = status.replace('HIT:', '').trim().split('-')
+      if (parts.length === 2) {
+        return `HIT (${parts[0].trim()} - ${parts[1].trim()})`
+      }
+    }
+    return status
+  }
+
   const isIrHit = (status: string | null) => {
     if (!status || status === '-') return false
     return status.toUpperCase().startsWith('HIT')
@@ -294,7 +306,7 @@ export default function Dashboard() {
                     fontWeight: '600',
                     color: isIrHit(log.irStatus || '-') ? '#ef4444' : '#737373'
                   }}>
-                    STATUS: {log.irStatus || '-'}
+                    STATUS: {formatIrStatus(log.irStatus)}
                   </span>
                 </div>
               </div>
@@ -369,7 +381,7 @@ export default function Dashboard() {
                         color: isIrHit(log.irStatus || '-') ? '#ef4444' : '#737373',
                         background: isIrHit(log.irStatus || '-') ? 'rgba(239, 68, 68, 0.1)' : 'transparent'
                       }}>
-                        {log.irStatus || '-'}
+                        {formatIrStatus(log.irStatus)}
                       </td>
                       <td style={{ padding: '10px 12px', fontSize: '12px', color: '#737373' }}>
                         {new Date(log.createdAt).toLocaleString()}
