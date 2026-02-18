@@ -171,9 +171,9 @@ export default function Dashboard() {
     if (upper.startsWith('HIT:')) {
       const parts = status.replace('HIT:', '').trim().split('-')
       if (parts.length === 2) {
-        const addr = parts[0].trim().replace('0X', '')
-        const cmd = parts[1].trim().replace('0X', '')
-        // Return "-" if address or command is 0
+        const addr = parts[0].trim().toLowerCase().replace('0x', '')
+        const cmd = parts[1].trim().toLowerCase().replace('0x', '')
+        // Return "-" if address or command is 0 or empty
         if (addr === '0' || cmd === '0' || addr === '' || cmd === '') {
           return '-'
         }

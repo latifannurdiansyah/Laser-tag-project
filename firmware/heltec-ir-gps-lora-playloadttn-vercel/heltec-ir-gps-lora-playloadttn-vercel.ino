@@ -235,6 +235,11 @@ bool sdInitialized = false;
 // Immediate trigger flags
 bool g_sendImmediately = false;
 
+// Pending IR data for reliable transmission
+bool g_irPending = false;
+uint16_t g_pendingAddress = 0;
+uint8_t g_pendingCommand = 0;
+
 // ====================================
 // SD CARD HELPERS
 // ====================================
@@ -478,7 +483,14 @@ void loraTask(void *pv)
                 payload.lat = payload.lng = payload.alt = 0.0f;
             }
 
-            if (xSemaphoreTake(xIrMutex, MUTEX_TIMEOUT) == pdTRUE) {
+            // Use pending IR data if available (from immediate trigger)
+            if (g_irPending) {
+                payload.sub_address_id = g_pendingCommand;
+                payload.shooter_address_id = g_pendingAddress;
+                payload.shooter_sub_address_id = 1;
+                payload.status = 1;
+                g_irPending = false;  // Clear pending after use
+            } else if (xSemaphoreTake(xIrMutex, MUTEX_TIMEOUT) == pdTRUE) {
                 payload.sub_address_id = g_irStatus.dataReceived ? g_irStatus.command : 0;
                 payload.shooter_address_id = g_irStatus.dataReceived ? g_irStatus.address : 0;
                 payload.shooter_sub_address_id = g_irStatus.dataReceived ? 1 : 0;
@@ -648,6 +660,11 @@ void irTask(void *pv)
                     g_irStatus.command = IrReceiver.decodedIRData.command;
                     g_irStatus.dataReceived = true;
                     g_irStatus.lastTime = millis();
+                    
+                    // Store IR data for pending transmission
+                    g_irPending = true;
+                    g_pendingAddress = g_irStatus.address;
+                    g_pendingCommand = g_irStatus.command;
                     g_sendImmediately = true;  // Trigger LoRa send immediately
                     xSemaphoreGive(xIrMutex);
                 }
