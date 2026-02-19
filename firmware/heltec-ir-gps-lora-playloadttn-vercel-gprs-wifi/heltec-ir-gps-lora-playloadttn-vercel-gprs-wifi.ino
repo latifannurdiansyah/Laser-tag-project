@@ -405,7 +405,7 @@ void setup()
 #endif
 
 #if ENABLE_WIFI
-    xTaskCreatePinnedToCore(wifiTask, "WiFi", 16384, NULL, 1, &xWifiTaskHandle, 0);
+    xTaskCreatePinnedToCore(wifiTask, "WiFi", 32768, NULL, 1, &xWifiTaskHandle, 0);  // Core 0, larger stack
 #endif
 
 #if ENABLE_GPRS
@@ -667,27 +667,33 @@ void wifiTask(void *pv)
 
     uint32_t lastAPIUpload = 0;
     uint32_t lastSDCheck = 0;
+    uint32_t lastWifiCheck = 0;
     
     for (;;)
     {
-        if (WiFi.status() != WL_CONNECTED) {
-            if (xSemaphoreTake(xWifiMutex, MUTEX_TIMEOUT) == pdTRUE) {
-                g_wifiStatus.connected = false;
-                xSemaphoreGive(xWifiMutex);
-            }
-            if (millis() - g_wifiStatus.lastReconnect >= 5000) {
-                g_wifiStatus.lastReconnect = millis();
-                Serial.println("[WiFi] Reconnecting...");
-                WiFi.reconnect();
-            }
-        } else {
-            if (xSemaphoreTake(xWifiMutex, MUTEX_TIMEOUT) == pdTRUE) {
-                if (!g_wifiStatus.connected) {
-                    g_wifiStatus.connected = true;
-                    Serial.printf("[WiFi] Connected | IP: %s\n", WiFi.localIP().toString().c_str());
-                    uploadFromSD();
+        // Only check WiFi status every 1 second to reduce IPC calls
+        if (millis() - lastWifiCheck >= 1000) {
+            lastWifiCheck = millis();
+            
+            if (WiFi.status() != WL_CONNECTED) {
+                if (xSemaphoreTake(xWifiMutex, MUTEX_TIMEOUT) == pdTRUE) {
+                    g_wifiStatus.connected = false;
+                    xSemaphoreGive(xWifiMutex);
                 }
-                xSemaphoreGive(xWifiMutex);
+                if (millis() - g_wifiStatus.lastReconnect >= 5000) {
+                    g_wifiStatus.lastReconnect = millis();
+                    Serial.println("[WiFi] Reconnecting...");
+                    WiFi.reconnect();
+                }
+            } else {
+                if (xSemaphoreTake(xWifiMutex, MUTEX_TIMEOUT) == pdTRUE) {
+                    if (!g_wifiStatus.connected) {
+                        g_wifiStatus.connected = true;
+                        Serial.printf("[WiFi] Connected | IP: %s\n", WiFi.localIP().toString().c_str());
+                        uploadFromSD();
+                    }
+                    xSemaphoreGive(xWifiMutex);
+                }
             }
         }
 
