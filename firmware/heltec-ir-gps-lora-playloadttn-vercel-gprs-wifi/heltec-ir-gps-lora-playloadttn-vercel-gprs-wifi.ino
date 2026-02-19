@@ -320,9 +320,6 @@ void setup()
     // Disable all watchdogs
     disableLoopWDT();
     
-    // Disable Task Watchdog for this task
-    esp_task_wdt_deinit();
-    
     pinMode(Vext_Ctrl, OUTPUT);
     digitalWrite(Vext_Ctrl, HIGH);
     delay(100);
