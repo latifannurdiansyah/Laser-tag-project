@@ -716,6 +716,9 @@ void tftTask(void *pv)
 
     for (;;)
     {
+        // Reset watchdog periodically
+        esp_task_wdt_reset();
+        
         if (millis() - pageSwitch >= PAGE_SWITCH_MS) {
             currentPage = (currentPage + 1) % TFT_MAX_PAGES;
             pageSwitch = millis();
@@ -746,10 +749,17 @@ void tftTask(void *pv)
                 framebuffer.setCursor(TFT_LEFT_MARGIN, y);
                 framebuffer.print(g_TftPageData[currentPage].rows[i]);
             }
-            xSemaphoreGive(xTftMutex);
+            
+            // Draw to TFT inside mutex to prevent race condition
             tft.drawRGBBitmap(0, 0, framebuffer.getBuffer(), TFT_WIDTH, TFT_HEIGHT);
+            
+            xSemaphoreGive(xTftMutex);
+            
+            // Yield to allow other tasks to run
+            taskYIELD();
         }
-        vTaskDelay(pdMS_TO_TICKS(100));
+        // Reduced update frequency to prevent watchdog
+        vTaskDelay(pdMS_TO_TICKS(500));
     }
 }
 
