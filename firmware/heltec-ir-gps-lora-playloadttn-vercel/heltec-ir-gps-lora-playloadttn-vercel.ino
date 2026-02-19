@@ -716,9 +716,6 @@ void tftTask(void *pv)
 
     for (;;)
     {
-        // Reset watchdog periodically
-        esp_task_wdt_reset();
-        
         if (millis() - pageSwitch >= PAGE_SWITCH_MS) {
             currentPage = (currentPage + 1) % TFT_MAX_PAGES;
             pageSwitch = millis();
