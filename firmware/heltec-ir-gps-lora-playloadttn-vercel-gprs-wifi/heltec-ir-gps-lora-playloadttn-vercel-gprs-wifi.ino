@@ -9,7 +9,7 @@
 // ============================================
 // Gunakan 1 = ENABLE, 0 = DISABLE
 #define ENABLE_WIFI    1   // Kirim via WiFi HTTP
-#define ENABLE_GPRS    1   // Kirim via GPRS (SIM900A)
+#define ENABLE_GPRS    0   // Kirim via GPRS (SIM900A)
 #define ENABLE_LORAWAN 1   // Kirim via LoRaWAN (TTN)
 #define ENABLE_SD      1   // Simpan ke SD Card
 
@@ -24,7 +24,6 @@
 #include <RadioLib.h>
 #include <TinyGPS++.h>
 #include <IRremote.hpp>
-#include <FreeRTOS.h>
 
 #if ENABLE_WIFI
 #include <WiFi.h>
@@ -121,7 +120,6 @@ const uint8_t nwkKey[] = {
 // ============================================
 const int8_t TIMEZONE_OFFSET_HOURS = 7;
 const uint32_t UPLINK_INTERVAL_MS = 1000;
-const uint32_t WIFI_INTERVAL_MS = 1000;
 const uint32_t GPRS_INTERVAL_MS = 5000;
 const uint8_t  MAX_JOIN_ATTEMPTS = 10;
 const uint32_t JOIN_RETRY_DELAY_MS = 1000;
@@ -137,7 +135,7 @@ const uint8_t subBand = 0;
 // ============================================
 #define TFT_WIDTH        160
 #define TFT_HEIGHT       80
-#define TFT_MAX_PAGES    5
+#define TFT_MAX_PAGES    3    // LoRa, GPS, IR (simplified like working firmware)
 #define TFT_ROWS_PER_PAGE 6
 #define PAGE_SWITCH_MS   3000
 
@@ -261,8 +259,6 @@ IRStatus g_irStatus = {
 TftPageData g_TftPageData[TFT_MAX_PAGES] = {
     {"LoRaWAN Status", "-", "-", "-", "-", "-"},
     {"GPS Status", "Lat: -", "Long: -", "Alt: -", "Sat: -", "Time: --:--:--"},
-    {"WiFi Status", "Conn: NO", "IP: -", "Last: -", "-", "-"},
-    {"GPRS Status", "Conn: NO", "IP: -", "Last: -", "-", "-"},
     {"IR Receiver", "Waiting...", "-", "-", "-", "-"}
 };
 
@@ -317,16 +313,13 @@ void ensureSDInit();
 // ============================================
 void setup()
 {
-    // Disable all watchdogs
-    disableLoopWDT();
-    
     pinMode(Vext_Ctrl, OUTPUT);
     digitalWrite(Vext_Ctrl, HIGH);
     delay(100);
     pinMode(LED_K, OUTPUT);
     digitalWrite(LED_K, HIGH);
 
-#if !defined(LED_BUILTIN)
+#ifndef LED_BUILTIN
 #define LED_BUILTIN 18
 #endif
     pinMode(LED_BUILTIN, OUTPUT);
@@ -394,21 +387,12 @@ void setup()
     }
 
     xTaskCreatePinnedToCore(gpsTask, "GPS", 16384, NULL, 2, &xGpsTaskHandle, 1);
-    xTaskCreatePinnedToCore(tftTask, "TFT", 32768, NULL, 1, &xTftTaskHandle, 0);
+    xTaskCreatePinnedToCore(loraTask, "LoRa", 16384, NULL, 2, &xLoraTaskHandle, 1);
+    xTaskCreatePinnedToCore(tftTask, "TFT", 16384, NULL, 1, &xTftTaskHandle, 0);
+    xTaskCreatePinnedToCore(sdCardTask, "SD", 16384, NULL, 1, &xSdTaskHandle, 0);
+    xTaskCreatePinnedToCore(wifiTask, "WiFi", 16384, NULL, 1, &xWifiTaskHandle, 0);
     xTaskCreatePinnedToCore(irTask, "IR", 4096, NULL, 1, &xIrTaskHandle, 0);
     
-#if ENABLE_SD
-    xTaskCreatePinnedToCore(sdCardTask, "SD", 16384, NULL, 1, &xSdTaskHandle, 0);
-#endif
-
-#if ENABLE_LORAWAN
-    xTaskCreatePinnedToCore(loraTask, "LoRa", 16384, NULL, 2, &xLoraTaskHandle, 1);
-#endif
-
-#if ENABLE_WIFI
-    xTaskCreatePinnedToCore(wifiTask, "WiFi", 32768, NULL, 1, &xWifiTaskHandle, 0);  // Core 0, larger stack
-#endif
-
 #if ENABLE_GPRS
     xTaskCreatePinnedToCore(gprsTask, "GPRS", 65536, NULL, 0, &xGprsTaskHandle, 0);
 #endif
@@ -668,37 +652,31 @@ void wifiTask(void *pv)
 
     uint32_t lastAPIUpload = 0;
     uint32_t lastSDCheck = 0;
-    uint32_t lastWifiCheck = 0;
     
     for (;;)
     {
-        // Only check WiFi status every 1 second to reduce IPC calls
-        if (millis() - lastWifiCheck >= 1000) {
-            lastWifiCheck = millis();
-            
-            if (WiFi.status() != WL_CONNECTED) {
-                if (xSemaphoreTake(xWifiMutex, MUTEX_TIMEOUT) == pdTRUE) {
-                    g_wifiStatus.connected = false;
-                    xSemaphoreGive(xWifiMutex);
+        if (WiFi.status() != WL_CONNECTED) {
+            if (xSemaphoreTake(xWifiMutex, MUTEX_TIMEOUT) == pdTRUE) {
+                g_wifiStatus.connected = false;
+                xSemaphoreGive(xWifiMutex);
+            }
+            if (millis() - g_wifiStatus.lastReconnect >= 5000) {
+                g_wifiStatus.lastReconnect = millis();
+                Serial.println("[WiFi] Reconnecting...");
+                WiFi.reconnect();
+            }
+        } else {
+            if (xSemaphoreTake(xWifiMutex, MUTEX_TIMEOUT) == pdTRUE) {
+                if (!g_wifiStatus.connected) {
+                    g_wifiStatus.connected = true;
+                    Serial.printf("[WiFi] Connected | IP: %s\n", WiFi.localIP().toString().c_str());
+                    uploadFromSD();
                 }
-                if (millis() - g_wifiStatus.lastReconnect >= 5000) {
-                    g_wifiStatus.lastReconnect = millis();
-                    Serial.println("[WiFi] Reconnecting...");
-                    WiFi.reconnect();
-                }
-            } else {
-                if (xSemaphoreTake(xWifiMutex, MUTEX_TIMEOUT) == pdTRUE) {
-                    if (!g_wifiStatus.connected) {
-                        g_wifiStatus.connected = true;
-                        Serial.printf("[WiFi] Connected | IP: %s\n", WiFi.localIP().toString().c_str());
-                        uploadFromSD();
-                    }
-                    xSemaphoreGive(xWifiMutex);
-                }
+                xSemaphoreGive(xWifiMutex);
             }
         }
 
-        if (g_wifiStatus.connected && millis() - lastAPIUpload >= WIFI_INTERVAL_MS) {
+        if (g_wifiStatus.connected && millis() - lastAPIUpload >= 1000) {
             if (xSemaphoreTake(xGpsMutex, MUTEX_TIMEOUT) == pdTRUE) {
                 if (g_gpsData.valid && GPS.location.isValid()) {
                     sendToWiFiAPI(g_gpsData.lat, g_gpsData.lng);
@@ -776,16 +754,6 @@ void sendToWiFiAPI(float lat, float lng)
                   (httpCode == 200 || httpCode == 201) ? "SUCCESS" : "FAILED", httpCode);
 
     saveToSDOffline(lat, lng, alt, satellites, 0, rssi, snr, irStatus);
-
-    if (xSemaphoreTake(xTftMutex, MUTEX_TIMEOUT) == pdTRUE) {
-        g_TftPageData[2].rows[0] = "WiFi Status";
-        g_TftPageData[2].rows[1] = "Conn: YES";
-        g_TftPageData[2].rows[2] = "IP: " + g_wifiStatus.ip;
-        g_TftPageData[2].rows[3] = "HTTP: " + String(httpCode);
-        g_TftPageData[2].rows[4] = "-";
-        g_TftPageData[2].rows[5] = "-";
-        xSemaphoreGive(xTftMutex);
-    }
 }
 #endif
 
@@ -973,16 +941,6 @@ void sendToGPRS(float lat, float lng)
     logToSd(("[ThingSpeak] " + event + " | " + responseLine).c_str());
     Serial.printf("[ThingSpeak] Upload: %s | Resp: %s\n", event.c_str(), responseLine.c_str());
 
-    if (xSemaphoreTake(xTftMutex, MUTEX_TIMEOUT) == pdTRUE) {
-        g_TftPageData[3].rows[0] = "GPRS Status";
-        g_TftPageData[3].rows[1] = "Conn: YES";
-        g_TftPageData[3].rows[2] = "IP: " + g_gprsStatus.ip;
-        g_TftPageData[3].rows[3] = "Thing: " + event;
-        g_TftPageData[3].rows[4] = "-";
-        g_TftPageData[3].rows[5] = "-";
-        xSemaphoreGive(xTftMutex);
-    }
-
     saveToSDOffline(lat, lng, alt, satellites, 0, rssi, snr, irStatus);
 }
 #endif
@@ -1022,20 +980,20 @@ void irTask(void *pv)
 
         if (xSemaphoreTake(xTftMutex, MUTEX_TIMEOUT) == pdTRUE) {
             if (xSemaphoreTake(xIrMutex, MUTEX_TIMEOUT) == pdTRUE) {
-                g_TftPageData[4].rows[0] = "IR Receiver";
+                g_TftPageData[2].rows[0] = "IR Receiver";
                 if (g_irStatus.dataReceived) {
-                    g_TftPageData[4].rows[1] = "Proto: " + g_irStatus.protocol;
-                    g_TftPageData[4].rows[2] = "Addr: 0x" + String(g_irStatus.address, HEX);
-                    g_TftPageData[4].rows[3] = "Cmd: 0x" + String(g_irStatus.command, HEX);
+                    g_TftPageData[2].rows[1] = "Proto: " + g_irStatus.protocol;
+                    g_TftPageData[2].rows[2] = "Addr: 0x" + String(g_irStatus.address, HEX);
+                    g_TftPageData[2].rows[3] = "Cmd: 0x" + String(g_irStatus.command, HEX);
                     unsigned long ago = (millis() - g_irStatus.lastTime) / 1000;
-                    g_TftPageData[4].rows[4] = "Last: " + String(ago) + "s ago";
-                    g_TftPageData[4].rows[5] = "-";
+                    g_TftPageData[2].rows[4] = "Last: " + String(ago) + "s ago";
+                    g_TftPageData[2].rows[5] = "-";
                 } else {
-                    g_TftPageData[4].rows[1] = "Waiting...";
-                    g_TftPageData[4].rows[2] = "-";
-                    g_TftPageData[4].rows[3] = "-";
-                    g_TftPageData[4].rows[4] = "-";
-                    g_TftPageData[4].rows[5] = "-";
+                    g_TftPageData[2].rows[1] = "Waiting...";
+                    g_TftPageData[2].rows[2] = "-";
+                    g_TftPageData[2].rows[3] = "-";
+                    g_TftPageData[2].rows[4] = "-";
+                    g_TftPageData[2].rows[5] = "-";
                 }
                 xSemaphoreGive(xIrMutex);
             }
@@ -1068,17 +1026,11 @@ void tftTask(void *pv)
             
             framebuffer.setCursor(2, 2);
             
-            bool wifiOk = false, gprsOk = false, loraOk = false;
+            bool wifiOk = false, loraOk = false;
 #if ENABLE_WIFI
             if (xSemaphoreTake(xWifiMutex, 10) == pdTRUE) {
                 wifiOk = g_wifiStatus.connected;
                 xSemaphoreGive(xWifiMutex);
-            }
-#endif
-#if ENABLE_GPRS
-            if (xSemaphoreTake(xGprsMutex, 10) == pdTRUE) {
-                gprsOk = g_gprsStatus.connected;
-                xSemaphoreGive(xGprsMutex);
             }
 #endif
 #if ENABLE_LORAWAN
@@ -1089,20 +1041,14 @@ void tftTask(void *pv)
 #endif
             
             const char* wStr = "-";
-            const char* gStr = "-";
             const char* lStr = "-";
 #if ENABLE_WIFI
             if (wifiOk) wStr = "OK"; else wStr = "X";
 #endif
-#if ENABLE_GPRS
-            if (gprsOk) gStr = "OK"; else gStr = "X";
-#endif
 #if ENABLE_LORAWAN
             if (loraOk) lStr = "OK"; else lStr = "X";
 #endif
-            char statusBuf[32];
-            snprintf(statusBuf, sizeof(statusBuf), "W:%s G:%s L:%s", wStr, gStr, lStr);
-            framebuffer.print(statusBuf);
+            framebuffer.printf("W:%s L:%s", wStr, lStr);
             
             for (int i = 0; i < TFT_ROWS_PER_PAGE; i++) {
                 int y = TFT_TOP_MARGIN + (i + 1) * TFT_LINE_HEIGHT;
