@@ -7,10 +7,11 @@
 // ============================================
 // KONFIGURASI MODE - UBAH DI SINI SEBELUM UPLOAD
 // ============================================
-#define ENABLE_WIFI    true   // Kirim via WiFi HTTP
-#define ENABLE_GPRS    true   // Kirim via GPRS (SIM900A)
-#define ENABLE_LORAWAN true   // Kirim via LoRaWAN (TTN)
-#define ENABLE_SD      true   // Simpan ke SD Card
+// Gunakan 1 = ENABLE, 0 = DISABLE
+#define ENABLE_WIFI    1   // Kirim via WiFi HTTP
+#define ENABLE_GPRS    1   // Kirim via GPRS (SIM900A)
+#define ENABLE_LORAWAN 1   // Kirim via LoRaWAN (TTN)
+#define ENABLE_SD      1   // Simpan ke SD Card
 
 // ============================================
 // KONFIGURASI WIFI
@@ -349,11 +350,14 @@ void setup()
     Serial.println("GPS Tracker - 4-Mode Transmission");
     Serial.print("Device ID: ");
     Serial.println(DEVICE_ID);
-    Serial.printf("WiFi: %s, GPRS: %s, LoRaWAN: %s, SD: %s\n",
-#if ENABLE_WIFI "ENABLED" #else "DISABLED" #endif,
-#if ENABLE_GPRS "ENABLED" #else "DISABLED" #endif,
-#if ENABLE_LORAWAN "ENABLED" #else "DISABLED" #endif,
-#if ENABLE_SD "ENABLED" #else "DISABLED" #endif);
+    
+    const char* wifiStatus = ENABLE_WIFI ? "ENABLED" : "DISABLED";
+    const char* gprsStatus = ENABLE_GPRS ? "ENABLED" : "DISABLED";
+    const char* loraStatus = ENABLE_LORAWAN ? "ENABLED" : "DISABLED";
+    const char* sdStatus = ENABLE_SD ? "ENABLED" : "DISABLED";
+    
+    Serial.printf("WiFi: %s, GPRS: %s, LoRaWAN: %s, SD: %s\n", 
+        wifiStatus, gprsStatus, loraStatus, sdStatus);
     Serial.println("========================================\n");
 
     Serial1.begin(115200, SERIAL_8N1, GPS_RX_PIN, GPS_TX_PIN);
@@ -1061,7 +1065,6 @@ void tftTask(void *pv)
             
             framebuffer.setCursor(2, 2);
             
-#if ENABLE_WIFI || ENABLE_GPRS || ENABLE_LORAWAN
             bool wifiOk = false, gprsOk = false, loraOk = false;
 #if ENABLE_WIFI
             if (xSemaphoreTake(xWifiMutex, 10) == pdTRUE) {
@@ -1081,24 +1084,20 @@ void tftTask(void *pv)
                 xSemaphoreGive(xLoraMutex);
             }
 #endif
-            char statusBuf[32];
-            snprintf(statusBuf, sizeof(statusBuf), "W:%s G:%s L:%s", 
+            const char* wStr = "-";
+            const char* gStr = "-";
+            const char* lStr = "-";
 #if ENABLE_WIFI
-                wifiOk ? "OK" : "X",
-#else
-                "-",
+            if (wifiOk) wStr = "OK"; else wStr = "X";
 #endif
 #if ENABLE_GPRS
-                gprsOk ? "OK" : "X",
-#else
-                "-",
+            if (gprsOk) gStr = "OK"; else gStr = "X";
 #endif
 #if ENABLE_LORAWAN
-                loraOk ? "OK" : "X"
-#else
-                "-"
+            if (loraOk) lStr = "OK"; else lStr = "X";
 #endif
-            );
+            char statusBuf[32];
+            snprintf(statusBuf, sizeof(statusBuf), "W:%s G:%s L:%s", wStr, gStr, lStr);
             framebuffer.print(statusBuf);
             
             for (int i = 0; i < TFT_ROWS_PER_PAGE; i++) {
