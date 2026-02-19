@@ -25,7 +25,6 @@
 #include <TinyGPS++.h>
 #include <IRremote.hpp>
 #include <FreeRTOS.h>
-#include <esp_task_wdt.h>
 
 #if ENABLE_WIFI
 #include <WiFi.h>
@@ -318,8 +317,7 @@ void ensureSDInit();
 // ============================================
 void setup()
 {
-    disableLoopWDT();
-    esp_task_wdt_init(30, false); // Disable hardware watchdog (30 second timeout)
+    disableLoopWDT(); // Disable loop watchdog
     
     pinMode(Vext_Ctrl, OUTPUT);
     digitalWrite(Vext_Ctrl, HIGH);
