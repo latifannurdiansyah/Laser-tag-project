@@ -32,6 +32,8 @@
 #endif
 
 #if ENABLE_GPRS
+#define TINY_GSM_MODEM_SIM900
+#define TINY_GSM_RX_BUFFER 1024
 #include <HardwareSerial.h>
 #include <TinyGsmClient.h>
 #endif
@@ -48,9 +50,6 @@
 // ============================================
 // KONFIGURASI GPRS (Indosat)
 // ============================================
-#define TINY_GSM_MODEM_SIM900
-#define TINY_GSM_RX_BUFFER 1024
-
 #define GPRS_APN       "indosatgprs"
 #define GPRS_USER      "indosat"
 #define GPRS_PASS      "indosat"
