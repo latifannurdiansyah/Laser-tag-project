@@ -167,11 +167,11 @@ Vercel adalah platform hosting gratis untuk project Next.js. Ikuti langkah berik
 6. **Deploy**
    - Klik **"Deploy"**
    - Tunggu 1-2 menit untuk build
-   - Jika berhasil, akan muncul link seperti: `https://laser-tag-project.vercel.app`
+   - Jika berhasil, akan muncul link seperti: `https://mygps-tracker.vercel.app`
 
 7. **Catat URL-nya!**
-   - Dashboard: `https://laser-tag-project.vercel.app/dashboard`
-   - API: `https://laser-tag-project.vercel.app/api/track`
+   - Dashboard: `https://mygps-tracker.vercel.app/dashboard`
+   - API: `https://mygps-tracker.vercel.app/api/track`
 
 ---
 
@@ -447,7 +447,7 @@ NwkKey:     9BF612F4AA33DB73AA1B7AC64D700226
 3. Isi:
    ```
    Webhook ID:       vercel-gps-tracker
-   Webhook URL:      https://laser-tag-project.vercel.app/api/ttn
+   Webhook URL:      https://mygps-tracker.vercel.app/api/ttn
    Method:           POST
    Uplink message:   ✅ Enabled (centang)
    ```
@@ -700,7 +700,7 @@ Time    | Gatew | DevAddr | FCnt | Payload
 10:30:45| gw1   | 01A2B3C4| 1    | 12345678...
 ```
 
-4. Cek Vercel dashboard: `https://laser-tag-project.vercel.app/dashboard`
+4. Cek Vercel dashboard: `https://mygps-tracker.vercel.app/dashboard`
 5. Data harus muncul dalam 30 detik (uplink interval)
 
 ### 2.7a Serial Monitor Debug Output
@@ -1070,9 +1070,9 @@ void setup() {
 ### URLs Penting
 
 ```
-Dashboard:       https://laser-tag-project.vercel.app/dashboard
-API Track:       https://laser-tag-project.vercel.app/api/track
-API TTN:         https://laser-tag-project.vercel.app/api/ttn
+Dashboard:       https://mygps-tracker.vercel.app/dashboard
+API Track:       https://mygps-tracker.vercel.app/api/track
+API TTN:         https://mygps-tracker.vercel.app/api/ttn
 Neon Console:    https://console.neon.tech
 TTN Console:     https://console.thethingsnetwork.org
 Vercel Dashboard: https://vercel.com/dashboard
@@ -1331,10 +1331,10 @@ Artinya:
 
 | Service | URL |
 |---------|-----|
-| **Dashboard** | `https://laser-tag-project.vercel.app/dashboard` |
-| **API Track** | `https://laser-tag-project.vercel.app/api/track` |
-| **API TTN** | `https://laser-tag-project.vercel.app/api/ttn` |
-| **Random Test** | `https://laser-tag-project.vercel.app/api/random` |
+| **Dashboard** | `https://mygps-tracker.vercel.app/dashboard` |
+| **API Track** | `https://mygps-tracker.vercel.app/api/track` |
+| **API TTN** | `https://mygps-tracker.vercel.app/api/ttn` |
+| **Random Test** | `https://mygps-tracker.vercel.app/api/random` |
 
 ### Links Console/Development
 
