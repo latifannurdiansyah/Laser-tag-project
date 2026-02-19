@@ -317,7 +317,11 @@ void ensureSDInit();
 // ============================================
 void setup()
 {
-    disableLoopWDT(); // Disable loop watchdog
+    // Disable all watchdogs
+    disableLoopWDT();
+    
+    // Disable Task Watchdog for this task
+    esp_task_wdt_deinit();
     
     pinMode(Vext_Ctrl, OUTPUT);
     digitalWrite(Vext_Ctrl, HIGH);
@@ -393,7 +397,7 @@ void setup()
     }
 
     xTaskCreatePinnedToCore(gpsTask, "GPS", 16384, NULL, 2, &xGpsTaskHandle, 1);
-    xTaskCreatePinnedToCore(tftTask, "TFT", 16384, NULL, 1, &xTftTaskHandle, 0);
+    xTaskCreatePinnedToCore(tftTask, "TFT", 32768, NULL, 1, &xTftTaskHandle, 0);
     xTaskCreatePinnedToCore(irTask, "IR", 4096, NULL, 1, &xIrTaskHandle, 0);
     
 #if ENABLE_SD
