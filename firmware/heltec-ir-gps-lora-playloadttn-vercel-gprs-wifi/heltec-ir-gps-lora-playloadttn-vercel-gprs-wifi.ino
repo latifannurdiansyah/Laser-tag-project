@@ -14,6 +14,29 @@
 #define ENABLE_SD      1   // Simpan ke SD Card
 
 // ============================================
+// LIBRARY INCLUDES - Harus di atas semua type definitions
+// ============================================
+#include <Arduino.h>
+#include <SPI.h>
+#include <SD.h>
+#include <Adafruit_ST7735.h>
+#include <Adafruit_GFX.h>
+#include <RadioLib.h>
+#include <TinyGPS++.h>
+#include <IRremote.hpp>
+#include <FreeRTOS.h>
+
+#if ENABLE_WIFI
+#include <WiFi.h>
+#include <HTTPClient.h>
+#endif
+
+#if ENABLE_GPRS
+#include <HardwareSerial.h>
+#include <TinyGsmClient.h>
+#endif
+
+// ============================================
 // KONFIGURASI WIFI
 // ============================================
 // UBAH URL INI SESUAI DEPLOYMENT ANDA!
@@ -94,40 +117,34 @@ const uint8_t nwkKey[] = {
 #define TFT_SCLK 41
 #define TFT_MOSI 42
 
-#ifndef LED_BUILTIN
-#define LED_BUILTIN 18
-#endif
-
-// Timezone offset from UTC in hours (WIB = +7, WITA = +8, WIT = +9)
+// ============================================
+// TIMING CONSTANTS
+// ============================================
 const int8_t TIMEZONE_OFFSET_HOURS = 7;
+const uint32_t UPLINK_INTERVAL_MS = 1000;
+const uint32_t WIFI_INTERVAL_MS = 1000;
+const uint32_t GPRS_INTERVAL_MS = 5000;
+const uint8_t  MAX_JOIN_ATTEMPTS = 10;
+const uint32_t JOIN_RETRY_DELAY_MS = 1000;
+const uint32_t SD_WRITE_INTERVAL_MS = 2000;
+const size_t   LOG_QUEUE_SIZE = 20;
+const TickType_t MUTEX_TIMEOUT = pdMS_TO_TICKS(100);
+
+const LoRaWANBand_t Region = AS923;
+const uint8_t subBand = 0;
 
 // ============================================
 // DISPLAY CONSTANTS
 // ============================================
 #define TFT_WIDTH        160
 #define TFT_HEIGHT       80
-#define TFT_MAX_PAGES    5    // LoRa, GPS, WiFi, GPRS, IR
+#define TFT_MAX_PAGES    5
 #define TFT_ROWS_PER_PAGE 6
 #define PAGE_SWITCH_MS   3000
 
 const int TFT_LEFT_MARGIN  = 3;
 const int TFT_TOP_MARGIN   = 2;
 const int TFT_LINE_HEIGHT  = 10;
-
-// ============================================
-// TIMING & BEHAVIOR
-// ============================================
-const uint32_t UPLINK_INTERVAL_MS = 1000;   // LoRaWAN interval
-const uint32_t WIFI_INTERVAL_MS = 1000;      // WiFi interval
-const uint32_t GPRS_INTERVAL_MS = 5000;      // GPRS interval
-const uint8_t  MAX_JOIN_ATTEMPTS  = 10;
-const uint32_t JOIN_RETRY_DELAY_MS = 1000;
-const uint32_t SD_WRITE_INTERVAL_MS = 2000;
-const size_t   LOG_QUEUE_SIZE = 20;
-const TickType_t MUTEX_TIMEOUT = pdMS_TO_TICKS(100);
-
-const LoRaWANBand_t Region pdMS_TO_T = AS923;
-const uint8_t subBand = 0;
 
 // ============================================
 // DATA STRUCTURES
@@ -186,28 +203,6 @@ struct __attribute__((packed)) DataPayload {
     int16_t  rssi;
     int8_t   snr;
 };
-
-// ============================================
-// LIBRARY INCLUDES
-// ============================================
-#include <Arduino.h>
-#include <SPI.h>
-#include <SD.h>
-#include <Adafruit_ST7735.h>
-#include <Adafruit_GFX.h>
-#include <RadioLib.h>
-#include <TinyGPS++.h>
-#include <IRremote.hpp>
-
-#if ENABLE_WIFI
-#include <WiFi.h>
-#include <HTTPClient.h>
-#endif
-
-#if ENABLE_GPRS
-#include <HardwareSerial.h>
-#include <TinyGsmClient.h>
-#endif
 
 // ============================================
 // GLOBAL OBJECTS
@@ -330,6 +325,10 @@ void setup()
     delay(100);
     pinMode(LED_K, OUTPUT);
     digitalWrite(LED_K, HIGH);
+
+#if !defined(LED_BUILTIN)
+#define LED_BUILTIN 18
+#endif
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN, LOW);
 
@@ -1017,7 +1016,6 @@ void irTask(void *pv)
 
         if (xSemaphoreTake(xTftMutex, MUTEX_TIMEOUT) == pdTRUE) {
             if (xSemaphoreTake(xIrMutex, MUTEX_TIMEOUT) == pdTRUE) {
-#if TFT_MAX_PAGES >= 5
                 g_TftPageData[4].rows[0] = "IR Receiver";
                 if (g_irStatus.dataReceived) {
                     g_TftPageData[4].rows[1] = "Proto: " + g_irStatus.protocol;
@@ -1033,7 +1031,6 @@ void irTask(void *pv)
                     g_TftPageData[4].rows[4] = "-";
                     g_TftPageData[4].rows[5] = "-";
                 }
-#endif
                 xSemaphoreGive(xIrMutex);
             }
             xSemaphoreGive(xTftMutex);
@@ -1084,6 +1081,7 @@ void tftTask(void *pv)
                 xSemaphoreGive(xLoraMutex);
             }
 #endif
+            
             const char* wStr = "-";
             const char* gStr = "-";
             const char* lStr = "-";
