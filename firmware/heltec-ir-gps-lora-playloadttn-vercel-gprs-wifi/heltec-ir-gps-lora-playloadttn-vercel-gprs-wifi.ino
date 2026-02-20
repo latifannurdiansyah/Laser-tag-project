@@ -490,21 +490,18 @@ void loraTask(void *pv)
 // ============================================
 // WIFI TASK (CPU 1)
 // Selalu kirim ke Vercel API, retry 3x
+// WiFi status ditampilkan di status bar TFT
 // ============================================
 #if ENABLE_WIFI
 void wifiTask(void *pv)
 {
     Serial.printf("[WiFi] Connecting %s\n", WIFI_SSID);
 
-    // WiFi task: menghubungkan dan upload data
-    // Note: WiFi status ditampilkan di status bar, tidak perlu slide terpisah
-
     WiFi.disconnect(true);
     vTaskDelay(pdMS_TO_TICKS(200));
     WiFi.mode(WIFI_STA);
     vTaskDelay(pdMS_TO_TICKS(300));
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-    setWifiPage("Connecting...", "...");
 
     unsigned long t0 = millis();
     while (WiFi.status() != WL_CONNECTED && millis() - t0 < 20000)
@@ -513,7 +510,6 @@ void wifiTask(void *pv)
     if (WiFi.status() == WL_CONNECTED) {
         String ip = WiFi.localIP().toString();
         Serial.printf("[WiFi] Connected IP:%s\n", ip.c_str());
-        setWifiPage("Connected", ip.c_str());
         if (xSemaphoreTake(xWifiMutex, MUTEX_TIMEOUT) == pdTRUE) {
             g_wifi.connected = true; g_wifi.ip = ip;
             xSemaphoreGive(xWifiMutex);
@@ -521,7 +517,6 @@ void wifiTask(void *pv)
         uploadFromSD();
     } else {
         Serial.println("[WiFi] Connect failed, will retry");
-        setWifiPage("Failed", "N/A");
     }
 
     uint32_t lastUpload = 0;
@@ -531,11 +526,9 @@ void wifiTask(void *pv)
             if (xSemaphoreTake(xWifiMutex, MUTEX_TIMEOUT) == pdTRUE) {
                 g_wifi.connected = false; xSemaphoreGive(xWifiMutex);
             }
-            setWifiPage("Disconnected", "N/A");
             if (millis() - g_wifi.lastReconnect >= 10000) {
                 g_wifi.lastReconnect = millis();
                 Serial.println("[WiFi] Reconnecting...");
-                setWifiPage("Reconnecting", "...");
                 WiFi.disconnect(true);
                 vTaskDelay(pdMS_TO_TICKS(300));
                 WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
@@ -545,14 +538,12 @@ void wifiTask(void *pv)
                 if (WiFi.status() == WL_CONNECTED) {
                     String ip = WiFi.localIP().toString();
                     Serial.printf("[WiFi] Reconnected IP:%s\n", ip.c_str());
-                    setWifiPage("Connected", ip.c_str());
                     if (xSemaphoreTake(xWifiMutex, MUTEX_TIMEOUT) == pdTRUE) {
                         g_wifi.connected = true; g_wifi.ip = ip;
                         xSemaphoreGive(xWifiMutex);
                     }
                 } else {
                     Serial.println("[WiFi] Reconnect fail");
-                    setWifiPage("Retry fail", "N/A");
                 }
             }
         } else {
