@@ -634,12 +634,16 @@ void wifiTask(void *pv)
 {
     Serial.printf("[WiFi] Connecting: %s\n", WIFI_SSID);
     
+    WiFi.disconnect(true);
+    delay(100);
     WiFi.mode(WIFI_STA);
+    delay(500);
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
     
     unsigned long startAttempt = millis();
     while (WiFi.status() != WL_CONNECTED && millis() - startAttempt < 15000) {
         delay(500);
+        yield();
     }
 
     if (WiFi.status() == WL_CONNECTED) {
@@ -681,7 +685,7 @@ void wifiTask(void *pv)
             }
         }
 
-        if (g_wifiStatus.connected && millis() - lastAPIUpload >= 1000) {
+        if (g_wifiStatus.connected && millis() - lastAPIUpload >= 10000) {
             if (xSemaphoreTake(xGpsMutex, MUTEX_TIMEOUT) == pdTRUE) {
                 if (g_gpsData.valid && GPS.location.isValid()) {
                     sendToWiFiAPI(g_gpsData.lat, g_gpsData.lng);
@@ -696,6 +700,7 @@ void wifiTask(void *pv)
             lastSDCheck = millis();
         }
 
+        yield();
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
@@ -1063,8 +1068,9 @@ void tftTask(void *pv)
             }
             xSemaphoreGive(xTftMutex);
             tft.drawRGBBitmap(0, 0, framebuffer.getBuffer(), TFT_WIDTH, TFT_HEIGHT);
+            yield();
         }
-        vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(pdMS_TO_TICKS(50));
     }
 }
 
