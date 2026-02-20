@@ -199,12 +199,11 @@ GprsStatus g_gprs = { false, "N/A", "IDLE" };
 
 IRStatus g_ir = { false, 0, 0, 0 };
 
-// TFT pages — baris 0 = judul halaman
+// TFT pages — baris 0 = judul halaman (GPS, LoRaWAN, IR)
 TftPageData g_pages[TFT_MAX_PAGES] = {
-    { {"LoRaWAN", "Status: IDLE", "RSSI: -", "SNR: -", "Joined: NO", "-"} },
     { {"GPS", "Lat: -", "Lng: -", "Alt: -", "Sat: 0", "Time: --:--:--"} },
-    { {"IR Receiver", "Waiting...", "-", "-", "-", "-"} },
-    { {"WiFi", "Status: -", "IP: N/A", "Last: -", "OK: 0", "Fail: 0"} }
+    { {"LoRaWAN", "Status: IDLE", "RSSI: -", "SNR: -", "Joined: NO", "-"} },
+    { {"IR Receiver", "Waiting...", "-", "-", "-", "-"} }
 };
 
 bool     sdInitialized    = false;
