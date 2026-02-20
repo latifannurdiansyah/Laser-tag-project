@@ -14,7 +14,7 @@
 // KONFIGURASI MODE - UBAH DI SINI SEBELUM UPLOAD
 // ============================================
 #define ENABLE_WIFI    1
-#define ENABLE_GPRS    0
+#define ENABLE_GPRS    1
 #define ENABLE_LORAWAN 1
 #define ENABLE_SD      1
 
@@ -398,7 +398,7 @@ void setup()
 #endif
 
 #if ENABLE_GPRS
-    xTaskCreatePinnedToCore(gprsTask, "GPRS", 65536, NULL, 0, &xGprsTaskHandle, 1);
+    xTaskCreatePinnedToCore(gprsTask, "GPRS", 65536, NULL, 1, &xGprsTaskHandle, 1);
 #endif
 }
 
@@ -772,11 +772,15 @@ void sendToWiFiAPI(float lat, float lng)
 #if ENABLE_GPRS
 void gprsTask(void *pv)
 {
+    Serial.println("[GPRS] Task started");
+    Serial.flush();
     Serial.println("[GPRS] Initializing modem...");
+    Serial.flush();
     vTaskDelay(pdMS_TO_TICKS(100));
 
     if (!modem.begin()) {
         Serial.println("[GPRS] Init failed");
+        Serial.flush();
         logToSd("[GPRS] Init failed");
         vTaskDelete(NULL);
     }
@@ -784,6 +788,7 @@ void gprsTask(void *pv)
 
     if (strlen(SIM_PIN) > 0 && !modem.simUnlock(SIM_PIN)) {
         Serial.println("[GPRS] SIM unlock failed");
+        Serial.flush();
         logToSd("[GPRS] SIM unlock failed");
         vTaskDelete(NULL);
     }
