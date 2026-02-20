@@ -2,19 +2,24 @@
 // HELTEC TRACKER V1.1 - ALL-IN-ONE PROGRAM
 // GPS + LoRaWAN + WiFi + GPRS + IR Receiver + SD Card + TFT Display
 // Combined firmware with selectable transmission modes
+//
+// FIX: Task Watchdog Timeout pada TFT Task
+//   - Tambah esp_task_wdt_reset() di tftTask
+//   - WiFi task dipindah ke CPU 1
+//   - Stack TFT dinaikkan ke 65536
+//   - Hapus yield() yang tidak konsisten, ganti dengan wdt reset
 // ============================================
 
 // ============================================
 // KONFIGURASI MODE - UBAH DI SINI SEBELUM UPLOAD
 // ============================================
-// Gunakan 1 = ENABLE, 0 = DISABLE
-#define ENABLE_WIFI    1   // Kirim via WiFi HTTP
-#define ENABLE_GPRS    0   // Kirim via GPRS (SIM900A)
-#define ENABLE_LORAWAN 0   // Kirim via LoRaWAN (TTN)
-#define ENABLE_SD      0   // Simpan ke SD Card (Disabled for testing)
+#define ENABLE_WIFI    1
+#define ENABLE_GPRS    0
+#define ENABLE_LORAWAN 1
+#define ENABLE_SD      1
 
 // ============================================
-// LIBRARY INCLUDES - Harus di atas semua type definitions
+// LIBRARY INCLUDES
 // ============================================
 #include <Arduino.h>
 #include <SPI.h>
@@ -24,6 +29,7 @@
 #include <RadioLib.h>
 #include <TinyGPS++.h>
 #include <IRremote.hpp>
+#include "esp_task_wdt.h"   // ← FIX: Include WDT header
 
 #if ENABLE_WIFI
 #include <WiFi.h>
@@ -40,8 +46,6 @@
 // ============================================
 // KONFIGURASI WIFI
 // ============================================
-// UBAH URL INI SESUAI DEPLOYMENT ANDA!
-// Contoh: "https://your-app.vercel.app/api/track"
 #define WIFI_SSID       "UserAndroid"
 #define WIFI_PASSWORD   "55555550"
 #define WIFI_API_URL    "https://laser-tag-project.vercel.app/api/track"
@@ -66,7 +70,7 @@
 #define IR_RECEIVE_PIN  5
 
 // ============================================
-// LoRaWAN Credentials - GANTI DENGAN MILIK ANDA DARI TTN!
+// LoRaWAN Credentials
 // ============================================
 const uint64_t joinEUI = 0x0000000000000003;
 const uint64_t devEUI  = 0x70B3D57ED0075AC0;
@@ -135,7 +139,7 @@ const uint8_t subBand = 0;
 // ============================================
 #define TFT_WIDTH        160
 #define TFT_HEIGHT       80
-#define TFT_MAX_PAGES    3    // LoRa, GPS, IR (simplified like working firmware)
+#define TFT_MAX_PAGES    3
 #define TFT_ROWS_PER_PAGE 6
 #define PAGE_SWITCH_MS   3000
 
@@ -185,7 +189,6 @@ struct TftPageData {
     String rows[TFT_ROWS_PER_PAGE];
 };
 
-// LoRaWAN Payload Structure (32-byte aligned)
 struct __attribute__((packed)) DataPayload {
     uint32_t address_id;
     uint8_t  sub_address_id;
@@ -219,19 +222,14 @@ TinyGsmClient gprsClient(modem);
 // Global shared data
 GpsData g_gpsData = {
     .valid = false,
-    .lat = 0.0f,
-    .lng = 0.0f,
-    .alt = 0.0f,
+    .lat = 0.0f, .lng = 0.0f, .alt = 0.0f,
     .satellites = 0,
-    .hour = 0,
-    .minute = 0,
-    .second = 0
+    .hour = 0, .minute = 0, .second = 0
 };
 
 LoraStatus g_loraStatus = {
     .lastEvent = "IDLE",
-    .rssi = 0,
-    .snr = 0.0f,
+    .rssi = 0, .snr = 0.0f,
     .joined = false
 };
 
@@ -250,8 +248,7 @@ GprsStatus g_gprsStatus = {
 
 IRStatus g_irStatus = {
     .dataReceived = false,
-    .address = 0,
-    .command = 0,
+    .address = 0, .command = 0,
     .protocol = "NONE",
     .lastTime = 0
 };
@@ -265,28 +262,28 @@ TftPageData g_TftPageData[TFT_MAX_PAGES] = {
 // ============================================
 // FreeRTOS HANDLES
 // ============================================
-SemaphoreHandle_t xGpsMutex = NULL;
+SemaphoreHandle_t xGpsMutex  = NULL;
 SemaphoreHandle_t xLoraMutex = NULL;
-SemaphoreHandle_t xTftMutex = NULL;
+SemaphoreHandle_t xTftMutex  = NULL;
 SemaphoreHandle_t xWifiMutex = NULL;
 SemaphoreHandle_t xGprsMutex = NULL;
-SemaphoreHandle_t xIrMutex = NULL;
-QueueHandle_t xLogQueue = NULL;
+SemaphoreHandle_t xIrMutex   = NULL;
+QueueHandle_t     xLogQueue  = NULL;
 
-TaskHandle_t xGpsTaskHandle = NULL;
+TaskHandle_t xGpsTaskHandle  = NULL;
 TaskHandle_t xLoraTaskHandle = NULL;
-TaskHandle_t xTftTaskHandle = NULL;
-TaskHandle_t xSdTaskHandle = NULL;
+TaskHandle_t xTftTaskHandle  = NULL;
+TaskHandle_t xSdTaskHandle   = NULL;
 TaskHandle_t xWifiTaskHandle = NULL;
 TaskHandle_t xGprsTaskHandle = NULL;
-TaskHandle_t xIrTaskHandle = NULL;
+TaskHandle_t xIrTaskHandle   = NULL;
 
 // Flags
-bool sdInitialized = false;
+bool sdInitialized   = false;
 bool g_sendImmediately = false;
-bool g_irPending = false;
+bool g_irPending     = false;
 uint16_t g_pendingAddress = 0;
-uint8_t g_pendingCommand = 0;
+uint8_t  g_pendingCommand = 0;
 
 // ============================================
 // FORWARD DECLARATIONS
@@ -342,14 +339,11 @@ void setup()
     Serial.println("GPS Tracker - 4-Mode Transmission");
     Serial.print("Device ID: ");
     Serial.println(DEVICE_ID);
-    
-    const char* wifiStatus = ENABLE_WIFI ? "ENABLED" : "DISABLED";
-    const char* gprsStatus = ENABLE_GPRS ? "ENABLED" : "DISABLED";
-    const char* loraStatus = ENABLE_LORAWAN ? "ENABLED" : "DISABLED";
-    const char* sdStatus = ENABLE_SD ? "ENABLED" : "DISABLED";
-    
-    Serial.printf("WiFi: %s, GPRS: %s, LoRaWAN: %s, SD: %s\n", 
-        wifiStatus, gprsStatus, loraStatus, sdStatus);
+    Serial.printf("WiFi: %s, GPRS: %s, LoRaWAN: %s, SD: %s\n",
+        ENABLE_WIFI   ? "ENABLED" : "DISABLED",
+        ENABLE_GPRS   ? "ENABLED" : "DISABLED",
+        ENABLE_LORAWAN? "ENABLED" : "DISABLED",
+        ENABLE_SD     ? "ENABLED" : "DISABLED");
     Serial.println("========================================\n");
 
     Serial1.begin(115200, SERIAL_8N1, GPS_RX_PIN, GPS_TX_PIN);
@@ -366,43 +360,45 @@ void setup()
     tft.fillScreen(ST7735_BLACK);
     tft.setTextColor(ST7735_YELLOW);
     tft.setTextSize(1);
-    tft.setCursor(5, 5);
-    tft.print("GPS 4-Mode Tracker");
-    tft.setCursor(5, 20);
-    tft.print(DEVICE_ID);
-    tft.setCursor(5, 35);
-    tft.print("Initializing...");
+    tft.setCursor(5, 5);  tft.print("GPS 4-Mode Tracker");
+    tft.setCursor(5, 20); tft.print(DEVICE_ID);
+    tft.setCursor(5, 35); tft.print("Initializing...");
     delay(1500);
 
-    xGpsMutex = xSemaphoreCreateMutex();
+    xGpsMutex  = xSemaphoreCreateMutex();
     xLoraMutex = xSemaphoreCreateMutex();
-    xTftMutex = xSemaphoreCreateMutex();
+    xTftMutex  = xSemaphoreCreateMutex();
     xWifiMutex = xSemaphoreCreateMutex();
     xGprsMutex = xSemaphoreCreateMutex();
-    xIrMutex = xSemaphoreCreateMutex();
+    xIrMutex   = xSemaphoreCreateMutex();
 
     xLogQueue = xQueueCreate(LOG_QUEUE_SIZE, sizeof(String *));
-    if (!xLogQueue) {
-        while (1) delay(1000);
-    }
+    if (!xLogQueue) { while (1) delay(1000); }
 
+    // ── CPU 1: GPS, LoRa, IR ──────────────────────────────────────────
     xTaskCreatePinnedToCore(gpsTask, "GPS", 16384, NULL, 2, &xGpsTaskHandle, 1);
-    
+    xTaskCreatePinnedToCore(irTask,  "IR",  4096,  NULL, 1, &xIrTaskHandle,  1);
+
 #if ENABLE_LORAWAN
     xTaskCreatePinnedToCore(loraTask, "LoRa", 16384, NULL, 2, &xLoraTaskHandle, 1);
 #endif
 
-    xTaskCreatePinnedToCore(tftTask, "TFT", 32768, NULL, 1, &xTftTaskHandle, 0);
-    
+    // ── CPU 0: TFT, SD ───────────────────────────────────────────────
+    // FIX: Stack TFT dinaikkan 32768 → 65536
+    xTaskCreatePinnedToCore(tftTask, "TFT", 65536, NULL, 1, &xTftTaskHandle, 0);
+
 #if ENABLE_SD
     xTaskCreatePinnedToCore(sdCardTask, "SD", 16384, NULL, 1, &xSdTaskHandle, 0);
 #endif
-    
-    xTaskCreatePinnedToCore(wifiTask, "WiFi", 65536, NULL, 1, &xWifiTaskHandle, 0);
-    xTaskCreatePinnedToCore(irTask, "IR", 4096, NULL, 1, &xIrTaskHandle, 0);
-    
+
+    // ── CPU 1: WiFi, GPRS ────────────────────────────────────────────
+    // FIX: WiFi dipindah ke CPU 1 agar tidak bertabrakan dengan TFT di CPU 0
+#if ENABLE_WIFI
+    xTaskCreatePinnedToCore(wifiTask, "WiFi", 65536, NULL, 1, &xWifiTaskHandle, 1);
+#endif
+
 #if ENABLE_GPRS
-    xTaskCreatePinnedToCore(gprsTask, "GPRS", 65536, NULL, 0, &xGprsTaskHandle, 0);
+    xTaskCreatePinnedToCore(gprsTask, "GPRS", 65536, NULL, 0, &xGprsTaskHandle, 1);
 #endif
 }
 
@@ -412,7 +408,7 @@ void loop()
 }
 
 // ============================================
-// GPS TASK
+// GPS TASK (CPU 1)
 // ============================================
 void gpsTask(void *pv)
 {
@@ -423,11 +419,12 @@ void gpsTask(void *pv)
         }
 
         bool hasTime = GPS.time.isValid();
-        bool hasLoc = GPS.location.isValid();
+        bool hasLoc  = GPS.location.isValid();
 
         if (xSemaphoreTake(xGpsMutex, MUTEX_TIMEOUT) == pdTRUE)
         {
-            g_gpsData.valid = hasTime || hasLoc;
+            g_gpsData.valid      = hasTime || hasLoc;
+            g_gpsData.satellites = GPS.satellites.value();
             if (hasLoc) {
                 g_gpsData.lat = GPS.location.lat();
                 g_gpsData.lng = GPS.location.lng();
@@ -435,9 +432,8 @@ void gpsTask(void *pv)
             } else {
                 g_gpsData.lat = g_gpsData.lng = g_gpsData.alt = 0.0f;
             }
-            g_gpsData.satellites = GPS.satellites.value();
             if (hasTime) {
-                g_gpsData.hour = GPS.time.hour();
+                g_gpsData.hour   = GPS.time.hour();
                 g_gpsData.minute = GPS.time.minute();
                 g_gpsData.second = GPS.time.second();
             } else {
@@ -448,24 +444,23 @@ void gpsTask(void *pv)
 
         if (xSemaphoreTake(xTftMutex, MUTEX_TIMEOUT) == pdTRUE)
         {
-            g_TftPageData[1].rows[0] = "GPS Status";
-            g_TftPageData[1].rows[1] = hasLoc ? ("Lat: " + String(g_gpsData.lat, 6)) : "Lat: -";
-            g_TftPageData[1].rows[2] = hasLoc ? ("Long: " + String(g_gpsData.lng, 6)) : "Long: -";
-            g_TftPageData[1].rows[3] = hasLoc ? ("Alt: " + String(g_gpsData.alt, 1) + " m") : "Alt: -";
-            g_TftPageData[1].rows[4] = "Sat: " + String(g_gpsData.satellites);
-
             int8_t displayHour = 0;
             if (hasTime) {
                 displayHour = g_gpsData.hour + TIMEZONE_OFFSET_HOURS;
                 if (displayHour >= 24) displayHour -= 24;
                 else if (displayHour < 0) displayHour += 24;
             }
-
             char timeBuf[12];
             snprintf(timeBuf, sizeof(timeBuf), "%02d:%02d:%02d",
-                     hasTime ? displayHour : 0,
-                     hasTime ? g_gpsData.minute : 0,
-                     hasTime ? g_gpsData.second : 0);
+                     hasTime ? displayHour       : 0,
+                     hasTime ? g_gpsData.minute  : 0,
+                     hasTime ? g_gpsData.second  : 0);
+
+            g_TftPageData[1].rows[0] = "GPS Status";
+            g_TftPageData[1].rows[1] = hasLoc ? ("Lat: "  + String(g_gpsData.lat, 6)) : "Lat: -";
+            g_TftPageData[1].rows[2] = hasLoc ? ("Long: " + String(g_gpsData.lng, 6)) : "Long: -";
+            g_TftPageData[1].rows[3] = hasLoc ? ("Alt: "  + String(g_gpsData.alt, 1) + " m") : "Alt: -";
+            g_TftPageData[1].rows[4] = "Sat: " + String(g_gpsData.satellites);
             g_TftPageData[1].rows[5] = "Time: " + String(timeBuf);
             xSemaphoreGive(xTftMutex);
         }
@@ -474,15 +469,15 @@ void gpsTask(void *pv)
     }
 }
 
+// ============================================
+// LORAWAN TASK (CPU 1)
+// ============================================
 #if ENABLE_LORAWAN
-// ============================================
-// LORAWAN TASK
-// ============================================
 void loraTask(void *pv)
 {
     SPI.begin(RADIO_SCLK_PIN, RADIO_MISO_PIN, RADIO_MOSI_PIN, RADIO_CS_PIN);
-    delay(100); // Wait for other tasks to initialize
-    
+    delay(100);
+
     int16_t state = radio.begin();
     if (state != RADIOLIB_ERR_NONE) {
         char err[64];
@@ -510,21 +505,20 @@ void loraTask(void *pv)
         logToSd(joinMsg);
 
         state = node.activateOTAA();
-        yield(); // Prevent watchdog timeout during OTAA
-        
+        vTaskDelay(pdMS_TO_TICKS(10));
+
         if (state == RADIOLIB_LORAWAN_NEW_SESSION) {
             Serial.println("[LoRa] Join: SUCCESS");
             logToSd("Join successful!");
             if (xSemaphoreTake(xLoraMutex, MUTEX_TIMEOUT) == pdTRUE) {
-                g_loraStatus.joined = true;
+                g_loraStatus.joined    = true;
                 g_loraStatus.lastEvent = "JOINED";
                 xSemaphoreGive(xLoraMutex);
             }
             break;
         } else {
             Serial.printf("[LoRa] Join: FAILED (%s)\n", stateDecode(state).c_str());
-            delay(JOIN_RETRY_DELAY_MS);
-            yield(); // Prevent watchdog timeout
+            vTaskDelay(pdMS_TO_TICKS(JOIN_RETRY_DELAY_MS));
         }
     }
 
@@ -555,31 +549,28 @@ void loraTask(void *pv)
             }
 
             if (g_irPending) {
-                payload.sub_address_id = g_pendingCommand;
-                payload.shooter_address_id = g_pendingAddress;
+                payload.sub_address_id         = g_pendingCommand;
+                payload.shooter_address_id     = g_pendingAddress;
                 payload.shooter_sub_address_id = 1;
-                payload.status = 1;
+                payload.status                 = 1;
                 g_irPending = false;
             } else if (xSemaphoreTake(xIrMutex, MUTEX_TIMEOUT) == pdTRUE) {
-                payload.sub_address_id = g_irStatus.dataReceived ? g_irStatus.command : 0;
-                payload.shooter_address_id = g_irStatus.dataReceived ? g_irStatus.address : 0;
+                payload.sub_address_id         = g_irStatus.dataReceived ? g_irStatus.command : 0;
+                payload.shooter_address_id     = g_irStatus.dataReceived ? g_irStatus.address : 0;
                 payload.shooter_sub_address_id = g_irStatus.dataReceived ? 1 : 0;
-                payload.status = g_irStatus.dataReceived ? 1 : 0;
+                payload.status                 = g_irStatus.dataReceived ? 1 : 0;
                 xSemaphoreGive(xIrMutex);
             } else {
-                payload.sub_address_id = 0;
-                payload.shooter_address_id = 0;
-                payload.shooter_sub_address_id = 0;
-                payload.status = 0;
+                payload.sub_address_id = payload.shooter_address_id = 0;
+                payload.shooter_sub_address_id = payload.status = 0;
             }
 
             if (xSemaphoreTake(xLoraMutex, MUTEX_TIMEOUT) == pdTRUE) {
                 payload.rssi = g_loraStatus.rssi;
-                payload.snr = (int8_t)(g_loraStatus.snr + 0.5f);
+                payload.snr  = (int8_t)(g_loraStatus.snr + 0.5f);
                 xSemaphoreGive(xLoraMutex);
             } else {
-                payload.rssi = 0;
-                payload.snr = 0;
+                payload.rssi = payload.snr = 0;
             }
 
             uint8_t buffer[sizeof(DataPayload)];
@@ -587,22 +578,21 @@ void loraTask(void *pv)
 
             state = node.sendReceive(buffer, sizeof(buffer));
             String eventStr;
-            float snr = 0.0f;
+            float  snr  = 0.0f;
             int16_t rssi = 0;
 
             if (state < RADIOLIB_ERR_NONE) {
                 eventStr = "TX_FAIL";
-                Serial.printf("[LoRa] TX: FAILED\n");
+                Serial.println("[LoRa] TX: FAILED");
             } else {
                 if (state > 0) {
-                    snr = radio.getSNR();
+                    snr  = radio.getSNR();
                     rssi = radio.getRSSI();
                     eventStr = "TX+RX_OK";
                 } else {
                     eventStr = "TX_OK";
                 }
                 Serial.printf("[LoRa] TX: SUCCESS | RSSI: %d | SNR: %.1f\n", rssi, snr);
-                
                 if (xSemaphoreTake(xIrMutex, MUTEX_TIMEOUT) == pdTRUE) {
                     g_irStatus.dataReceived = false;
                     xSemaphoreGive(xIrMutex);
@@ -611,8 +601,8 @@ void loraTask(void *pv)
 
             if (xSemaphoreTake(xLoraMutex, MUTEX_TIMEOUT) == pdTRUE) {
                 g_loraStatus.lastEvent = eventStr;
-                g_loraStatus.snr = snr;
-                g_loraStatus.rssi = rssi;
+                g_loraStatus.snr       = snr;
+                g_loraStatus.rssi      = rssi;
                 xSemaphoreGive(xLoraMutex);
             }
 
@@ -620,7 +610,7 @@ void loraTask(void *pv)
                 g_TftPageData[0].rows[0] = "LoRaWAN Status";
                 g_TftPageData[0].rows[1] = "Event: " + eventStr;
                 g_TftPageData[0].rows[2] = "RSSI: " + String(rssi) + " dBm";
-                g_TftPageData[0].rows[3] = "SNR: " + String(snr, 1) + " dB";
+                g_TftPageData[0].rows[3] = "SNR: "  + String(snr, 1) + " dB";
                 g_TftPageData[0].rows[4] = "Batt: N/A";
                 g_TftPageData[0].rows[5] = "Joined: YES";
                 xSemaphoreGive(xTftMutex);
@@ -632,26 +622,25 @@ void loraTask(void *pv)
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
-#endif
+#endif // ENABLE_LORAWAN
 
+// ============================================
+// WIFI TASK (CPU 1) ← FIX: dipindah dari CPU 0 ke CPU 1
+// ============================================
 #if ENABLE_WIFI
-// ============================================
-// WIFI TASK
-// ============================================
 void wifiTask(void *pv)
 {
     Serial.printf("[WiFi] Connecting: %s\n", WIFI_SSID);
-    
+
     WiFi.disconnect(true);
     delay(100);
     WiFi.mode(WIFI_STA);
     delay(500);
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-    
+
     unsigned long startAttempt = millis();
     while (WiFi.status() != WL_CONNECTED && millis() - startAttempt < 15000) {
-        delay(500);
-        yield();
+        vTaskDelay(pdMS_TO_TICKS(500));
     }
 
     if (WiFi.status() == WL_CONNECTED) {
@@ -659,21 +648,19 @@ void wifiTask(void *pv)
         Serial.printf("[WiFi] Connected | IP: %s\n", ip.c_str());
         if (xSemaphoreTake(xWifiMutex, MUTEX_TIMEOUT) == pdTRUE) {
             g_wifiStatus.connected = true;
-            g_wifiStatus.ip = ip;
+            g_wifiStatus.ip        = ip;
             xSemaphoreGive(xWifiMutex);
         }
         uploadFromSD();
     } else {
-        Serial.println("[WiFi] Failed");
+        Serial.println("[WiFi] Failed to connect");
     }
 
     uint32_t lastAPIUpload = 0;
-    uint32_t lastSDCheck = 0;
-    
+
     for (;;)
     {
-        yield();
-        
+        // Reconnect jika terputus
         if (WiFi.status() != WL_CONNECTED) {
             if (xSemaphoreTake(xWifiMutex, MUTEX_TIMEOUT) == pdTRUE) {
                 g_wifiStatus.connected = false;
@@ -685,50 +672,52 @@ void wifiTask(void *pv)
                 WiFi.reconnect();
             }
         } else {
+            bool wasDisconnected = false;
             if (xSemaphoreTake(xWifiMutex, MUTEX_TIMEOUT) == pdTRUE) {
-                if (!g_wifiStatus.connected) {
-                    g_wifiStatus.connected = true;
-                    Serial.printf("[WiFi] Connected | IP: %s\n", WiFi.localIP().toString().c_str());
-                    // uploadFromSD(); // Disabled for testing
-                }
+                wasDisconnected         = !g_wifiStatus.connected;
+                g_wifiStatus.connected  = true;
+                g_wifiStatus.ip         = WiFi.localIP().toString();
                 xSemaphoreGive(xWifiMutex);
+            }
+            if (wasDisconnected) {
+                Serial.printf("[WiFi] Reconnected | IP: %s\n", WiFi.localIP().toString().c_str());
             }
         }
 
+        // Kirim data ke API setiap 10 detik
         if (g_wifiStatus.connected && millis() - lastAPIUpload >= 10000) {
+            float lat = 0.0f, lng = 0.0f;
+            bool valid = false;
             if (xSemaphoreTake(xGpsMutex, MUTEX_TIMEOUT) == pdTRUE) {
-                if (g_gpsData.valid && GPS.location.isValid()) {
-                    sendToWiFiAPI(g_gpsData.lat, g_gpsData.lng);
-                }
+                valid = g_gpsData.valid && GPS.location.isValid();
+                lat   = g_gpsData.lat;
+                lng   = g_gpsData.lng;
                 xSemaphoreGive(xGpsMutex);
+            }
+            if (valid) {
+                sendToWiFiAPI(lat, lng);
             }
             lastAPIUpload = millis();
         }
 
-        // SD upload disabled for testing
-        // if (g_wifiStatus.connected && millis() - lastSDCheck >= 30000) {
-        //     uploadFromSD();
-        //     lastSDCheck = millis();
-        // }
-
-        yield();
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
 
 void sendToWiFiAPI(float lat, float lng)
 {
-    char irStatus[32] = "-";
-    float alt = 0.0f;
-    uint8_t satellites = 0;
-    int16_t rssi = 0;
-    float snr = 0.0f;
-    uint16_t irAddress = 0;
-    uint8_t irCommand = 0;
+    char     irStatus[32] = "-";
+    float    alt          = 0.0f;
+    uint8_t  satellites   = 0;
+    int16_t  rssi         = 0;
+    float    snr          = 0.0f;
+    uint16_t irAddress    = 0;
+    uint8_t  irCommand    = 0;
 
     if (xSemaphoreTake(xIrMutex, MUTEX_TIMEOUT) == pdTRUE) {
         if (g_irStatus.dataReceived) {
-            snprintf(irStatus, sizeof(irStatus), "HIT: 0x%X-0x%X", g_irStatus.address, g_irStatus.command);
+            snprintf(irStatus, sizeof(irStatus), "HIT: 0x%X-0x%X",
+                     g_irStatus.address, g_irStatus.command);
             irAddress = g_irStatus.address;
             irCommand = g_irStatus.command;
         }
@@ -737,19 +726,20 @@ void sendToWiFiAPI(float lat, float lng)
 
     if (xSemaphoreTake(xGpsMutex, MUTEX_TIMEOUT) == pdTRUE) {
         satellites = g_gpsData.satellites;
-        alt = g_gpsData.alt;
+        alt        = g_gpsData.alt;
         xSemaphoreGive(xGpsMutex);
     }
 
     if (xSemaphoreTake(xLoraMutex, MUTEX_TIMEOUT) == pdTRUE) {
         rssi = g_loraStatus.rssi;
-        snr = g_loraStatus.snr;
+        snr  = g_loraStatus.snr;
         xSemaphoreGive(xLoraMutex);
     }
 
     HTTPClient http;
     http.begin(WIFI_API_URL);
     http.addHeader("Content-Type", "application/json");
+    http.setTimeout(8000); // Timeout 8 detik agar tidak block terlalu lama
 
     char payload[350];
     snprintf(payload, sizeof(payload),
@@ -765,42 +755,36 @@ void sendToWiFiAPI(float lat, float lng)
         "\"satellites\":%u,"
         "\"rssi\":%d,"
         "\"snr\":%.1f}",
-        DEVICE_ID, lat, lng, alt, irStatus, irAddress, irCommand,
-        0, satellites, rssi, snr);
+        DEVICE_ID, lat, lng, alt, irStatus,
+        irAddress, irCommand, 0, satellites, rssi, snr);
 
     int httpCode = http.POST(payload);
     http.end();
-    yield();
-    
-    Serial.printf("[WiFi] Upload: %s | Code: %d\n", 
+
+    Serial.printf("[WiFi] Upload: %s | Code: %d\n",
                   (httpCode == 200 || httpCode == 201) ? "SUCCESS" : "FAILED", httpCode);
-
-    // saveToSDOffline(lat, lng, alt, satellites, 0, rssi, snr, irStatus); // Disabled for testing
 }
-#endif
+#endif // ENABLE_WIFI
 
+// ============================================
+// GPRS TASK (CPU 1)
+// ============================================
 #if ENABLE_GPRS
-// ============================================
-// GPRS TASK
-// ============================================
 void gprsTask(void *pv)
 {
     Serial.println("[GPRS] Initializing modem...");
     vTaskDelay(pdMS_TO_TICKS(100));
-    
+
     if (!modem.begin()) {
-        String err = "[GPRS] Init failed";
-        Serial.println(err);
-        logToSd(err.c_str());
+        Serial.println("[GPRS] Init failed");
+        logToSd("[GPRS] Init failed");
         vTaskDelete(NULL);
     }
-    
     vTaskDelay(pdMS_TO_TICKS(100));
 
     if (strlen(SIM_PIN) > 0 && !modem.simUnlock(SIM_PIN)) {
-        String err = "[GPRS] SIM unlock failed";
-        Serial.println(err);
-        logToSd(err.c_str());
+        Serial.println("[GPRS] SIM unlock failed");
+        logToSd("[GPRS] SIM unlock failed");
         vTaskDelete(NULL);
     }
 
@@ -808,49 +792,43 @@ void gprsTask(void *pv)
     for (int retry = 0; retry < 5; retry++) {
         Serial.printf("[GPRS] Connecting to APN (attempt %d/5)...\n", retry + 1);
         vTaskDelay(pdMS_TO_TICKS(100));
-        
         if (modem.gprsConnect(GPRS_APN, GPRS_USER, GPRS_PASS)) {
             gprsConnected = true;
             String ip = modem.getLocalIP();
-            logToSd(("[GPRS] Connected, IP=" + ip).c_str());
             Serial.println("[GPRS] Connected, IP=" + ip);
-            
+            logToSd(("[GPRS] Connected, IP=" + ip).c_str());
             if (xSemaphoreTake(xGprsMutex, MUTEX_TIMEOUT) == pdTRUE) {
-                g_gprsStatus.connected = true;
-                g_gprsStatus.ip = ip;
-                g_gprsStatus.lastEvent = "CONNECTED";
+                g_gprsStatus.connected  = true;
+                g_gprsStatus.ip         = ip;
+                g_gprsStatus.lastEvent  = "CONNECTED";
                 xSemaphoreGive(xGprsMutex);
             }
             break;
         }
         logToSd(("[GPRS] Connect retry " + String(retry + 1)).c_str());
-        
-        for (int i = 0; i < 50; i++) {
-            vTaskDelay(pdMS_TO_TICKS(100));
-        }
+        vTaskDelay(pdMS_TO_TICKS(5000));
     }
 
     if (!gprsConnected) {
-        logToSd("[GPRS] Failed to establish connection");
         Serial.println("[GPRS] Failed to establish connection");
+        logToSd("[GPRS] Failed to establish connection");
     }
 
     uint32_t lastScheduledSend = 0;
     for (;;) {
         if (!gprsConnected || !modem.isGprsConnected()) {
-            logToSd("[GPRS] Connection lost - reconnecting");
             Serial.println("[GPRS] Connection lost - reconnecting");
+            logToSd("[GPRS] Connection lost - reconnecting");
             vTaskDelay(pdMS_TO_TICKS(100));
-            
+
             if (modem.gprsConnect(GPRS_APN, GPRS_USER, GPRS_PASS)) {
                 gprsConnected = true;
                 String ip = modem.getLocalIP();
-                logToSd(("[GPRS] Reconnected, IP=" + ip).c_str());
                 Serial.println("[GPRS] Reconnected, IP=" + ip);
-                
+                logToSd(("[GPRS] Reconnected, IP=" + ip).c_str());
                 if (xSemaphoreTake(xGprsMutex, MUTEX_TIMEOUT) == pdTRUE) {
                     g_gprsStatus.connected = true;
-                    g_gprsStatus.ip = ip;
+                    g_gprsStatus.ip        = ip;
                     xSemaphoreGive(xGprsMutex);
                 }
             } else {
@@ -859,29 +837,21 @@ void gprsTask(void *pv)
                     g_gprsStatus.connected = false;
                     xSemaphoreGive(xGprsMutex);
                 }
-                for (int i = 0; i < 50; i++) {
-                    vTaskDelay(pdMS_TO_TICKS(100));
-                }
+                vTaskDelay(pdMS_TO_TICKS(5000));
                 continue;
             }
         }
 
         if (millis() - lastScheduledSend >= GPRS_INTERVAL_MS) {
-            float lat = 0.0f, lng = 0.0f, alt = 0.0f;
-            uint8_t satellites = 0;
-            
+            float lat = 0.0f, lng = 0.0f;
             if (xSemaphoreTake(xGpsMutex, MUTEX_TIMEOUT) == pdTRUE) {
                 lat = g_gpsData.lat;
                 lng = g_gpsData.lng;
-                alt = g_gpsData.alt;
-                satellites = g_gpsData.satellites;
                 xSemaphoreGive(xGpsMutex);
             }
-
             if (g_gpsData.valid && lat != 0.0f && lng != 0.0f) {
                 sendToGPRS(lat, lng);
             }
-            
             lastScheduledSend = millis();
         }
 
@@ -891,43 +861,39 @@ void gprsTask(void *pv)
 
 void sendToGPRS(float lat, float lng)
 {
-    char irStatus[32] = "-";
-    float alt = 0.0f;
-    uint8_t satellites = 0;
-    int16_t rssi = 0;
-    float snr = 0.0f;
+    char    irStatus[32] = "-";
+    float   alt          = 0.0f;
+    uint8_t satellites   = 0;
+    int16_t rssi         = 0;
+    float   snr          = 0.0f;
 
     if (xSemaphoreTake(xIrMutex, MUTEX_TIMEOUT) == pdTRUE) {
-        if (g_irStatus.dataReceived) {
-            snprintf(irStatus, sizeof(irStatus), "HIT: 0x%X-0x%X", g_irStatus.address, g_irStatus.command);
-        }
+        if (g_irStatus.dataReceived)
+            snprintf(irStatus, sizeof(irStatus), "HIT: 0x%X-0x%X",
+                     g_irStatus.address, g_irStatus.command);
         xSemaphoreGive(xIrMutex);
     }
-
     if (xSemaphoreTake(xGpsMutex, MUTEX_TIMEOUT) == pdTRUE) {
-        alt = g_gpsData.alt;
-        satellites = g_gpsData.satellites;
+        alt = g_gpsData.alt; satellites = g_gpsData.satellites;
         xSemaphoreGive(xGpsMutex);
     }
-
     if (xSemaphoreTake(xLoraMutex, MUTEX_TIMEOUT) == pdTRUE) {
-        rssi = g_loraStatus.rssi;
-        snr = g_loraStatus.snr;
+        rssi = g_loraStatus.rssi; snr = g_loraStatus.snr;
         xSemaphoreGive(xLoraMutex);
     }
 
-    String url = String("/update?api_key=") + THINGSPEAK_API_KEY;
-    url += "&field1=" + String(lat, 6);
-    url += "&field2=" + String(lng, 6);
-    url += "&field3=" + String(alt, 1);
-    url += "&field4=" + String(satellites);
-    url += "&field5=" + String(irStatus);
-    url += "&field6=" + String(rssi);
-    url += "&field7=" + String(snr, 1);
+    String url = String("/update?api_key=") + THINGSPEAK_API_KEY
+               + "&field1=" + String(lat, 6)
+               + "&field2=" + String(lng, 6)
+               + "&field3=" + String(alt, 1)
+               + "&field4=" + String(satellites)
+               + "&field5=" + String(irStatus)
+               + "&field6=" + String(rssi)
+               + "&field7=" + String(snr, 1);
 
     String event = "HTTP_FAIL";
     String responseLine = "-";
-    
+
     if (gprsClient.connect(THINGSPEAK_URL, THINGSPEAK_PORT)) {
         gprsClient.print(String("GET ") + url + " HTTP/1.1\r\n");
         gprsClient.print(String("Host: ") + THINGSPEAK_URL + "\r\n");
@@ -939,20 +905,15 @@ void sendToGPRS(float lat, float lng)
             vTaskDelay(pdMS_TO_TICKS(10));
         }
         vTaskDelay(pdMS_TO_TICKS(50));
-        
+
         if (gprsClient.available()) {
             responseLine = gprsClient.readStringUntil('\n');
-            vTaskDelay(pdMS_TO_TICKS(10));
             while (gprsClient.available()) {
                 gprsClient.read();
                 vTaskDelay(pdMS_TO_TICKS(1));
             }
-            
-            if (responseLine.indexOf("200") >= 0 || responseLine.indexOf("OK") >= 0) {
-                event = "THING_OK";
-            } else {
-                event = "THING_FAIL";
-            }
+            event = (responseLine.indexOf("200") >= 0 || responseLine.indexOf("OK") >= 0)
+                  ? "THING_OK" : "THING_FAIL";
         }
         gprsClient.stop();
     } else {
@@ -960,15 +921,13 @@ void sendToGPRS(float lat, float lng)
         logToSd("[GPRS] ThingSpeak connect failed");
     }
 
-    logToSd(("[ThingSpeak] " + event + " | " + responseLine).c_str());
     Serial.printf("[ThingSpeak] Upload: %s | Resp: %s\n", event.c_str(), responseLine.c_str());
-
-    // saveToSDOffline(lat, lng, alt, satellites, 0, rssi, snr, irStatus); // Disabled for testing
+    logToSd(("[ThingSpeak] " + event + " | " + responseLine).c_str());
 }
-#endif
+#endif // ENABLE_GPRS
 
 // ============================================
-// IR RECEIVER TASK
+// IR RECEIVER TASK (CPU 1)
 // ============================================
 void irTask(void *pv)
 {
@@ -977,36 +936,37 @@ void irTask(void *pv)
         if (IrReceiver.decode()) {
             if (IrReceiver.decodedIRData.protocol == NEC) {
                 if (xSemaphoreTake(xIrMutex, MUTEX_TIMEOUT) == pdTRUE) {
-                    g_irStatus.protocol = "NEC";
-                    g_irStatus.address = IrReceiver.decodedIRData.address;
-                    g_irStatus.command = IrReceiver.decodedIRData.command;
+                    g_irStatus.protocol     = "NEC";
+                    g_irStatus.address      = IrReceiver.decodedIRData.address;
+                    g_irStatus.command      = IrReceiver.decodedIRData.command;
                     g_irStatus.dataReceived = true;
-                    g_irStatus.lastTime = millis();
-                    
-                    g_irPending = true;
-                    g_pendingAddress = g_irStatus.address;
-                    g_pendingCommand = g_irStatus.command;
+                    g_irStatus.lastTime     = millis();
+
+                    g_irPending       = true;
+                    g_pendingAddress  = g_irStatus.address;
+                    g_pendingCommand  = g_irStatus.command;
                     g_sendImmediately = true;
                     xSemaphoreGive(xIrMutex);
                 }
-                
-                Serial.printf("IR Received | Addr: 0x%04X | Cmd: 0x%02X\n", 
-                             g_irStatus.address, g_irStatus.command);
+
+                Serial.printf("IR Received | Addr: 0x%04X | Cmd: 0x%02X\n",
+                              g_irStatus.address, g_irStatus.command);
                 char irLog[48];
-                snprintf(irLog, sizeof(irLog), "IR: Addr=0x%04X Cmd=0x%02X", 
-                        g_irStatus.address, g_irStatus.command);
+                snprintf(irLog, sizeof(irLog), "IR: Addr=0x%04X Cmd=0x%02X",
+                         g_irStatus.address, g_irStatus.command);
                 logToSd(irLog);
             }
             IrReceiver.resume();
         }
 
+        // Update TFT page IR
         if (xSemaphoreTake(xTftMutex, MUTEX_TIMEOUT) == pdTRUE) {
             if (xSemaphoreTake(xIrMutex, MUTEX_TIMEOUT) == pdTRUE) {
                 g_TftPageData[2].rows[0] = "IR Receiver";
                 if (g_irStatus.dataReceived) {
                     g_TftPageData[2].rows[1] = "Proto: " + g_irStatus.protocol;
                     g_TftPageData[2].rows[2] = "Addr: 0x" + String(g_irStatus.address, HEX);
-                    g_TftPageData[2].rows[3] = "Cmd: 0x" + String(g_irStatus.command, HEX);
+                    g_TftPageData[2].rows[3] = "Cmd: 0x"  + String(g_irStatus.command, HEX);
                     unsigned long ago = (millis() - g_irStatus.lastTime) / 1000;
                     g_TftPageData[2].rows[4] = "Last: " + String(ago) + "s ago";
                     g_TftPageData[2].rows[5] = "-";
@@ -1027,27 +987,34 @@ void irTask(void *pv)
 }
 
 // ============================================
-// TFT TASK
+// TFT TASK (CPU 0)
+// FIX: Tambah esp_task_wdt_reset() agar watchdog tidak trigger
+// FIX: Stack dinaikkan ke 65536
 // ============================================
 void tftTask(void *pv)
 {
-    uint32_t pageSwitch = millis();
-    uint8_t currentPage = 0;
+    // Daftarkan task ini ke watchdog, lalu reset secara rutin
+    esp_task_wdt_add(NULL);
+
+    uint32_t pageSwitch  = millis();
+    uint8_t  currentPage = 0;
 
     for (;;)
     {
+        // ── FIX: Reset WDT di awal setiap iterasi ─────────────────────
+        esp_task_wdt_reset();
+
         if (millis() - pageSwitch >= PAGE_SWITCH_MS) {
             currentPage = (currentPage + 1) % TFT_MAX_PAGES;
-            pageSwitch = millis();
+            pageSwitch  = millis();
         }
 
         if (xSemaphoreTake(xTftMutex, MUTEX_TIMEOUT) == pdTRUE) {
             framebuffer.fillScreen(ST7735_BLACK);
             framebuffer.setTextColor(ST7735_WHITE);
             framebuffer.setTextSize(1);
-            
             framebuffer.setCursor(2, 2);
-            
+
             bool wifiOk = false, loraOk = false;
 #if ENABLE_WIFI
             if (xSemaphoreTake(xWifiMutex, 10) == pdTRUE) {
@@ -1061,40 +1028,39 @@ void tftTask(void *pv)
                 xSemaphoreGive(xLoraMutex);
             }
 #endif
-            
-            const char* wStr = "-";
-            const char* lStr = "-";
-#if ENABLE_WIFI
-            if (wifiOk) wStr = "OK"; else wStr = "X";
-#endif
-#if ENABLE_LORAWAN
-            if (loraOk) lStr = "OK"; else lStr = "X";
-#endif
-            framebuffer.printf("W:%s L:%s", wStr, lStr);
-            
+            framebuffer.printf("W:%s L:%s",
+                               wifiOk ? "OK" : "X",
+                               loraOk ? "OK" : "X");
+
             for (int i = 0; i < TFT_ROWS_PER_PAGE; i++) {
                 int y = TFT_TOP_MARGIN + (i + 1) * TFT_LINE_HEIGHT;
-                if (y >= 80) break;
+                if (y >= TFT_HEIGHT) break;
                 framebuffer.setCursor(TFT_LEFT_MARGIN, y);
                 framebuffer.print(g_TftPageData[currentPage].rows[i]);
-                yield(); // Prevent watchdog during rendering
             }
             xSemaphoreGive(xTftMutex);
+
+            // ── FIX: Reset WDT sebelum SPI transfer (operasi paling lama) ──
+            esp_task_wdt_reset();
             tft.drawRGBBitmap(0, 0, framebuffer.getBuffer(), TFT_WIDTH, TFT_HEIGHT);
-            yield();
         }
-        vTaskDelay(pdMS_TO_TICKS(200));
+
+        // ── FIX: Reset WDT setelah render selesai ─────────────────────
+        esp_task_wdt_reset();
+
+        // Naikkan dari 200ms ke 300ms agar IDLE task mendapat giliran
+        vTaskDelay(pdMS_TO_TICKS(300));
     }
 }
 
+// ============================================
+// SD CARD TASK (CPU 0)
+// ============================================
 #if ENABLE_SD
-// ============================================
-// SD CARD LOGGING TASK
-// ============================================
 void sdCardTask(void *pv)
 {
     delay(500);
-    
+
     sdInitialized = SD.begin(SD_CS, SPI, 8000000);
     if (!sdInitialized) {
         Serial.println("[SD] Failed");
@@ -1104,18 +1070,15 @@ void sdCardTask(void *pv)
     uint32_t cardSize = SD.cardSize() / (1024 * 1024);
     Serial.printf("[SD] Connected | Size: %luMB\n", cardSize);
 
-    if (SD.exists("/tracker.log")) {
-        SD.remove("/tracker.log");
-    }
+    if (SD.exists("/tracker.log")) SD.remove("/tracker.log");
 
-    File file;
     uint32_t lastWrite = 0;
 
     for (;;)
     {
         uint32_t now = millis();
         if (now - lastWrite >= SD_WRITE_INTERVAL_MS) {
-            file = SD.open("/tracker.log", FILE_APPEND);
+            File file = SD.open("/tracker.log", FILE_APPEND);
             if (file) {
                 char *msg;
                 while (xQueueReceive(xLogQueue, &msg, 0) == pdTRUE) {
@@ -1129,7 +1092,7 @@ void sdCardTask(void *pv)
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
-#endif
+#endif // ENABLE_SD
 
 // ============================================
 // HELPER FUNCTIONS
@@ -1145,7 +1108,8 @@ void logToSd(const char* msg)
 #endif
 }
 
-void ensureSDInit() {
+void ensureSDInit()
+{
     if (!sdInitialized) {
         sdInitialized = SD.begin(SD_CS, SPI, 8000000);
     }
@@ -1157,14 +1121,11 @@ void saveToSDOffline(float lat, float lng, float alt, uint8_t satellites,
 #if ENABLE_SD
     ensureSDInit();
     if (!sdInitialized) return;
-    
     File file = SD.open("/offline_queue.csv", FILE_APPEND);
     if (!file) return;
-    
     char line[200];
     snprintf(line, sizeof(line), "%lu,%.6f,%.6f,%.1f,%u,%u,%d,%.1f,%s",
              millis(), lat, lng, alt, satellites, battery, rssi, snr, irStatus);
-    
     file.println(line);
     file.close();
 #endif
@@ -1174,91 +1135,73 @@ bool uploadFromSD()
 {
 #if ENABLE_WIFI
     ensureSDInit();
-    if (!sdInitialized || !SD.exists("/offline_queue.csv")) {
-        return false;
-    }
-    
+    if (!sdInitialized || !SD.exists("/offline_queue.csv")) return false;
+
     File file = SD.open("/offline_queue.csv", FILE_READ);
     if (!file) return false;
-    
-    int uploadCount = 0;
-    int failCount = 0;
-    String tempFileContent = "";
-    
+
+    int    uploadCount    = 0;
+    int    failCount      = 0;
+    String failedContent  = "";
+
     while (file.available()) {
         String line = file.readStringUntil('\n');
         line.trim();
-        
         if (line.length() < 10) continue;
-        
-        int commas[8];
-        int commaCount = 0;
-        for (int i = 0; i < line.length() && commaCount < 8; i++) {
-            if (line.charAt(i) == ',') {
-                commas[commaCount++] = i;
-            }
+
+        int commas[8], commaCount = 0;
+        for (size_t i = 0; i < line.length() && commaCount < 8; i++) {
+            if (line.charAt(i) == ',') commas[commaCount++] = i;
         }
-        
         if (commaCount < 7) continue;
-        
-        String irStatus = line.substring(commas[7] + 1);
-        float lat = line.substring(commas[0] + 1, commas[1]).toFloat();
-        float lng = line.substring(commas[1] + 1, commas[2]).toFloat();
-        float alt = line.substring(commas[2] + 1, commas[3]).toFloat();
-        uint8_t satellites = line.substring(commas[3] + 1, commas[4]).toInt();
-        uint16_t battery = line.substring(commas[4] + 1, commas[5]).toInt();
-        int16_t rssi = line.substring(commas[5] + 1, commas[6]).toInt();
-        float snr = line.substring(commas[6] + 1, commas[7]).toFloat();
-        
+
+        float   lat        = line.substring(commas[0]+1, commas[1]).toFloat();
+        float   lng        = line.substring(commas[1]+1, commas[2]).toFloat();
+        float   alt        = line.substring(commas[2]+1, commas[3]).toFloat();
+        uint8_t satellites = line.substring(commas[3]+1, commas[4]).toInt();
+        uint16_t battery   = line.substring(commas[4]+1, commas[5]).toInt();
+        int16_t rssi       = line.substring(commas[5]+1, commas[6]).toInt();
+        float   snr        = line.substring(commas[6]+1, commas[7]).toFloat();
+        String  irStatus   = line.substring(commas[7]+1);
+
         HTTPClient http;
         http.begin(WIFI_API_URL);
         http.addHeader("Content-Type", "application/json");
-        
+        http.setTimeout(8000);
+
         String payload = "{\"source\":\"wifi\","
-                        "\"id\":\"" + String(DEVICE_ID) + "\","
-                        "\"lat\":" + String(lat, 6) + ","
-                        "\"lng\":" + String(lng, 6) + ","
-                        "\"alt\":" + String(alt, 1) + ","
-                        "\"irStatus\":\"" + irStatus + "\","
-                        "\"battery\":" + String(battery) + ","
-                        "\"satellites\":" + String(satellites) + ","
-                        "\"rssi\":" + String(rssi) + ","
-                        "\"snr\":" + String(snr, 1) + "}";
-        
+                         "\"id\":\""        + String(DEVICE_ID) + "\","
+                         "\"lat\":"         + String(lat, 6)    + ","
+                         "\"lng\":"         + String(lng, 6)    + ","
+                         "\"alt\":"         + String(alt, 1)    + ","
+                         "\"irStatus\":\""  + irStatus          + "\","
+                         "\"battery\":"     + String(battery)   + ","
+                         "\"satellites\":"  + String(satellites) + ","
+                         "\"rssi\":"        + String(rssi)      + ","
+                         "\"snr\":"         + String(snr, 1)    + "}";
+
         int httpCode = http.POST(payload);
         http.end();
-        
+
         if (httpCode == 200 || httpCode == 201) {
             uploadCount++;
         } else {
             failCount++;
-            tempFileContent += line + "\n";
+            failedContent += line + "\n";
         }
-        
-        delay(100);
-        yield();
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
-    
     file.close();
-    
-    if (uploadCount > 0 || failCount > 0) {
-        Serial.printf("[WiFi] Upload: %d success, %d failed\n", uploadCount, failCount);
-    }
-    
-    if (uploadCount > 0) {
-        File tempFile = SD.open("/offline_queue.csv", FILE_WRITE);
-        if (tempFile) {
-            tempFile.print(tempFileContent);
-            tempFile.close();
-            SD.remove("/offline_queue.csv");
-            File renameFile = SD.open("/offline_queue.csv", FILE_WRITE);
-            renameFile.print(tempFileContent);
-            renameFile.close();
-        }
-    } else if (tempFileContent.length() == 0) {
+
+    if (uploadCount > 0 || failCount > 0)
+        Serial.printf("[WiFi] SD Upload: %d success, %d failed\n", uploadCount, failCount);
+
+    if (failedContent.length() == 0) {
         SD.remove("/offline_queue.csv");
+    } else {
+        File f = SD.open("/offline_queue.csv", FILE_WRITE);
+        if (f) { f.print(failedContent); f.close(); }
     }
-    
     return uploadCount > 0;
 #else
     return false;
@@ -1272,9 +1215,8 @@ const char* formatLogLine()
         int8_t logHour = g_gpsData.hour + TIMEZONE_OFFSET_HOURS;
         if (logHour >= 24) logHour -= 24;
         else if (logHour < 0) logHour += 24;
-
         snprintf(timeBuf, sizeof(timeBuf), "%02d:%02d:%02d",
-                 g_gpsData.valid ? logHour : 0,
+                 g_gpsData.valid ? logHour          : 0,
                  g_gpsData.valid ? g_gpsData.minute : 0,
                  g_gpsData.valid ? g_gpsData.second : 0);
         xSemaphoreGive(xGpsMutex);
@@ -1283,12 +1225,12 @@ const char* formatLogLine()
     }
 
     static char event[32] = "IDLE";
-    float snr = 0.0f;
+    float   snr  = 0.0f;
     int16_t rssi = 0;
     if (xSemaphoreTake(xLoraMutex, MUTEX_TIMEOUT) == pdTRUE) {
-        strncpy(event, g_loraStatus.lastEvent.c_str(), sizeof(event) - 1);
-        event[sizeof(event) - 1] = '\0';
-        snr = g_loraStatus.snr;
+        strncpy(event, g_loraStatus.lastEvent.c_str(), sizeof(event)-1);
+        event[sizeof(event)-1] = '\0';
+        snr  = g_loraStatus.snr;
         rssi = g_loraStatus.rssi;
         xSemaphoreGive(xLoraMutex);
     }
@@ -1304,26 +1246,26 @@ const char* formatLogLine()
     }
 
     static char logLine[150];
-    snprintf(logLine, sizeof(logLine),
-             "%s,%s,%.1f,%d,%s,%s,%s",
+    snprintf(logLine, sizeof(logLine), "%s,%s,%.1f,%d,%s,%s,%s",
              timeBuf, event, snr, rssi, latBuf, lonBuf, altBuf);
     return logLine;
 }
 
-String stateDecode(const int16_t result) {
+String stateDecode(const int16_t result)
+{
     switch (result) {
-        case RADIOLIB_ERR_NONE: return "ERR_NONE";
-        case RADIOLIB_ERR_CHIP_NOT_FOUND: return "ERR_CHIP_NOT_FOUND";
-        case RADIOLIB_ERR_PACKET_TOO_LONG: return "ERR_PACKET_TOO_LONG";
-        case RADIOLIB_ERR_RX_TIMEOUT: return "ERR_RX_TIMEOUT";
-        case RADIOLIB_ERR_MIC_MISMATCH: return "ERR_MIC_MISMATCH";
+        case RADIOLIB_ERR_NONE:              return "ERR_NONE";
+        case RADIOLIB_ERR_CHIP_NOT_FOUND:    return "ERR_CHIP_NOT_FOUND";
+        case RADIOLIB_ERR_PACKET_TOO_LONG:   return "ERR_PACKET_TOO_LONG";
+        case RADIOLIB_ERR_RX_TIMEOUT:        return "ERR_RX_TIMEOUT";
+        case RADIOLIB_ERR_MIC_MISMATCH:      return "ERR_MIC_MISMATCH";
         case RADIOLIB_ERR_INVALID_FREQUENCY: return "ERR_INVALID_FREQUENCY";
-        case RADIOLIB_ERR_NETWORK_NOT_JOINED: return "ERR_NETWORK_NOT_JOINED";
-        case RADIOLIB_ERR_DOWNLINK_MALFORMED: return "ERR_DOWNLINK_MALFORMED";
-        case RADIOLIB_ERR_NO_RX_WINDOW: return "ERR_NO_RX_WINDOW";
-        case RADIOLIB_ERR_UPLINK_UNAVAILABLE: return "ERR_UPLINK_UNAVAILABLE";
-        case RADIOLIB_ERR_NO_JOIN_ACCEPT: return "ERR_NO_JOIN_ACCEPT";
-        case RADIOLIB_LORAWAN_NEW_SESSION: return "LORAWAN_NEW_SESSION";
+        case RADIOLIB_ERR_NETWORK_NOT_JOINED:return "ERR_NETWORK_NOT_JOINED";
+        case RADIOLIB_ERR_DOWNLINK_MALFORMED:return "ERR_DOWNLINK_MALFORMED";
+        case RADIOLIB_ERR_NO_RX_WINDOW:      return "ERR_NO_RX_WINDOW";
+        case RADIOLIB_ERR_UPLINK_UNAVAILABLE:return "ERR_UPLINK_UNAVAILABLE";
+        case RADIOLIB_ERR_NO_JOIN_ACCEPT:    return "ERR_NO_JOIN_ACCEPT";
+        case RADIOLIB_LORAWAN_NEW_SESSION:   return "LORAWAN_NEW_SESSION";
         case RADIOLIB_LORAWAN_SESSION_RESTORED: return "LORAWAN_SESSION_RESTORED";
         default: return "Unknown (" + String(result) + ")";
     }
