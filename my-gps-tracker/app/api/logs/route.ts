@@ -26,6 +26,12 @@ export async function GET() {
     `
     
     console.log('[API] Logs found:', (logs as any[]).length)
+    
+    // Debug: print first few logs
+    if ((logs as any[]).length > 0) {
+      console.log('[API] First log:', JSON.stringify((logs as any[])[0]))
+    }
+    
     return NextResponse.json(logs)
   } catch (error: any) {
     console.error('[API] Error fetching logs:', error)
@@ -43,6 +49,7 @@ export async function GET() {
         orderBy: { createdAt: 'desc' },
         take: 100
       })
+      console.log('[API] Fallback logs found:', fallback.length)
       return NextResponse.json(fallback)
     } catch (fallbackError: any) {
       return NextResponse.json({ error: error.message || 'Unknown error' }, { status: 500 })

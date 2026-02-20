@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma'
 export async function POST(request: Request) {
   try {
     const body = await request.json()
+    console.log('[API] Received GPS data:', JSON.stringify(body))
+    
     const {
       source,
       id,
@@ -17,9 +19,10 @@ export async function POST(request: Request) {
       snr
     } = body
 
-    console.log('[API] Received GPS data:', body)
+    console.log('[API] Parsed values - id:', id, 'lat:', lat, 'lng:', lng, 'alt:', alt)
 
     if (!id || lat === undefined || lng === undefined) {
+      console.log('[API] Missing required fields - id:', id, 'lat:', lat, 'lng:', lng)
       return NextResponse.json({ error: 'Missing required fields (id, lat, lng)' }, { status: 400 })
     }
 
@@ -39,6 +42,7 @@ export async function POST(request: Request) {
     }
 
     try {
+      console.log('[API] Creating log with data:', { source, deviceId: id, lat, lng, alt })
       const log = await prisma.gpsLog.create({
         data: {
           source: source || 'wifi',
@@ -54,10 +58,10 @@ export async function POST(request: Request) {
           rawPayload: body
         }
       })
-      console.log('[API] Track log created:', log.id)
+      console.log('[API] Track log created successfully, id:', log.id)
       return NextResponse.json(log)
     } catch (dbError: any) {
-      console.log('[API] New schema not found, using old schema')
+      console.log('[API] New schema not found, using old schema, error:', dbError.message)
       const log = await prisma.gpsLog.create({
         data: {
           deviceId: id,
