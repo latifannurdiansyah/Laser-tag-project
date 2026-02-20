@@ -388,9 +388,9 @@ void setup()
 
     xTaskCreatePinnedToCore(gpsTask, "GPS", 16384, NULL, 2, &xGpsTaskHandle, 1);
     xTaskCreatePinnedToCore(loraTask, "LoRa", 16384, NULL, 2, &xLoraTaskHandle, 1);
-    xTaskCreatePinnedToCore(tftTask, "TFT", 16384, NULL, 1, &xTftTaskHandle, 0);
+    xTaskCreatePinnedToCore(tftTask, "TFT", 32768, NULL, 1, &xTftTaskHandle, 0);
     xTaskCreatePinnedToCore(sdCardTask, "SD", 16384, NULL, 1, &xSdTaskHandle, 0);
-    xTaskCreatePinnedToCore(wifiTask, "WiFi", 16384, NULL, 1, &xWifiTaskHandle, 0);
+    xTaskCreatePinnedToCore(wifiTask, "WiFi", 32768, NULL, 1, &xWifiTaskHandle, 0);
     xTaskCreatePinnedToCore(irTask, "IR", 4096, NULL, 1, &xIrTaskHandle, 0);
     
 #if ENABLE_GPRS
@@ -1068,12 +1068,13 @@ void tftTask(void *pv)
                 if (y >= 80) break;
                 framebuffer.setCursor(TFT_LEFT_MARGIN, y);
                 framebuffer.print(g_TftPageData[currentPage].rows[i]);
+                yield(); // Prevent watchdog during rendering
             }
             xSemaphoreGive(xTftMutex);
             tft.drawRGBBitmap(0, 0, framebuffer.getBuffer(), TFT_WIDTH, TFT_HEIGHT);
             yield();
         }
-        vTaskDelay(pdMS_TO_TICKS(50));
+        vTaskDelay(pdMS_TO_TICKS(200));
     }
 }
 
