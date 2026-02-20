@@ -664,6 +664,8 @@ void wifiTask(void *pv)
     
     for (;;)
     {
+        yield();
+        
         if (WiFi.status() != WL_CONNECTED) {
             if (xSemaphoreTake(xWifiMutex, MUTEX_TIMEOUT) == pdTRUE) {
                 g_wifiStatus.connected = false;
@@ -759,6 +761,7 @@ void sendToWiFiAPI(float lat, float lng)
 
     int httpCode = http.POST(payload);
     http.end();
+    yield();
     
     Serial.printf("[WiFi] Upload: %s | Code: %d\n", 
                   (httpCode == 200 || httpCode == 201) ? "SUCCESS" : "FAILED", httpCode);
@@ -1223,6 +1226,7 @@ bool uploadFromSD()
         }
         
         delay(100);
+        yield();
     }
     
     file.close();
