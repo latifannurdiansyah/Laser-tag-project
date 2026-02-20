@@ -11,7 +11,7 @@
 #define ENABLE_WIFI    1   // Kirim via WiFi HTTP
 #define ENABLE_GPRS    0   // Kirim via GPRS (SIM900A)
 #define ENABLE_LORAWAN 0   // Kirim via LoRaWAN (TTN)
-#define ENABLE_SD      1   // Simpan ke SD Card
+#define ENABLE_SD      0   // Simpan ke SD Card (Disabled for testing)
 
 // ============================================
 // LIBRARY INCLUDES - Harus di atas semua type definitions
@@ -393,8 +393,12 @@ void setup()
 #endif
 
     xTaskCreatePinnedToCore(tftTask, "TFT", 32768, NULL, 1, &xTftTaskHandle, 0);
+    
+#if ENABLE_SD
     xTaskCreatePinnedToCore(sdCardTask, "SD", 16384, NULL, 1, &xSdTaskHandle, 0);
-    xTaskCreatePinnedToCore(wifiTask, "WiFi", 32768, NULL, 1, &xWifiTaskHandle, 0);
+#endif
+    
+    xTaskCreatePinnedToCore(wifiTask, "WiFi", 65536, NULL, 1, &xWifiTaskHandle, 0);
     xTaskCreatePinnedToCore(irTask, "IR", 4096, NULL, 1, &xIrTaskHandle, 0);
     
 #if ENABLE_GPRS
@@ -685,7 +689,7 @@ void wifiTask(void *pv)
                 if (!g_wifiStatus.connected) {
                     g_wifiStatus.connected = true;
                     Serial.printf("[WiFi] Connected | IP: %s\n", WiFi.localIP().toString().c_str());
-                    uploadFromSD();
+                    // uploadFromSD(); // Disabled for testing
                 }
                 xSemaphoreGive(xWifiMutex);
             }
@@ -701,10 +705,11 @@ void wifiTask(void *pv)
             lastAPIUpload = millis();
         }
 
-        if (g_wifiStatus.connected && millis() - lastSDCheck >= 30000) {
-            uploadFromSD();
-            lastSDCheck = millis();
-        }
+        // SD upload disabled for testing
+        // if (g_wifiStatus.connected && millis() - lastSDCheck >= 30000) {
+        //     uploadFromSD();
+        //     lastSDCheck = millis();
+        // }
 
         yield();
         vTaskDelay(pdMS_TO_TICKS(1000));
@@ -770,7 +775,7 @@ void sendToWiFiAPI(float lat, float lng)
     Serial.printf("[WiFi] Upload: %s | Code: %d\n", 
                   (httpCode == 200 || httpCode == 201) ? "SUCCESS" : "FAILED", httpCode);
 
-    saveToSDOffline(lat, lng, alt, satellites, 0, rssi, snr, irStatus);
+    // saveToSDOffline(lat, lng, alt, satellites, 0, rssi, snr, irStatus); // Disabled for testing
 }
 #endif
 
@@ -958,7 +963,7 @@ void sendToGPRS(float lat, float lng)
     logToSd(("[ThingSpeak] " + event + " | " + responseLine).c_str());
     Serial.printf("[ThingSpeak] Upload: %s | Resp: %s\n", event.c_str(), responseLine.c_str());
 
-    saveToSDOffline(lat, lng, alt, satellites, 0, rssi, snr, irStatus);
+    // saveToSDOffline(lat, lng, alt, satellites, 0, rssi, snr, irStatus); // Disabled for testing
 }
 #endif
 
