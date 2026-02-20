@@ -414,8 +414,12 @@ void gpsTask(void *pv)
 {
     for (;;)
     {
-        while (Serial1.available() > 0) {
-            GPS.encode(Serial1.read());
+        // Process GPS data
+        int available = Serial1.available();
+        if (available > 0) {
+            for (int i = 0; i < available; i++) {
+                GPS.encode(Serial1.read());
+            }
         }
 
         bool hasTime = GPS.time.isValid();
@@ -425,12 +429,22 @@ void gpsTask(void *pv)
         {
             g_gpsData.valid      = hasTime || hasLoc;
             g_gpsData.satellites = GPS.satellites.value();
+            
+            // Debug: print GPS status
+            static uint32_t lastDebug = 0;
+            if (millis() - lastDebug >= 5000) {
+                lastDebug = millis();
+                Serial.printf("[GPS] hasLoc=%d lat=%.6f lng=%.6f sat=%d\n", 
+                    hasLoc, GPS.location.lat(), GPS.location.lng(), GPS.satellites.value());
+            }
+            
             if (hasLoc) {
                 g_gpsData.lat = GPS.location.lat();
                 g_gpsData.lng = GPS.location.lng();
                 g_gpsData.alt = GPS.altitude.meters();
             } else {
-                g_gpsData.lat = g_gpsData.lng = g_gpsData.alt = 0.0f;
+                // JANGAN set ke 0 jika sudah ada data valid sebelumnya
+                // g_gpsData.lat = g_gpsData.lng = g_gpsData.alt = 0.0f;
             }
             if (hasTime) {
                 g_gpsData.hour   = GPS.time.hour();
@@ -684,23 +698,29 @@ void wifiTask(void *pv)
             }
         }
 
-        // Kirim data ke API setiap 10 detik (bahkan jika GPS belum valid sempurna)
+        // Kirim data ke API setiap 10 detik - SELALU upload meskipun GPS 0 (untuk debug)
         if (g_wifiStatus.connected && millis() - lastAPIUpload >= 10000) {
             float lat = 0.0f, lng = 0.0f;
+            float alt = 0.0f;
+            uint8_t satellites = 0;
             bool hasCoords = false;
+            
             if (xSemaphoreTake(xGpsMutex, MUTEX_TIMEOUT) == pdTRUE) {
-                // Cek jika ada koordinat (bukan 0)
-                hasCoords = (g_gpsData.lat != 0.0f && g_gpsData.lng != 0.0f);
+                // Selalu ambil data GPS
                 lat = g_gpsData.lat;
                 lng = g_gpsData.lng;
+                alt = g_gpsData.alt;
+                satellites = g_gpsData.satellites;
+                // Cek jika ada koordinat valid (bukan 0)
+                hasCoords = (lat != 0.0f && lng != 0.0f);
                 xSemaphoreGive(xGpsMutex);
             }
             
-            Serial.printf("[WiFi] GPS: lat=%.6f lng=%.6f hasCoords=%d\n", lat, lng, hasCoords);
+            Serial.printf("[WiFi] GPS: lat=%.6f lng=%.6f sat=%d hasCoords=%d\n", lat, lng, satellites, hasCoords);
             
-            if (hasCoords) {
-                sendToWiFiAPI(lat, lng);
-            }
+            // SELALU upload - untuk debug
+            sendToWiFiAPI(lat, lng);
+            
             lastAPIUpload = millis();
         }
 
