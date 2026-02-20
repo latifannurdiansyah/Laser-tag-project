@@ -119,10 +119,10 @@ const uint8_t nwkKey[] = {
 // TIMING CONSTANTS
 // ============================================
 const int8_t TIMEZONE_OFFSET_HOURS = 7;
-const uint32_t UPLINK_INTERVAL_MS = 1000;
+const uint32_t UPLINK_INTERVAL_MS = 10000;
 const uint32_t GPRS_INTERVAL_MS = 5000;
-const uint8_t  MAX_JOIN_ATTEMPTS = 10;
-const uint32_t JOIN_RETRY_DELAY_MS = 1000;
+const uint8_t  MAX_JOIN_ATTEMPTS = 5;
+const uint32_t JOIN_RETRY_DELAY_MS = 2000;
 const uint32_t SD_WRITE_INTERVAL_MS = 2000;
 const size_t   LOG_QUEUE_SIZE = 20;
 const TickType_t MUTEX_TIMEOUT = pdMS_TO_TICKS(100);
@@ -473,6 +473,8 @@ void gpsTask(void *pv)
 void loraTask(void *pv)
 {
     SPI.begin(RADIO_SCLK_PIN, RADIO_MISO_PIN, RADIO_MOSI_PIN, RADIO_CS_PIN);
+    delay(100); // Wait for other tasks to initialize
+    
     int16_t state = radio.begin();
     if (state != RADIOLIB_ERR_NONE) {
         char err[64];
@@ -500,6 +502,8 @@ void loraTask(void *pv)
         logToSd(joinMsg);
 
         state = node.activateOTAA();
+        yield(); // Prevent watchdog timeout during OTAA
+        
         if (state == RADIOLIB_LORAWAN_NEW_SESSION) {
             Serial.println("[LoRa] Join: SUCCESS");
             logToSd("Join successful!");
@@ -512,6 +516,7 @@ void loraTask(void *pv)
         } else {
             Serial.printf("[LoRa] Join: FAILED (%s)\n", stateDecode(state).c_str());
             delay(JOIN_RETRY_DELAY_MS);
+            yield(); // Prevent watchdog timeout
         }
     }
 
