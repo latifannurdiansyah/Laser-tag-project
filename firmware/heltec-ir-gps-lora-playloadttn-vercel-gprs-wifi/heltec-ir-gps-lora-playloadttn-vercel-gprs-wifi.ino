@@ -10,7 +10,7 @@
 // Gunakan 1 = ENABLE, 0 = DISABLE
 #define ENABLE_WIFI    1   // Kirim via WiFi HTTP
 #define ENABLE_GPRS    0   // Kirim via GPRS (SIM900A)
-#define ENABLE_LORAWAN 1   // Kirim via LoRaWAN (TTN)
+#define ENABLE_LORAWAN 0   // Kirim via LoRaWAN (TTN)
 #define ENABLE_SD      1   // Simpan ke SD Card
 
 // ============================================
@@ -387,7 +387,11 @@ void setup()
     }
 
     xTaskCreatePinnedToCore(gpsTask, "GPS", 16384, NULL, 2, &xGpsTaskHandle, 1);
+    
+#if ENABLE_LORAWAN
     xTaskCreatePinnedToCore(loraTask, "LoRa", 16384, NULL, 2, &xLoraTaskHandle, 1);
+#endif
+
     xTaskCreatePinnedToCore(tftTask, "TFT", 32768, NULL, 1, &xTftTaskHandle, 0);
     xTaskCreatePinnedToCore(sdCardTask, "SD", 16384, NULL, 1, &xSdTaskHandle, 0);
     xTaskCreatePinnedToCore(wifiTask, "WiFi", 32768, NULL, 1, &xWifiTaskHandle, 0);
