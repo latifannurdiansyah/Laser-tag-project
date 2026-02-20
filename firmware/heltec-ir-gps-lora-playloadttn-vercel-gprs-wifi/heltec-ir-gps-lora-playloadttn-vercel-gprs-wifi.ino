@@ -44,7 +44,7 @@
 // Contoh: "https://your-app.vercel.app/api/track"
 #define WIFI_SSID       "UserAndroid"
 #define WIFI_PASSWORD   "55555550"
-#define WIFI_API_URL    "https://mygps-tracker.vercel.app/api/track"
+#define WIFI_API_URL    "https://laser-tag-project.vercel.app/api/track"
 
 // ============================================
 // KONFIGURASI GPRS (Indosat)
