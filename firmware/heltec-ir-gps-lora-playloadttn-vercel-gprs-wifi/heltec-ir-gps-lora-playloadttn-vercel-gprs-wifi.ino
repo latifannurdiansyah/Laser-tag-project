@@ -684,17 +684,21 @@ void wifiTask(void *pv)
             }
         }
 
-        // Kirim data ke API setiap 10 detik
+        // Kirim data ke API setiap 10 detik (bahkan jika GPS belum valid sempurna)
         if (g_wifiStatus.connected && millis() - lastAPIUpload >= 10000) {
             float lat = 0.0f, lng = 0.0f;
-            bool valid = false;
+            bool hasCoords = false;
             if (xSemaphoreTake(xGpsMutex, MUTEX_TIMEOUT) == pdTRUE) {
-                valid = g_gpsData.valid && GPS.location.isValid();
-                lat   = g_gpsData.lat;
-                lng   = g_gpsData.lng;
+                // Cek jika ada koordinat (bukan 0)
+                hasCoords = (g_gpsData.lat != 0.0f && g_gpsData.lng != 0.0f);
+                lat = g_gpsData.lat;
+                lng = g_gpsData.lng;
                 xSemaphoreGive(xGpsMutex);
             }
-            if (valid) {
+            
+            Serial.printf("[WiFi] GPS: lat=%.6f lng=%.6f hasCoords=%d\n", lat, lng, hasCoords);
+            
+            if (hasCoords) {
                 sendToWiFiAPI(lat, lng);
             }
             lastAPIUpload = millis();
@@ -760,9 +764,8 @@ void sendToWiFiAPI(float lat, float lng)
 
     int httpCode = http.POST(payload);
     http.end();
-
-    Serial.printf("[WiFi] Upload: %s | Code: %d\n",
-                  (httpCode == 200 || httpCode == 201) ? "SUCCESS" : "FAILED", httpCode);
+    Serial.printf("[WiFi] Upload: %s | Code: %d | lat:%.6f lng:%.6f\n",
+                  (httpCode == 200 || httpCode == 201) ? "SUCCESS" : "FAILED", httpCode, lat, lng);
 }
 #endif // ENABLE_WIFI
 
@@ -772,11 +775,14 @@ void sendToWiFiAPI(float lat, float lng)
 #if ENABLE_GPRS
 void gprsTask(void *pv)
 {
+    // Beri waktu untuk task lain init dulu
+    vTaskDelay(pdMS_TO_TICKS(500));
+    
     Serial.println("[GPRS] Task started");
     Serial.flush();
     Serial.println("[GPRS] Initializing modem...");
     Serial.flush();
-    vTaskDelay(pdMS_TO_TICKS(100));
+    vTaskDelay(pdMS_TO_TICKS(500));
 
     if (!modem.begin()) {
         Serial.println("[GPRS] Init failed");
