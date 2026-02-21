@@ -41,14 +41,30 @@
 // ============================================
 #define WIFI_SSID          "UserAndroid"
 #define WIFI_PASSWORD      "55555550"
-#define WIFI_API_URL       "https://laser-tag-project.vercel.app/api/track"
+
+// PILIH API: true = Local MySQL, false = Vercel
+#define USE_LOCAL_MYSQL    true
+
+#if USE_LOCAL_MYSQL
+  // Ganti IP_ADDRESS dengan IP komputer Anda
+  // Cara cek: CMD → ipconfig → IPv4 Address
+  #define WIFI_API_URL     "http://192.168.11.73/lasertag/api/track.php"
+#else
+  #define WIFI_API_URL     "https://laser-tag-project.vercel.app/api/track"
+#endif
+
+// GPRS kirim ke hosting online (bukan lokal - GPRS tidak bisa akses IP privat)
+// Format: http://domain:port/folder/api/track.php
+#define GPRS_API_URL      "http://simpera.teknoklop.com:10000/lasertag/api/track.php"
 
 #define GPRS_APN           "indosatgprs"
 #define GPRS_USER          "indosat"
 #define GPRS_PASS          "indosat"
-#define THINGSPEAK_URL     "api.thingspeak.com"
-#define THINGSPEAK_PORT    80
-#define THINGSPEAK_API_KEY "N6ATMD4JVI90HTHH"
+
+// ThingSpeak (COMMENTED - backup only)
+// #define THINGSPEAK_URL     "api.thingspeak.com"
+// #define THINGSPEAK_PORT    80
+// #define THINGSPEAK_API_KEY "N6ATMD4JVI90HTHH"
 
 #define DEVICE_ID          "Heltec-P1"
 #define IR_RECEIVE_PIN     5
@@ -498,8 +514,14 @@ void wifiPost(float lat, float lng)
 {
     char irBuf[32]="-"; float alt=0; uint8_t sat=0; int16_t rssi=0; float snr=0;
     uint16_t ia=0; uint8_t ic=0;
+    const char* hitStatus = "NONE";
     if(xSemaphoreTake(mIr,MTX)==pdTRUE){
-        if(g_ir.got){ snprintf(irBuf,32,"HIT:0x%X-0x%X",g_ir.addr,g_ir.cmd); ia=g_ir.addr; ic=g_ir.cmd; }
+        if(g_ir.got){ 
+            snprintf(irBuf,32,"HIT:0x%X-0x%X",g_ir.addr,g_ir.cmd); 
+            ia=g_ir.addr; 
+            ic=g_ir.cmd;
+            hitStatus = "HIT";
+        }
         xSemaphoreGive(mIr);
     }
     if(xSemaphoreTake(mGps,MTX)==pdTRUE){ alt=g_gps.alt; sat=g_gps.sat; xSemaphoreGive(mGps); }
@@ -507,10 +529,10 @@ void wifiPost(float lat, float lng)
 
     char pl[400];
     snprintf(pl, sizeof(pl),
-        "{\"source\":\"wifi\",\"id\":\"%s\",\"lat\":%.6f,\"lng\":%.6f,\"alt\":%.1f,"
-        "\"irStatus\":\"%s\",\"address\":%u,\"command\":%u,"
-        "\"battery\":0,\"satellites\":%u,\"rssi\":%d,\"snr\":%.1f}",
-        DEVICE_ID, lat, lng, alt, irBuf, ia, ic, sat, rssi, snr);
+        "{\"deviceId\":\"%s\",\"lat\":%.6f,\"lng\":%.6f,\"alt\":%.1f,"
+        "\"sats\":%u,\"rssi\":%d,\"snr\":%.1f,\"battery\":0,"
+        "\"irAddress\":%u,\"irCommand\":%u,\"hitStatus\":\"%s\"}",
+        DEVICE_ID, lat, lng, alt, sat, rssi, snr, ia, ic, hitStatus);
 
     int code=0; bool ok=false;
     for(int i=1; i<=3 && !ok; i++){
@@ -581,19 +603,48 @@ void taskGprs(void *pv)
 void gprsPost(float lat, float lng)
 {
     char irBuf[32]="-"; float alt=0; uint8_t sat=0; int16_t rssi=0; float snr=0;
-    if(xSemaphoreTake(mIr,MTX)==pdTRUE){ if(g_ir.got) snprintf(irBuf,32,"HIT:0x%X-0x%X",g_ir.addr,g_ir.cmd); xSemaphoreGive(mIr); }
+    uint16_t ia=0; uint8_t ic=0;
+    const char* hitStatus = "NONE";
+    if(xSemaphoreTake(mIr,MTX)==pdTRUE){ 
+        if(g_ir.got){ 
+            snprintf(irBuf,32,"HIT:0x%X-0x%X",g_ir.addr,g_ir.cmd); 
+            ia=g_ir.addr; 
+            ic=g_ir.cmd;
+            hitStatus = "HIT";
+        }
+        xSemaphoreGive(mIr); 
+    }
     if(xSemaphoreTake(mGps,MTX)==pdTRUE){ alt=g_gps.alt; sat=g_gps.sat; xSemaphoreGive(mGps); }
     if(xSemaphoreTake(mLora,MTX)==pdTRUE){ rssi=g_lora.rssi; snr=g_lora.snr; xSemaphoreGive(mLora); }
-    String url = String("/update?api_key=") + THINGSPEAK_API_KEY
-        + "&field1="+String(lat,6) + "&field2="+String(lng,6)
-        + "&field3="+String(alt,1) + "&field4="+String(sat)
-        + "&field5="+String(irBuf) + "&field6="+String(rssi) + "&field7="+String(snr,1);
-    if(gsmClient.connect(THINGSPEAK_URL, THINGSPEAK_PORT)){
-        gsmClient.printf("GET %s HTTP/1.1\r\nHost: %s\r\nConnection: close\r\n\r\n", url.c_str(), THINGSPEAK_URL);
+
+    char pl[400];
+    snprintf(pl, sizeof(pl),
+        "{\"deviceId\":\"%s\",\"lat\":%.6f,\"lng\":%.6f,\"alt\":%.1f,"
+        "\"sats\":%u,\"rssi\":%d,\"snr\":%.1f,"
+        "\"irAddress\":%u,\"irCommand\":%u,\"hitStatus\":\"%s\"}",
+        DEVICE_ID, lat, lng, alt, sat, rssi, snr, ia, ic, hitStatus);
+
+    // Kirim ke Hosting via GPRS (HTTP port 10000)
+    const char* host = "simpera.teknoklop.com";
+    const char* path = "/lasertag/api/track.php";
+    int port = 10000;
+    
+    if(gsmClient.connect(host, port)){
+        gsmClient.printf("POST %s HTTP/1.1\r\n", path);
+        gsmClient.printf("Host: %s:%d\r\n", host, port);
+        gsmClient.printf("Content-Type: application/json\r\n");
+        gsmClient.printf("Content-Length: %d\r\n", strlen(pl));
+        gsmClient.printf("Connection: close\r\n");
+        gsmClient.printf("\r\n");
+        gsmClient.print(pl);
+        
         unsigned long t=millis();
-        while(!gsmClient.available() && millis()-t<10000) vTaskDelay(pdMS_TO_TICKS(10));
+        while(!gsmClient.available() && millis()-t<15000) vTaskDelay(pdMS_TO_TICKS(10));
         while(gsmClient.available()){ gsmClient.read(); vTaskDelay(1); }
         gsmClient.stop();
+        Serial.println("[GPRS] Data sent to Hosting");
+    } else {
+        Serial.println("[GPRS] Failed to connect");
     }
 }
 #endif

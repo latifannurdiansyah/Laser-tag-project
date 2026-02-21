@@ -85,7 +85,7 @@ void sendToAPIDualMode(float lat, float lng, int alt, int sats) {
   }
 
   HTTPClient http;
-  http.begin(API_URL);
+  http.begin(API_URL_MARIADB);
   http.addHeader("Content-Type", "application/json");
 
   String payload = String("{") +
@@ -99,9 +99,10 @@ void sendToAPIDualMode(float lat, float lng, int alt, int sats) {
   int httpResponseCode = http.POST(payload);
   if (httpResponseCode > 0) {
     String response = http.getString();
-    Serial.println("[API] Success! Response: " + String(httpResponseCode));
+    Serial.println("[API-MariaDB] Response: " + String(httpResponseCode));
+    Serial.println("[API-MariaDB] Body: " + response);
   } else {
-    Serial.println("[API] Error: " + String(httpResponseCode));
+    Serial.println("[API-MariaDB] Error: " + String(httpResponseCode));
   }
   http.end();
 }
