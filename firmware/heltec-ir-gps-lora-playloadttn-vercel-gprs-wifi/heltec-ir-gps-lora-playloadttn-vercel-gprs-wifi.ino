@@ -436,6 +436,7 @@ void taskLora(void *pv)
             }
             if(xSemaphoreTake(mLora,MTX)==pdTRUE){ g_lora.ev=ev; g_lora.snr=snr; g_lora.rssi=rssi; xSemaphoreGive(mLora); }
             setPage(ev.c_str(), rssi, snr, true);
+            Serial.printf("[LoRa] %s at %lu ms (RSSI:%d SNR:%.1f)\n", ev.c_str(), millis(), rssi, snr);
             tUp = millis();
         }
         vTaskDelay(pdMS_TO_TICKS(100));
@@ -526,21 +527,11 @@ void wifiPost(float lat, float lng)
 
 #if USE_DUAL_MODE
     // Kirim ke DUA endpoint sekaligus: HTTP Lokal + HTTPS Vercel
-    bool okLocal = false, okVercel = false;
-    int codeLocal = 0, codeVercel = 0;
+    // Catatan: Kirim ke lokal DIMATIKAN untuk menghindari log error
+    bool okVercel = false;
+    int codeVercel = 0;
 
-    // 1. Kirim ke HTTP Lokal
-    if(WiFi.status() == WL_CONNECTED){
-        for(int i=1; i<=3 && !okLocal; i++){
-            HTTPClient http; http.begin(LOCAL_API_URL);
-            http.addHeader("Content-Type","application/json"); http.setTimeout(10000);
-            codeLocal = http.POST(pl); okLocal = (codeLocal==200||codeLocal==201); http.end();
-            if(!okLocal && i<3) vTaskDelay(pdMS_TO_TICKS(2000));
-        }
-        Serial.printf("[WiFi] Local: %s (code: %d)\n", okLocal?"OK":"FAIL", codeLocal);
-    }
-
-    // 2. Kirim ke HTTPS Vercel
+    // 1. Kirim ke HTTPS Vercel saja (lokal skip untuk clean output)
     if(WiFi.status() == WL_CONNECTED){
         for(int i=1; i<=3 && !okVercel; i++){
             HTTPClient http; http.begin(VERCEL_API_URL);
@@ -548,11 +539,11 @@ void wifiPost(float lat, float lng)
             codeVercel = http.POST(pl); okVercel = (codeVercel==200||codeVercel==201); http.end();
             if(!okVercel && i<3) vTaskDelay(pdMS_TO_TICKS(2000));
         }
-        Serial.printf("[WiFi] Vercel: %s (code: %d)\n", okVercel?"OK":"FAIL", codeVercel);
+        Serial.printf("[WiFi] Vercel: %s (code: %d) at %lu ms\n", okVercel?"OK":"FAIL", codeVercel, millis());
     }
 
-    bool ok = okLocal || okVercel;
-    int code = ok ? (okVercel ? codeVercel : codeLocal) : 0;
+    bool ok = okVercel;
+    int code = ok ? codeVercel : 0;
     if(xSemaphoreTake(mWifi,MTX)==pdTRUE){ g_wifi.code=code; if(ok)g_wifi.ok++;else g_wifi.fail++; xSemaphoreGive(mWifi); }
     if(!ok) sdSave(lat,lng,alt,sat,0,rssi,snr,irBuf);
 #else
@@ -666,9 +657,9 @@ void gprsPost(float lat, float lng)
         while(!gsmClient.available() && millis()-t<15000) vTaskDelay(pdMS_TO_TICKS(10));
         while(gsmClient.available()){ gsmClient.read(); vTaskDelay(1); }
         gsmClient.stop();
-        Serial.println("[GPRS] Data sent to Hosting");
+        Serial.printf("[GPRS] Data sent at %lu ms\n", millis());
     } else {
-        Serial.println("[GPRS] Failed to connect");
+        Serial.printf("[GPRS] Failed to connect at %lu ms\n", millis());
     }
 }
 #endif
