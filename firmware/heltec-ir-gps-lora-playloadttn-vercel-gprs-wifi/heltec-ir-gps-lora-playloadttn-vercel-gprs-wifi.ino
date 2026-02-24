@@ -81,7 +81,7 @@ const uint8_t nwkKey[] = {0x9B,0xF6,0x12,0xF4,0xAA,0x33,0xDB,0x73,0xAA,0x1B,0x7A
 #define GPS_TX_PIN     34
 #define GPS_RX_PIN     33
 #define GPRS_TX_PIN    17
-#define GPRS_RX_PIN    16
+#define GPRS_RX_PIN    18
 #define GPRS_RST_PIN   15
 #define SD_CS          4
 #define TFT_CS         38
@@ -94,9 +94,9 @@ const uint8_t nwkKey[] = {0x9B,0xF6,0x12,0xF4,0xAA,0x33,0xDB,0x73,0xAA,0x1B,0x7A
 // TIMING
 // ============================================
 const int8_t   TZ_OFFSET          = 7;
-const uint32_t UPLINK_INTERVAL_MS = 10000;
-const uint32_t WIFI_UPLOAD_MS     = 10000;
-const uint32_t GPRS_INTERVAL_MS   = 5000;
+const uint32_t UPLINK_INTERVAL_MS = 1000;   // 1 detik - LoRaWAN uplink
+const uint32_t WIFI_UPLOAD_MS     = 1000;   // 1 detik - WiFi upload
+const uint32_t GPRS_INTERVAL_MS   = 1000;   // 1 detik - GPRS upload
 const uint8_t  MAX_JOIN_ATTEMPTS  = 5;
 const uint32_t JOIN_RETRY_MS      = 2000;
 const uint32_t SD_WRITE_MS        = 2000;
@@ -190,6 +190,7 @@ void gprsPost(float lat, float lng);
 void sdSave(float,float,float,uint8_t,uint16_t,int16_t,float,const char*);
 bool sdUpload();
 String decodeState(int16_t);
+void initGprsHardware();
 
 // ============================================
 // SETUP
@@ -241,8 +242,10 @@ void setup()
 #if ENABLE_LORAWAN
     xTaskCreatePinnedToCore(taskLora, "LoRa",16384, NULL, 1, NULL, 1);
 #endif
+
 #if ENABLE_GPRS
-    xTaskCreatePinnedToCore(taskGprs, "GPRS",32768, NULL, 1, NULL, 1);
+    // Init hardware GPRS di setup() agar langsung ready
+    initGprsHardware();
 #endif
 }
 
@@ -568,40 +571,71 @@ void wifiPost(float lat, float lng)
 // Serial: "[GPRS] Connected IP: x.x.x.x"
 // ============================================
 #if ENABLE_GPRS
-void taskGprs(void *pv)
+void initGprsHardware()
 {
-    vTaskDelay(pdMS_TO_TICKS(8000)); // Tunggu WiFi + LoRa
-
-    // Init hardware SIM900A
-    pinMode(GPRS_RST_PIN,OUTPUT);
-    digitalWrite(GPRS_RST_PIN,HIGH); vTaskDelay(pdMS_TO_TICKS(200));
-    digitalWrite(GPRS_RST_PIN,LOW);  vTaskDelay(pdMS_TO_TICKS(200));
-    digitalWrite(GPRS_RST_PIN,HIGH); vTaskDelay(pdMS_TO_TICKS(1000));
+    Serial.println("[GPRS] Initializing hardware...");
+    
+    // Reset sequence SIM900A
+    pinMode(GPRS_RST_PIN, OUTPUT);
+    digitalWrite(GPRS_RST_PIN, HIGH);
+    vTaskDelay(pdMS_TO_TICKS(200));
+    digitalWrite(GPRS_RST_PIN, LOW);
+    vTaskDelay(pdMS_TO_TICKS(200));
+    digitalWrite(GPRS_RST_PIN, HIGH);
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    
+    // Start Serial untuk SIM900A
     sim900.begin(57600, SERIAL_8N1, GPRS_RX_PIN, GPRS_TX_PIN);
     vTaskDelay(pdMS_TO_TICKS(1000));
-
-    if(!modem.begin()){ Serial.println("[GPRS] Modem fail"); vTaskDelete(NULL); }
-
+    
+    // Start modem
+    if(!modem.begin()){
+        Serial.println("[GPRS] Modem begin FAILED");
+        return;
+    }
+    Serial.println("[GPRS] Modem initialized");
+    
+    // Coba koneksi GPRS
     bool conn = false;
-    for(int r=0; r<5&&!conn; r++){
+    for(int r = 0; r < 5 && !conn; r++){
+        Serial.printf("[GPRS] Connection attempt %d/5...\n", r+1);
         if(modem.gprsConnect(GPRS_APN, GPRS_USER, GPRS_PASS)){
             conn = true;
             String ip = modem.getLocalIP();
-            Serial.printf("[GPRS] Connected IP: %s\n", ip.c_str());
-            if(xSemaphoreTake(mGprs,MTX)==pdTRUE){ g_gprs.connected=true; g_gprs.ip=ip; xSemaphoreGive(mGprs); }
-        } else vTaskDelay(pdMS_TO_TICKS(5000));
+            Serial.printf("[GPRS] Connected! IP: %s\n", ip.c_str());
+            if(xSemaphoreTake(mGprs, MTX) == pdTRUE){
+                g_gprs.connected = true;
+                g_gprs.ip = ip;
+                xSemaphoreGive(mGprs);
+            }
+        } else {
+            Serial.printf("[GPRS] Attempt %d failed, retrying...\n", r+1);
+            vTaskDelay(pdMS_TO_TICKS(5000));
+        }
     }
-    if(!conn){ Serial.println("[GPRS] Failed"); vTaskDelete(NULL); }
+    
+    if(!conn){
+        Serial.println("[GPRS] All connection attempts failed");
+    } else {
+        // Buat task GPRS hanya jika hardware ready
+        xTaskCreatePinnedToCore(taskGprsLoop, "GPRS", 32768, NULL, 1, NULL, 1);
+    }
+}
 
+void taskGprsLoop(void *pv)
+{
+    Serial.println("[GPRS] Task started, waiting for data...");
     uint32_t tSend = 0;
     for(;;){
         if(!modem.isGprsConnected()){
+            Serial.println("[GPRS] Connection lost, reconnecting...");
             if(modem.gprsConnect(GPRS_APN, GPRS_USER, GPRS_PASS)){
                 String ip = modem.getLocalIP();
                 Serial.printf("[GPRS] Reconnected IP: %s\n", ip.c_str());
                 if(xSemaphoreTake(mGprs,MTX)==pdTRUE){ g_gprs.connected=true; g_gprs.ip=ip; xSemaphoreGive(mGprs); }
             } else {
                 if(xSemaphoreTake(mGprs,MTX)==pdTRUE){ g_gprs.connected=false; xSemaphoreGive(mGprs); }
+                Serial.println("[GPRS] Reconnect failed, retrying...");
                 vTaskDelay(pdMS_TO_TICKS(5000)); continue;
             }
         }
