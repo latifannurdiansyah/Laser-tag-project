@@ -38,7 +38,7 @@
 #define USE_DUAL_MODE      true
 
 // HTTP Lokal (MySQL)
-#define LOCAL_API_URL      "http://10.28.122.226/lasertag/api/track.php"
+#define LOCAL_API_URL      "http://192.168.11.96/lasertag/api/track.php"
 
 // HTTPS Vercel
 #define VERCEL_API_URL     "https://laser-tag-project.vercel.app/api/track"
