@@ -8,18 +8,19 @@ export async function POST(request: Request) {
     
     // Support field from firmware (deviceId, sats, hitStatus)
     // AND field from API (id, satellites, irStatus)
-    const id = body.id || body.deviceId || null
-    const lat = body.lat || body.latitude || null
-    const lng = body.lng || body.longitude || null
-    const alt = body.alt || body.altitude
-    const source = body.source || 'wifi'
-    const battery = body.battery || body.bat
-    const satellites = body.satellites || body.sats
+    // Use ?? (nullish coalescing) instead of || to handle 0 values
+    const id = body.id ?? body.deviceId ?? null
+    const lat = body.lat ?? body.latitude ?? null
+    const lng = body.lng ?? body.longitude ?? null
+    const alt = body.alt ?? body.altitude
+    const source = body.source ?? 'wifi'
+    const battery = body.battery ?? body.bat
+    const satellites = body.satellites ?? body.sats
     const rssi = body.rssi
     const snr = body.snr
-    const irStatus = body.irStatus || body.hitStatus || null
-    const command = body.command || body.irCommand
-    const address = body.address || body.irAddress
+    const irStatus = body.irStatus ?? body.hitStatus ?? null
+    const command = body.command ?? body.irCommand
+    const address = body.address ?? body.irAddress
 
     console.log('[API] Parsed values - id:', id, 'lat:', lat, 'lng:', lng, 'alt:', alt)
 
@@ -37,7 +38,8 @@ export async function POST(request: Request) {
       }
     }
 
-    if (command !== undefined && address !== undefined) {
+    // Only set IR hit status if both command and address are non-zero
+    if (command !== undefined && address !== undefined && command !== 0 && address !== 0) {
       irStatusStr = `HIT: 0x${parseInt(address).toString(16).toUpperCase()}-0x${parseInt(command).toString(16).toUpperCase()}`
     }
 
@@ -45,16 +47,16 @@ export async function POST(request: Request) {
       console.log('[API] Creating log with data:', { source, deviceId: id, lat, lng, alt })
       const log = await prisma.gpsLog.create({
         data: {
-          source: source || 'wifi',
+          source: source ?? 'wifi',
           deviceId: id,
-          latitude: parseFloat(lat),
-          longitude: parseFloat(lng),
-          altitude: alt !== undefined ? parseFloat(alt) : null,
+          latitude: lat ?? 0,
+          longitude: lng ?? 0,
+          altitude: alt != null ? parseFloat(alt) : null,
           irStatus: irStatusStr,
-          battery: battery !== undefined ? parseInt(battery) : null,
-          satellites: satellites !== undefined ? parseInt(satellites) : null,
-          rssi: rssi !== undefined ? parseInt(rssi) : null,
-          snr: snr !== undefined ? parseFloat(snr) : null,
+          battery: battery != null ? parseInt(battery) : null,
+          satellites: satellites != null ? parseInt(satellites) : null,
+          rssi: rssi != null ? parseInt(rssi) : null,
+          snr: snr != null ? parseFloat(snr) : null,
           rawPayload: body
         }
       })
@@ -65,8 +67,8 @@ export async function POST(request: Request) {
       const log = await prisma.gpsLog.create({
         data: {
           deviceId: id,
-          latitude: parseFloat(lat),
-          longitude: parseFloat(lng),
+          latitude: lat ?? 0,
+          longitude: lng ?? 0,
           irStatus: irStatusStr
         }
       })
