@@ -1,13 +1,5 @@
 // ============================================
 // HELTEC TRACKER V1.1
-// v4 FINAL — TFT SLIDE BERJALAN, Serial minimal
-//
-// FIX UTAMA:
-//   1. HAPUS esp_task_wdt_add() dari tftTask — ini penyebab TFT stuck/kill
-//   2. Hapus semua delay() panjang dari setup()
-//   3. tftTask dibuat PERTAMA, prioritas tertinggi di CPU 0
-//   4. GPRS init di dalam gprsTask (bukan setup)
-//   5. Serial Monitor: hanya WiFi/GPRS/SD/LoRa/IR status
 // ============================================
 
 #define ENABLE_WIFI    1
@@ -42,16 +34,14 @@
 #define WIFI_SSID          "UserAndroid"
 #define WIFI_PASSWORD      "55555550"
 
-// PILIH API: true = Local MySQL, false = Vercel
-#define USE_LOCAL_MYSQL    true
+// Dual Mode: true = Kirim ke HTTP lokal DAN HTTPS Vercel sekaligus
+#define USE_DUAL_MODE      true
 
-#if USE_LOCAL_MYSQL
-  // Ganti IP_ADDRESS dengan IP komputer Anda
-  // Cara cek: CMD → ipconfig → IPv4 Address
-  #define WIFI_API_URL     "http://192.168.11.73/lasertag/api/track.php"
-#else
-  #define WIFI_API_URL     "https://laser-tag-project.vercel.app/api/track"
-#endif
+// HTTP Lokal (MySQL)
+#define LOCAL_API_URL      "http://192.168.122.226/lasertag/api/track.php"
+
+// HTTPS Vercel
+#define VERCEL_API_URL     "https://laser-tag-project.vercel.app/api/track"
 
 // GPRS kirim ke hosting online (bukan lokal - GPRS tidak bisa akses IP privat)
 // Format: http://domain:port/folder/api/track.php
@@ -534,16 +524,50 @@ void wifiPost(float lat, float lng)
         "\"irAddress\":%u,\"irCommand\":%u,\"hitStatus\":\"%s\"}",
         DEVICE_ID, lat, lng, alt, sat, rssi, snr, ia, ic, hitStatus);
 
+#if USE_DUAL_MODE
+    // Kirim ke DUA endpoint sekaligus: HTTP Lokal + HTTPS Vercel
+    bool okLocal = false, okVercel = false;
+    int codeLocal = 0, codeVercel = 0;
+
+    // 1. Kirim ke HTTP Lokal
+    if(WiFi.status() == WL_CONNECTED){
+        for(int i=1; i<=3 && !okLocal; i++){
+            HTTPClient http; http.begin(LOCAL_API_URL);
+            http.addHeader("Content-Type","application/json"); http.setTimeout(10000);
+            codeLocal = http.POST(pl); okLocal = (codeLocal==200||codeLocal==201); http.end();
+            if(!okLocal && i<3) vTaskDelay(pdMS_TO_TICKS(2000));
+        }
+        Serial.printf("[WiFi] Local: %s (code: %d)\n", okLocal?"OK":"FAIL", codeLocal);
+    }
+
+    // 2. Kirim ke HTTPS Vercel
+    if(WiFi.status() == WL_CONNECTED){
+        for(int i=1; i<=3 && !okVercel; i++){
+            HTTPClient http; http.begin(VERCEL_API_URL);
+            http.addHeader("Content-Type","application/json"); http.setTimeout(10000);
+            codeVercel = http.POST(pl); okVercel = (codeVercel==200||codeVercel==201); http.end();
+            if(!okVercel && i<3) vTaskDelay(pdMS_TO_TICKS(2000));
+        }
+        Serial.printf("[WiFi] Vercel: %s (code: %d)\n", okVercel?"OK":"FAIL", codeVercel);
+    }
+
+    bool ok = okLocal || okVercel;
+    int code = ok ? (okVercel ? codeVercel : codeLocal) : 0;
+    if(xSemaphoreTake(mWifi,MTX)==pdTRUE){ g_wifi.code=code; if(ok)g_wifi.ok++;else g_wifi.fail++; xSemaphoreGive(mWifi); }
+    if(!ok) sdSave(lat,lng,alt,sat,0,rssi,snr,irBuf);
+#else
+    // Mode tunggal (hanya Vercel) - comportemen lama
     int code=0; bool ok=false;
     for(int i=1; i<=3 && !ok; i++){
         if(WiFi.status() != WL_CONNECTED) break;
-        HTTPClient http; http.begin(WIFI_API_URL);
+        HTTPClient http; http.begin(VERCEL_API_URL);
         http.addHeader("Content-Type","application/json"); http.setTimeout(10000);
         code = http.POST(pl); ok = (code==200||code==201); http.end();
         if(!ok && i<3) vTaskDelay(pdMS_TO_TICKS(2000));
     }
     if(xSemaphoreTake(mWifi,MTX)==pdTRUE){ g_wifi.code=code; if(ok)g_wifi.ok++;else g_wifi.fail++; xSemaphoreGive(mWifi); }
     if(!ok) sdSave(lat,lng,alt,sat,0,rssi,snr,irBuf);
+#endif
 }
 #endif
 
@@ -755,7 +779,7 @@ bool sdUpload(){
     if(!ex) return false;
     int okCnt=0; String fail="";
     if(xSemaphoreTake(mSpi,pdMS_TO_TICKS(200))==pdTRUE){
-        File f=SD.open("/offline_queue.csv",FILE_READ);
+        File f=SD.open("/offline_queue.csv", FILE_READ);
         if(!f){xSemaphoreGive(mSpi);return false;}
         while(f.available()){
             String ln=f.readStringUntil('\n'); ln.trim(); if(ln.length()<10) continue;
@@ -766,7 +790,7 @@ bool sdUpload(){
             int16_t rssi=ln.substring(c[5]+1,c[6]).toInt(); float snr=ln.substring(c[6]+1,c[7]).toFloat();
             String ir=ln.substring(c[7]+1);
             xSemaphoreGive(mSpi);
-            HTTPClient http; http.begin(WIFI_API_URL); http.addHeader("Content-Type","application/json"); http.setTimeout(10000);
+            HTTPClient http; http.begin(VERCEL_API_URL); http.addHeader("Content-Type","application/json"); http.setTimeout(10000);
             char pl[400]; snprintf(pl,400,"{\"source\":\"wifi_sd\",\"id\":\"%s\",\"lat\":%.6f,\"lng\":%.6f,\"alt\":%.1f,\"irStatus\":\"%s\",\"battery\":%u,\"satellites\":%u,\"rssi\":%d,\"snr\":%.1f}",DEVICE_ID,lat,lng,alt,ir.c_str(),bat,sat,rssi,snr);
             int code=http.POST(pl); http.end();
             if(code==200||code==201) okCnt++; else fail+=ln+"\n";

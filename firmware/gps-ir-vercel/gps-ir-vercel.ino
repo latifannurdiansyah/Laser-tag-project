@@ -10,7 +10,16 @@
 
 #define WIFI_SSID       "UserAndroid"
 #define WIFI_PASSWORD   "55555550"
+
+// Dual Mode: true = Kirim ke HTTP lokal DAN HTTPS Vercel
+#define USE_DUAL_MODE   true
+
+// HTTPS Vercel
 #define API_URL         "https://laser-tag-project.vercel.app/api/track"
+
+// HTTP Lokal (MySQL)
+#define LOCAL_API_URL   "http://192.168.122.226/lasertag/api/track.php"
+
 #define DEVICE_ID       "Heltec-IR-V1"
 
 #define Vext_Ctrl 3
@@ -241,11 +250,6 @@ void sendToAPI(float lat, float lng) {
     return;
   }
 
-  HTTPClient http;
-  http.begin(API_URL);
-  http.addHeader("Content-Type", "application/json");
-  http.setTimeout(5000);
-
   // Format IR Status: "HIT: 0xXXXX-0xXX" atau "-"
   String irStatus = irDataReceived ? 
     String("HIT: 0x") + String(lastIRAddress, HEX) + String("-0x") + String(lastIRCommand, HEX) : 
@@ -258,8 +262,47 @@ void sendToAPI(float lat, float lng) {
     "\"irStatus\":\"" + irStatus + "\"" +
     "}";
 
-  Serial.print("[API] Sending: ");
+  Serial.print("[API] Payload: ");
   Serial.println(payload);
+
+#if USE_DUAL_MODE
+  // Kirim ke DUA endpoint sekaligus: HTTP Lokal + HTTPS Vercel
+  bool okLocal = false, okVercel = false;
+  int codeLocal = 0, codeVercel = 0;
+
+  // 1. Kirim ke HTTP Lokal
+  {
+    HTTPClient http;
+    http.begin(LOCAL_API_URL);
+    http.addHeader("Content-Type", "application/json");
+    http.setTimeout(5000);
+    codeLocal = http.POST(payload);
+    okLocal = (codeLocal > 0);
+    Serial.printf("[API] Local: %s (code: %d)\n", okLocal?"OK":"FAIL", codeLocal);
+    http.end();
+  }
+
+  // 2. Kirim ke HTTPS Vercel
+  {
+    HTTPClient http;
+    http.begin(API_URL);
+    http.addHeader("Content-Type", "application/json");
+    http.setTimeout(5000);
+    codeVercel = http.POST(payload);
+    okVercel = (codeVercel > 0);
+    Serial.printf("[API] Vercel: %s (code: %d)\n", okVercel?"OK":"FAIL", codeVercel);
+    http.end();
+  }
+
+  if (!okLocal && !okVercel) {
+    Serial.println("[API] Both failed!");
+  }
+#else
+  // Mode tunggal - hanya Vercel
+  HTTPClient http;
+  http.begin(API_URL);
+  http.addHeader("Content-Type", "application/json");
+  http.setTimeout(5000);
 
   int httpResponseCode = http.POST(payload);
   
@@ -271,6 +314,7 @@ void sendToAPI(float lat, float lng) {
   }
   
   http.end();
+#endif
 }
 
 void displayGPSPage() {
