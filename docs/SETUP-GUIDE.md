@@ -14,7 +14,9 @@
    - [Troubleshooting TTN](#28-troubleshooting-ttn)
    - [Troubleshooting ESP32 Restart](#29-troubleshooting-esp32-restart)
    - [SD Card Configuration](#210-sd-card-configuration)
-3. [TFT Display 3 Pages Scrolling](#3-tft-display-3-pages-scrolling)
+   - [GPRS SIM900A Configuration](#211-gprs-sim900a-configuration)
+   - [Anti-Cheat System](#212-anti-cheat-system)
+3. [TFT Display 4 Pages Scrolling](#3-tft-display-4-pages-scrolling)
 
 ---
 
@@ -462,8 +464,8 @@ NwkKey:     9BF612F4AA33DB73AA1B7AC64D700226
 function decodeUplink(input) {
     var bytes = input.bytes;
     
-    if (bytes.length < 29) {
-        return { data: { error: "Invalid payload: expected 29 bytes" }};
+    if (bytes.length < 30) {
+        return { data: { error: "Invalid payload: expected 30 bytes" }};
     }
     
     // Little-endian float conversion (untuk ESP32)
@@ -506,6 +508,9 @@ function decodeUplink(input) {
     // SNR (byte 28) - signed int8
     data.snr = bytes[28];
     
+    // CHEAT DETECTED (byte 29) - baru!
+    data.cheatDetected = bytes[29];
+    
     // Status IR (byte 10)
     data.status = bytes[10];
     
@@ -516,6 +521,9 @@ function decodeUplink(input) {
     // IR Status: "-" jika tidak ada hit, "HIT" jika ada hit
     data.irStatus = data.status === 1 ? "HIT" : "-";
     
+    // CHEAT Status: "-" jika normal, "CHEAT!" jika terdeteksi
+    data.cheatStatus = data.cheatDetected === 1 ? "CHEAT!" : "-";
+    
     return {
         data: {
             deviceId: data.deviceId,
@@ -523,10 +531,12 @@ function decodeUplink(input) {
             lng: data.lng,
             alt: data.alt,
             irStatus: data.irStatus,
+            cheatStatus: data.cheatStatus,
             battery: data.battery,
             satellites: data.satellites,
             rssi: data.rssi,
-            snr: data.snr
+            snr: data.snr,
+            cheatDetected: data.cheatDetected
         }
     };
 }
@@ -534,7 +544,7 @@ function decodeUplink(input) {
 
 ### 2.5a PENTING: Penjelasan Offset Payload
 
-Struktur payload dari firmware (29 bytes total):
+Struktur payload dari firmware (30 bytes total):
 
 | Offset | Size | Type | Field | Contoh Nilai |
 |--------|------|------|-------|--------------|
@@ -550,6 +560,7 @@ Struktur payload dari firmware (29 bytes total):
 | 25 | 1 | uint8 | **satellites** | 8 |
 | 26-27 | 2 | int16 | **rssi** (dBm) | -75 |
 | 28 | 1 | int8 | **snr** (dB) | 7 |
+| 29 | 1 | uint8 | **cheatDetected** (0=normal, 1=cheat) | 0 atau 1 |
 
 **CATATAN PENTING:**
 - Semua dataGPS (lat, lng, alt) menggunakan format **float IEEE 754 little-endian**
@@ -574,16 +585,18 @@ Setelah menyimpan decoder, lakukan langkah berikut:
   "lng": 106.845600,
   "alt": 45.5,
   "irStatus": "-",
+  "cheatStatus": "-",
   "battery": 4200,
   "satellites": 8,
   "rssi": -75,
-  "snr": 7
+  "snr": 7,
+  "cheatDetected": 0
 }
 ```
 
 **Jika decoded payload tidak muncul atau nilainya 0/null:**
 - Cek apakah decoder sudah di-save dengan benar
-- Cek ukuran payload di "Raw" - harus 29 bytes
+- Cek ukuran payload di "Raw" - harus 30 bytes
 - Lihat console browser untuk error message
 
 ### 2.5c Troubleshooting TTN Payload
@@ -595,6 +608,7 @@ Setelah menyimpan decoder, lakukan langkah berikut:
 | rssi selalu 0 | Format bukan signed int16 | Pakai readInt16LE dengan konversi negatif |
 | satellites tidak muncul | Byte 25 tidak dibaca | Pastikan `bytes[25]` dibaca |
 | snr tidak muncul | Byte 28 tidak dibaca | Pastikan `bytes[28]` dibaca |
+| cheatDetected tidak muncul | Byte 29 tidak dibaca | Pastikan `bytes[29]` dibaca |
 
 ---
 
@@ -665,10 +679,10 @@ function decodeUplink(input) {
 
 1. Buka file:
    ```
-   firmware/heltec-ir-gps-lora-playloadttn-vercel/heltec-ir-gps-lora-playloadttn-vercel.ino
+   firmware/heltec-ir-gps-lora-playloadttn-vercel-gprs-wifi4.ino/heltec-ir-gps-lora-playloadttn-vercel-gprs-wifi4.ino.ino
    ```
 
-2. Cari bagian **LoRaWAN Credentials** (baris ~34):
+2. Cari bagian **LoRaWAN Credentials** (baris ~60):
 
 ```cpp
 const uint64_t joinEUI = 0x0000000000000003;  // GANTI DENGAN JoinEUI Anda
@@ -687,7 +701,35 @@ const uint8_t nwkKey[] = {
 
 3. Replace dengan credentials dari TTN Console Anda
 
-4. **Upload firmware** ke ESP32 via Arduino IDE
+4. **WiFi Configuration** (baris ~34):
+
+```cpp
+#define WIFI_SSID           "UserAndroid"
+#define WIFI_PASSWORD       "55555550"
+#define VERCEL_API_URL      "https://laser-tag-project.vercel.app/api/track"
+```
+
+5. **GPRS Configuration** (baris ~37-44):
+
+```cpp
+#define GPRS_APN            "indosatgprs"
+#define GPRS_USER           "indosat"
+#define GPRS_PASS           "indosat"
+#define GPRS_SIM_PIN        ""
+#define GPRS_HOST           "simpera.teknoklop.com"
+#define GPRS_PORT           10000
+#define GPRS_API_KEY        "tPmAT5Ab3j7F9"
+#define GPRS_PATH           "/lasertag/api/track.php"
+#define GPRS_CHEAT_PATH     "/lasertag/api/cheat_event.php"
+```
+
+6. **Device ID** (baris ~46):
+
+```cpp
+#define DEVICE_ID           "Heltec-P1"  // Ubah P1, P2, P3 sesuai device
+```
+
+7. **Upload firmware** ke ESP32 via Arduino IDE
 
 ### 2.7 Test Uplink
 
@@ -709,7 +751,7 @@ Firmware menampilkan output compact di Serial Monitor (115200 baud):
 
 ```
 ========================================
-GPS Tracker + IR + LoRaWAN + WiFi + SD
+Heltec Tracker V1.1 (LoRa+WiFi+GPRS+IR+AntiCheat)
 Device ID: Heltec-P1
 ========================================
 
@@ -719,7 +761,13 @@ Device ID: Heltec-P1
 [WiFi] Upload: SUCCESS | Code: 200
 [LoRa] Join: ATTEMPT 1/10
 [LoRa] Join: SUCCESS
-[LoRa] TX: SUCCESS | RSSI: -120 | SNR: 7.5
+[LoRa] TX: SUCCESS | RSSI: -120 | SNR: 7.5 | Cheat: 0
+[GPRS] Initializing GPRS modem...
+[GPRS] Connected persistently, IP=10.x.x.x
+[SCHEDULED GPRS] DB_OK
+[IMMEDIATE GPRS] IR_DB_OK
+[CHEAT] DETECTED! Sending immediate GPRS...
+[IMMEDIATE GPRS] CHEAT_OK
 ```
 
 #### Format Output
@@ -739,6 +787,16 @@ Device ID: Heltec-P1
 | `[LoRa] Join: MAX ATTEMPTS` | Gagal setelah 10x percobaan |
 | `[LoRa] TX: SUCCESS \| RSSI: X \| SNR: Y.X` | Data berhasil dikirim |
 | `[LoRa] TX: FAILED` | Gagal mengirim data |
+| `[GPRS] Init failed` | Modem GPRS tidak terdeteksi |
+| `[GPRS] Connected persistently, IP: X.X.X.X` | GPRS berhasil konek |
+| `[GPRS] Connection lost - attempting reconnect` | Koneksi terputus |
+| `[GPRS] SCHEDULED: DB_OK` | Data terjadwal berhasil dikirim |
+| `[GPRS] SCHEDULED: DB_FAIL` | Data terjadwal gagal |
+| `[GPRS] IMMEDIATE: IR_DB_OK` | IR hit berhasil dikirim |
+| `[GPRS] IMMEDIATE: CHEAT_OK` | Cheat event terkirim |
+| `[GPRS] IMMEDIATE: CONN_FAIL` | TCP connect gagal |
+| `[CHEAT] DETECTED!` | Cheat terdeteksi (IR sensor tertutup) |
+| `[CHEAT] IR uncovered - cheat flag cleared` | Cheat flag direset |
 
 #### Buka Serial Monitor
 
@@ -783,27 +841,157 @@ Firmware Configuration:
 
 ---
 
-## 3. TFT Display 3 Pages Scrolling
+## 2.11 GPRS SIM900A Configuration
+
+Firmware mendukung pengiriman data via GPRS (SIM900A) sebagai backup jika WiFi tidak tersedia.
+
+### Hardware Requirements
+
+- **Modem**: SIM900A GSM/GPRS
+- **SIM Card**: GSM dengan paket data (Indosat, dll)
+- **Power**: External 5V 2A (SIM900A membutuhkan arus tinggi)
+
+### Pin Configuration
+
+```
+SIM900A Pin Configuration (Heltec Wireless Tracker):
+┌─────────────────────────────────────┐
+│ GPRS_RST   → Pin 15                 │
+│ GPRS_RX    → Pin 16                 │
+│ GPRS_TX    → Pin 17                 │
+└─────────────────────────────────────┘
+```
+
+### GPRS Server Configuration
+
+| Parameter | Value |
+|-----------|-------|
+| **Host** | `simpera.teknoklop.com` |
+| **Port** | `10000` |
+| **APN** | `indosatgprs` |
+| **Username** | `indosat` |
+| **Password** | `indosat` |
+| **API Key** | `tPmAT5Ab3j7F9` |
+
+### API Endpoints
+
+| Path | Description |
+|------|-------------|
+| `/lasertag/api/track.php` | Regular GPS data transmission |
+| `/lasertag/api/cheat_event.php` | Cheat detection events |
+
+### Cara Kerja
+
+1. **Inisialisasi**: Modem SIM900A dinyalakan dan terhubung ke jaringan GSM
+2. **Koneksi**: GPRS connection dibuat ke APN (indosatgprs)
+3. **Pengiriman Data**:
+   - **Terjadwal**: Setiap 30 detik sekali
+   - **Immediate**: Saat IR hit terdeteksi atau cheat terdeteksi
+4. **Payload**: Binary struct dikirim via HTTP POST
+
+### Serial Monitor Output
+
+```
+[GPRS] Initializing GPRS modem...
+[GPRS] SIM ready
+[GPRS] Connecting to indosatgprs...
+[GPRS] Connected persistently, IP=10.x.x.x
+[SCHEDULED GPRS] DB_OK
+[IMMEDIATE GPRS] IR_DB_OK
+[IMMEDIATE GPRS] CHEAT_OK
+```
+
+### Troubleshooting GPRS
+
+| Masalah | Solusi |
+|---------|--------|
+| Modem tidak respons | Cek wiring RX/TX, pastikan 5V power cukup |
+| SIM tidak terdeteksi | Cek SIM card terpasang dengan benar |
+| GPRS connect gagal | Cek APN benar, cek pulsa/data tersedia |
+| TCP connect gagal | Cek host/port, cek firewall |
+| Data tidak sampai | Cek server endpoint berjalan |
+
+---
+
+## 2.12 Anti-Cheat System
+
+Firmware memiliki sistem deteksi cheat terintegrasi untuk mencegah pemain menutup sensor IR.
+
+### Cara Kerja
+
+1. **Sensor**: IR Ambient Photodiode di Pin 2
+2. **Deteksi**: Jika sensor tidak mendeteksi cahaya IR selama > 5 detik
+3. **Respons**: 
+   - Tampilkan "CHEAT RECORDED" di TFT display
+   - Kirim immediate GPRS payload
+   - Log ke SD Card
+   - Reset flag saat sensor kembali normal
+
+### Hardware Setup
+
+```
+Anti-Cheat Pin Configuration:
+┌─────────────────────────────────────┐
+│ IR_AMBIENT_PIN → Pin 2              │
+│ (Input dengan Pull-down internal)   │
+└─────────────────────────────────────┘
+```
+
+### Konfigurasi (di firmware)
+
+```cpp
+#define IR_AMBIENT_PIN        2
+#define CHEAT_DETECTION_MS   5000    // Waktu minimal tertutup untuk deteksi
+#define CHEAT_CHECK_INTERVAL  100     // Interval cek (ms)
+#define CHEAT_ALERT_DURATION 10000   // Durasi tampil banner (ms)
+```
+
+### TFT Display
+
+Ketika cheat terdeteksi:
+- Banner merah "CHEAT RECORDED" muncul di bagian bawah TFT
+- Halaman GPRS/DB Status menampilkan "Evt: CHEAT!"
+- Banner hilang setelah 10 detik
+
+### Serial Monitor Output
+
+```
+[CHEAT] IR covered >5s - CHEAT DETECTED!
+[CHEAT] DETECTED! Sending immediate GPRS...
+[CHEAT] IR uncovered - cheat flag cleared
+```
+
+### Payload Field
+
+Data cheat dikirim:
+- ** viaLoRaWAN**: Byte 29 (cheatDetected = 1)
+- **WiFi/GPRS**: Field `cheatDetected: 1`
+
+---
+
+## 3. TFT Display 4 Pages Scrolling
 
 ### 3.1 Cara Kerja Sistem
 
-Sistem TFT menggunakan **FreeRTOS task** untuk menampilkan 3 halaman yang bergantian secara otomatis:
+Sistem TFT menggunakan **FreeRTOS task** untuk menampilkan 4 halaman yang bergantian secara otomatis:
 
 ```
 ┌─────────────────────────┐
-│     PAGE 1: LoRaWAN      │  ← Setiap 3 detik berganti
+│     PAGE 1: LoRaWAN     │  ← Setiap 3 detik berganti
 ├─────────────────────────┤
 │     PAGE 2: GPS         │
 ├─────────────────────────┤
-│     PAGE 3: IR Status   │
+│     PAGE 3: GPRS/DB     │
+├─────────────────────────┤
+│     PAGE 4: IR Hit Info │
 └─────────────────────────┘
 ```
 
 **Konfigurasi Utama** (di file firmware):
 
 ```cpp
-#define TFT_MAX_PAGES     3       // Jumlah halaman
-#define PAGE_SWITCH_MS    3000   // Waktu tampil per halaman (3 detik)
+#define TFT_MAX_PAGES     4       // Jumlah halaman
+#define PAGE_SWITCH_MS   3000    // Waktu tampil per halaman (3 detik)
 ```
 
 ### 3.2 Struktur Data Halaman
@@ -815,9 +1003,10 @@ struct TftPageData {
 
 // Inisialisasi awal
 TftPageData g_TftPageData[TFT_MAX_PAGES] = {
-    {"LoRaWAN Status", "-", "-", "-", "-", "-"},           // Page 0: LoRaWAN
-    {"GPS Status", "Lat: -", "Long: -", "Alt: -", "Sat: -", "Time: --:--:--"},  // Page 1: GPS
-    {"IR Receiver", "Waiting...", "-", "-", "-", "-"}       // Page 2: IR
+    {"LoRaWAN Status", "Event: IDLE", "RSSI: -", "SNR: -", "Joined: NO", "-"},           // Page 0: LoRaWAN
+    {"GPS Status", "Lat: -", "Long: -", "Alt: -", "Sat: -", "--:--:--"},                  // Page 1: GPS
+    {"GPRS/DB Status", "Conn: NO", "IP: -", "Last: -", "Resp: -", "Evt: IDLE"},          // Page 2: GPRS
+    {"IR Hit Info", "Shooter: -", "Sub: -", "Loc: NONE", "Time: --:--", "Hits: 0"}       // Page 3: IR
 };
 ```
 
@@ -1085,17 +1274,22 @@ Vercel Dashboard: https://vercel.com/dashboard
 │   ESP32      │ ────────────→ │  /api/track     │
 │  Firmware    │               └────────┬────────┘
 └──────────────┘                        │
-                                        ▼
+                                         ▼
 ┌──────────────┐     LoRaWAN    ┌─────────────────┐
 │   ESP32      │ ────────────→ │  /api/ttn       │ ──┐
 │  (TTN)       │               └─────────────────┘   │
 └──────────────┘                                      │
-                                      ┌──────────────┴──────────────┐
-                                      ▼                              ▼
-                              ┌─────────────┐               ┌─────────────┐
-                              │  NeonDB     │ ←──────────→ │  Vercel     │
-                              │  (PostgreSQL)│               │  Dashboard  │
-                              └─────────────┘               └─────────────┘
+                                         ┌────────────┴──────────────┐
+                                         ▼                              ▼
+┌──────────────┐     GPRS       ┌─────────────────┐           ┌─────────────┐
+│   ESP32      │ ────────────→ │  simpera server │           │  Vercel     │
+│  (SIM900A)   │               │  /track.php     │           │  Dashboard  │
+└──────────────┘               └────────┬────────┘           └─────────────┘
+                                         ▼                             
+                                  ┌─────────────┐                    
+                                  │  NeonDB     │                    
+                                  │  (PostgreSQL)│                    
+                                  └─────────────┘                    
 ```
 
 ---
@@ -1103,10 +1297,10 @@ Vercel Dashboard: https://vercel.com/dashboard
 ## Credits
 
 Project ini dibuat untuk **thesis/seminar hasil** laser tag system dengan:
-- **Hardware**: ESP32-S3, Heltec Wireless Tracker, LoRa SX1262, GPS, IR Receiver
+- **Hardware**: ESP32-S3, Heltec Wireless Tracker, LoRa SX1262, GPS, IR Receiver, SIM900A (GPRS)
 - **Firmware**: Arduino C++ dengan FreeRTOS
 - **Web**: Next.js 16 + Prisma + PostgreSQL
-- **Network**: WiFi HTTP + LoRaWAN (TTN)
+- **Network**: WiFi HTTP + LoRaWAN (TTN) + GPRS (SIM900A)
 
 ---
 
