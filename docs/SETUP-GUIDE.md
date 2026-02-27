@@ -16,6 +16,13 @@
    - [SD Card Configuration](#210-sd-card-configuration)
    - [GPRS SIM900A Configuration](#211-gprs-sim900a-configuration)
    - [Anti-Cheat System](#212-anti-cheat-system)
+   - [ThingSpeak Configuration](#213-thingspeak-configuration)
+   - [ThingSpeak → Vercel Integration](#214-thingspeak--vercel-integration)
+   - [ThingSpeak Firmware Config](#215-thingspeak-firmware-config)
+   - [ThingHTTP - Setup Vercel Endpoint](#216-thinghttp---setup-vercel-endpoint)
+   - [React - Trigger Otomatis](#217-react---trigger-otomatis)
+   - [Test Manual ThingHTTP](#218-test-manual-thinghttp)
+   - [Alur Lengkap Setelah Setup](#219-alur-lengkap-setelah-setup)
 3. [TFT Display 4 Pages Scrolling](#3-tft-display-4-pages-scrolling)
 
 ---
@@ -969,6 +976,474 @@ Data cheat dikirim:
 
 ---
 
+## 2.13 ThingSpeak Configuration
+
+ThingSpeak adalah platform IoT dari MathWorks untuk menyimpan dan visualize data sensor. Firmware V1.3 sudah支持ThingSpeak via GPRS (SIM900A).
+
+### 2.13.1 Buat Akun ThingSpeak
+
+1. **Buka website ThingSpeak**
+   - Buka browser
+   - Kunjungi: **https://thingspeak.com**
+
+2. **Daftar / Login**
+   - Klik **"Sign Up"** atau **"Sign In"**
+   - Bisa login dengan **MathWorks Account** atau **Google/GitHub**
+   - Jika pakai GitHub, klik "Sign in with GitHub"
+
+3. **Verifikasi email** (jika baru daftar)
+   - Buka email dari MathWorks
+   - Klik link verifikasi
+
+### 2.13.2 Buat Channel Baru
+
+1. Setelah login, klik **"Channels"** → **"My Channels"**
+2. Klik **"New Channel"**
+
+3. **Isi detail channel**:
+   - **Name**: `Laser Tag GPS Tracker`
+   - **Description**: `GPS tracker untuk game laser tag`
+   - **Field 1**: `latitude`
+   - **Field 2**: `longitude`
+   - **Field 3**: `altitude`
+   - **Field 4**: `satellites`
+   - **Field 5**: `rssi`
+   - **Field 6**: `ir_hit_count`
+   - **Field 7**: `cheat_detected`
+   - **Field 8**: `snr`
+
+4. Klik **"Save Channel"**
+
+### 2.13.3 Dapatkan API Keys
+
+1. Klik tab **"API Keys"**
+2. **Simpan informasi berikut**:
+
+| Parameter | Value |
+|-----------|-------|
+| **Channel ID** | `3268510` |
+| **Write API Key** | `N6ATMD4JVI90HTHH` |
+
+3. **Simpan dengan aman** - API Key adalah credentials penting!
+
+### 2.13.4 Struktur Field ThingSpeak
+
+| Field | Nama | Tipe | Deskripsi |
+|-------|------|------|-----------|
+| 1 | latitude | Float | Latitude GPS (-90 to 90) |
+| 2 | longitude | Float | Longitude GPS (-180 to 180) |
+| 3 | altitude | Float | Ketinggian dalam meter |
+| 4 | satellites | Integer | Jumlah satelit yang terkunci |
+| 5 | rssi | Integer | RSSI LoRa dalam dBm (negatif) |
+| 6 | ir_hit_count | Integer | Jumlah kali ditembak |
+| 7 | cheat_detected | Integer | 0 = normal, 1 = cheat |
+| 8 | snr | Float | SNR LoRa dalam dB |
+
+### 2.13.5 Test Kirim Data ke ThingSpeak
+
+Buka browser dan coba URL ini:
+
+```
+https://api.thingspeak.com/update?api_key=N6ATMD4JVI90HTHH&field1=-6.208800&field2=106.845600&field3=45.5&field4=8&field5=-75&field6=0&field7=0&field8=7.5
+```
+
+Jika berhasil, akan mengembalikan nomor entry (misal: `1`). Cek di ThingSpeak Channel → **"Private View"** untuk melihat data.
+
+---
+
+## 2.14 ThingSpeak → Vercel Integration
+
+Agar data dari ThingSpeak juga masuk ke database Vercel (PostgreSQL), kita perlu setup integration agar ThingSpeak push data ke Vercel secara otomatis.
+
+### 2.14.1 Cara Kerja
+
+```
+┌──────────────┐     GPRS       ┌─────────────────┐
+│   ESP32      │ ────────────→ │  ThingSpeak     │
+│  (SIM900A)   │               │  Channel        │
+└──────────────┘               └────────┬────────┘
+                                         │
+                                         │ (HTTP POST)
+                                         ▼
+                                  ┌─────────────────────┐
+                                  │  /api/track        │
+                                  │  laser-tag-project │
+                                  │  (Vercel)         │
+                                  └──────────┬──────────┘
+                                             │
+                                             ▼
+                                  ┌─────────────────────┐
+                                  │  PostgreSQL        │
+                                  │  (NeonDB)         │
+                                  └─────────────────────┘
+```
+
+### 2.14.2 Setup ThingSpeak HTTP Integration
+
+1. **Buka ThingSpeak Channel** Anda
+2. Klik **"Apps"** → **"HTTP Integration"**
+
+3. **Klik "New Integration"**
+
+4. **Isi konfigurasi**:
+
+| Field | Value |
+|-------|-------|
+| **URL** | `https://laser-tag-project.vercel.app/api/track` |
+| **Method** | `POST` |
+| **Content Type** | `application/json` |
+| **Header** | (kosongkan) |
+
+5. **JSON Format** untuk payload:
+
+```json
+{
+  "source": "thingspeak",
+  "deviceId": "Heltec-P1",
+  "lat": {{field1}},
+  "lng": {{field2}},
+  "altitude": {{field3}},
+  "satellites": {{field4}},
+  "rssi": {{field5}},
+  "irStatus": {{field6}},
+  "cheatDetected": {{field7}},
+  "snr": {{field8}}
+}
+```
+
+6. Klik **"Save"**
+
+### 2.14.3 Alternative: ThingSpeak TalkBack
+
+Jika HTTP Integration tidak tersedia di versi ThingSpeak Anda, gunakan **TalkBack**:
+
+1. **Buka ThingSpeak** → **"Apps"** → **"TalkBack"**
+2. Klik **"New TalkBack"**
+3. **Isi**:
+   - **Name**: `Vercel Forwarder`
+   - **Description**: `Forward data to Vercel`
+4. **Setup Command**:
+   - **URL**: `https://laser-tag-project.vercel.app/api/track`
+   - **Method**: `POST`
+   - **Headers**: `Content-Type: application/json`
+   - **Body**: (sama seperti di atas)
+5. **Save**
+
+### 2.14.4 Verifikasi Integration
+
+1. **Kirim data** dari firmware/device (via GPRS ke ThingSpeak)
+2. **Buka ThingSpeak** → **"Private View"** → lihat chart update
+3. **Buka Vercel Dashboard**: `https://laser-tag-project.vercel.app/dashboard`
+4. **Cek** apakah data juga muncul di tabel PostgreSQL
+
+Jika data muncul di kedua tempat, integration berhasil!
+
+### 2.14.5 Troubleshooting ThingSpeak → Vercel
+
+| Masalah | Solusi |
+|---------|--------|
+| Data tidak sampai ke Vercel | Cek ThingSpeak → HTTP Integration → "Recent Messages" |
+| HTTP 400 Error | Pastikan JSON format benar, cek field names |
+| HTTP 500 Error | Cek Vercel logs, pastikan database connection OK |
+| Integration tidak muncul | Refresh page, pastikan sudah di-save |
+
+---
+
+## 2.15 ThingSpeak Firmware Config
+
+Firmware V1.3 sudah dikonfigurasi untuk mengirim data ke ThingSpeak via GPRS (SIM900A). Berikut konfigurasi yang digunakan:
+
+### 2.15.1 Konfigurasi di Firmware
+
+Buka file firmware: `firmware/heltec_tracker_v1_3/heltec_tracker_v1_3.ino`
+
+Cari bagian **ThingSpeak Configuration** (baris ~52-67):
+
+```cpp
+// ============================================
+// THINGSPEAK VIA SIM900A
+// ============================================
+#define TS_HOST             "api.thingspeak.com"
+#define TS_PORT             80
+#define TS_WRITE_KEY        "N6ATMD4JVI90HTHH"
+#define TS_CHANNEL_ID       "3268510"
+#define TS_INTERVAL_MS      15000   // Min 15 detik (limit ThingSpeak free)
+
+// Field Mapping:
+// field1 = latitude
+// field2 = longitude
+// field3 = altitude
+// field4 = satellites
+// field5 = rssi lora
+// field6 = ir hit count
+// field7 = cheat detected (0/1)
+// field8 = snr lora
+```
+
+### 2.15.2 Cara Kerja Firmware → ThingSpeak
+
+1. **Device** mengambil data GPS, IR, cheat status
+2. Setiap **15 detik** (TS_INTERVAL_MS), firmware mengirim via GPRS:
+   - Koneksi ke `api.thingspeak.com:80`
+   - HTTP POST ke `/update.json`
+   - Body: JSON dengan 8 fields
+3. ThingSpeak menyimpan data di channel
+
+### 2.15.3 Ubah Interval Kirim
+
+```cpp
+#define TS_INTERVAL_MS      15000   // 15 detik (minimal untuk free tier)
+
+// Untuk paid tier bisa lebih cepat:
+// #define TS_INTERVAL_MS      5000    // 5 detik
+```
+
+### 2.15.4 Serial Monitor Output
+
+Ketika data dikirim ke ThingSpeak, Serial Monitor menampilkan:
+
+```
+[TS] Connecting to api.thingspeak.com:80
+[TS] Response code: 200
+[TS] Body: {"channel_id":3268510,"entry_id":1,...}
+[TS] OK code:200 lat:-6.2088 lng:106.8456 hits:0
+```
+
+### 2.15.5 TFT Display Halaman ThingSpeak
+
+Firmware V1.3 memiliki halaman TFT ke-5 untuk menampilkan status ThingSpeak:
+
+```
+┌─────────────────────────────────────┐
+│ ThingSpeak(GPRS)                    │
+│ Status: OK                          │
+│ Code: 200                           │
+│ OK: 10                              │
+│ Fail: 0                             │
+│ Ch:3268510                          │
+└─────────────────────────────────────┘
+```
+
+Halaman ini bergantian dengan 4 halaman lain setiap 3 detik.
+
+---
+
+## 2.16 ThingHTTP - Setup Vercel Endpoint
+
+ThingHTTP adalah "template" HTTP request yang akan dipanggil oleh ThingSpeak.
+
+### 2.16.1 Buat ThingHTTP
+
+1. **Login ke ThingSpeak**
+   - Buka: **https://thingspeak.com**
+   - Login dengan akun Anda
+
+2. **Buka ThingHTTP**
+   - Klik menu **Apps** → **ThingHTTP**
+   - Klik **New ThingHTTP**
+
+3. **Isi form konfigurasi**:
+
+| Field | Nilai |
+|-------|-------|
+| **Name** | `ForwardToVercel` |
+| **URL** | `https://laser-tag-project.vercel.app/api/track` |
+| **Method** | `POST` |
+| **Content Type** | `application/json` |
+| **Body** | (lihat di bawah) |
+
+4. **Isi Body** (JSON):
+
+```json
+{
+  "source": "thingspeak",
+  "deviceId": "Heltec-P1",
+  "lat": %%channel_3268510_field_1%%,
+  "lng": %%channel_3268510_field_2%%,
+  "alt": %%channel_3268510_field_3%%,
+  "sats": %%channel_3268510_field_4%%,
+  "rssi": %%channel_3268510_field_5%%,
+  "irHitCount": %%channel_3268510_field_6%%,
+  "cheatDetected": %%channel_3268510_field_7%%,
+  "snr": %%channel_3268510_field_8%%
+}
+```
+
+> **Catatan:** `%%channel_3268510_field_X%%` adalah variabel bawaan ThingSpeak yang otomatis diganti dengan nilai terbaru dari channel Anda.
+
+5. Klik **Save ThingHTTP**
+
+### 2.16.2 Variabel ThingSpeak yang Tersedia
+
+| Variabel | Deskripsi |
+|----------|-----------|
+| `%%channel_ID_field_1%%` | Field 1 (latitude) |
+| `%%channel_ID_field_2%%` | Field 2 (longitude) |
+| `%%channel_ID_field_3%%` | Field 3 (altitude) |
+| `%%channel_ID_field_4%%` | Field 4 (satellites) |
+| `%%channel_ID_field_5%%` | Field 5 (rssi) |
+| `%%channel_ID_field_6%%` | Field 6 (ir_hit_count) |
+| `%%channel_ID_field_7%%` | Field 7 (cheat_detected) |
+| `%%channel_ID_field_8%%` | Field 8 (snr) |
+| `%%channel_ID%%` | Channel ID |
+| `%%created_at%%` | Timestamp data masuk |
+
+---
+
+## 2.17 React - Trigger Otomatis
+
+**React di ThingSpeak BUKAN React.js!** Ini adalah fitur **IF-THEN** yang memantau channel dan memanggil ThingHTTP secara otomatis setiap ada data baru.
+
+### 2.17.1 Buat React
+
+1. **Buka React**
+   - Klik menu **Apps** → **React**
+   - Klik **New React**
+
+2. **Isi form konfigurasi**:
+
+| Field | Nilai |
+|-------|-------|
+| **Name** | `TriggerVercel` |
+| **Condition Type** | **Numeric** |
+| **Test Frequency** | **On Data Insertion** |
+| **Condition** | Field 4 (Satellites) **is greater than** Value `0` |
+| **Action** | **ThingHTTP** → pilih `ForwardToVercel` |
+
+3. **Klik Save React**
+
+### 2.17.2 Penjelasan Konfigurasi
+
+| Opsi | Penjelasan |
+|------|------------|
+| **Condition Type: Numeric** | Karena data Anda berupa angka (lat, lng, field numerik) |
+| **Field 4 > 0** | Field 4 = Satellites, hampir selalu > 0 kalau GPS aktif |
+| **On Data Insertion** | Trigger setiap kali ada data masuk ke ThingSpeak |
+| **Action: ThingHTTP** | Memanggil ThingHTTP yang sudah dibuat (ForwardToVercel) |
+
+### 2.17.3 Opsi Trigger Lainnya
+
+**Opsi A: Trigger saat IR Hit saja (hemat limit)**
+
+| Field | Nilai |
+|-------|-------|
+| **Name** | `TriggerVercel_IRHit` |
+| **Condition Type** | **Numeric** |
+| **Condition** | Field 6 (ir_hit_count) **is greater than** Value `0` |
+| **Action** | ThingHTTP → `ForwardToVercel` |
+
+**Opsi B: Trigger saat Cheat saja (paling hemat)**
+
+| Field | Nilai |
+|-------|-------|
+| **Name** | `TriggerVercel_Cheat` |
+| **Condition Type** | **Numeric** |
+| **Condition** | Field 7 (cheat_detected) **is equal to** Value `1` |
+| **Action** | ThingHTTP → `ForwardToVercel` |
+
+### 2.17.4 Rekomendasi untuk Free Account
+
+ThingSpeak free account memiliki limit **100 request/hari**. Berikut rekomendasi:
+
+1. **React 1** - Trigger saat IR hit (field 6 > 0)
+2. **React 2** - Trigger saat cheat (field 7 = 1)
+
+Dengan begini, Vercel hanya menerima data saat ada event penting, tidak setiap 15 detik.
+
+---
+
+## 2.18 Test Manual ThingHTTP
+
+Sebelum test dari perangkat nyata, coba dulu manual untuk memastikan konfigurasi benar.
+
+### 2.18.1 Cara Test ThingHTTP
+
+1. **Buka ThingHTTP** yang sudah dibuat
+   - Klik **Apps** → **ThingHTTP**
+   - Klik nama ThingHTTP (`ForwardToVercel`)
+
+2. **Klik tombol Test**
+   - Ada di pojok kanan atas halaman
+   - Klik **"Test"**
+
+3. **Cek响应**
+   - Jika berhasil, akan muncul response dari Vercel
+   - Response harus berisi JSON dengan data yang dikirim
+
+### 2.18.2 Cek di Vercel
+
+1. **Buka Vercel Dashboard**
+   - Buka: **https://vercel.com/dashboard**
+   - Klik project Anda
+
+2. **Buka Function Logs**
+   - Klik **Deployments** → deployment terbaru
+   - Scroll ke bawah, cari **"Function Logs"**
+
+3. **Cek log**
+   - Seharusnya ada log dari `/api/track` dengan payload dari ThingSpeak
+
+### 2.18.3 Troubleshooting Test Gagal
+
+| Masalah | Solusi |
+|---------|--------|
+| Connection refused | Cek URL Vercel benar, project sudah di-deploy |
+| 404 Not Found | Cek endpoint `/api/track` ada di Vercel |
+| 500 Internal Error | Cek DATABASE_URL sudah diset di Vercel |
+| Timeout | ThingSpeak limit 5 detik, cek Vercel response time |
+
+---
+
+## 2.19 Alur Lengkap Setelah Setup
+
+Setelah semua dikonfigurasi, berikut alur lengkap data dari device sampai ke database:
+
+```
+┌──────────────┐
+│   SIM900A    │
+│  (Device)    │
+└──────┬───────┘
+       │
+       │  HTTP POST JSON (setiap 15 detik)
+       ▼
+┌──────────────┐
+│  ThingSpeak  │  ← Simpan ke Channel 3268510
+│   Channel    │
+└──────┬───────┘
+       │
+       │  React trigger (setiap data masuk)
+       ▼
+┌──────────────┐
+│  ThingHTTP   │  ← ForwardToVercel
+│  (API Call)  │
+└──────┬───────┘
+       │
+       │  POST JSON
+       ▼
+┌──────────────────────────┐
+│   Vercel API            │
+│  /api/track            │
+│  laser-tag-project      │
+└──────────┬─────────────┘
+           │
+           ▼
+┌──────────────────────────┐
+│   PostgreSQL            │
+│   (NeonDB)              │
+└──────────────────────────┘
+```
+
+### 2.19.1 RingkasanSetiap 15 Detik:
+
+1. **SIM900A** mengirim data GPS ke ThingSpeak via GPRS
+2. **ThingSpeak** menyimpan data ke channel (field 1-8)
+3. **React** mendeteksi data baru → trigger ThingHTTP
+4. **ThingHTTP** POST data ke Vercel `/api/track`
+5. **Vercel** simpan ke PostgreSQL (NeonDB)
+6. **Dashboard** tampilkan data terbaru
+
+---
+
 ## 3. TFT Display 4 Pages Scrolling
 
 ### 3.1 Cara Kerja Sistem
@@ -1265,6 +1740,8 @@ API TTN:         https://mygps-tracker.vercel.app/api/ttn
 Neon Console:    https://console.neon.tech
 TTN Console:     https://console.thethingsnetwork.org
 Vercel Dashboard: https://vercel.com/dashboard
+ThingSpeak:      https://thingspeak.com/channels/3268510
+ThingSpeak API:  https://api.thingspeak.com/update?api_key=N6ATMD4JVI90HTHH
 ```
 
 ### Data Flow
@@ -1282,9 +1759,28 @@ Vercel Dashboard: https://vercel.com/dashboard
                                          ┌────────────┴──────────────┐
                                          ▼                              ▼
 ┌──────────────┐     GPRS       ┌─────────────────┐           ┌─────────────┐
+│   ESP32      │ ────────────→ │  ThingSpeak     │           │  Vercel     │
+│  (SIM900A)   │               │  Channel        │           │  Dashboard  │
+└──────────────┘               └────────┬────────┘           └─────────────┘
+                                         │                             
+                                         │ (HTTP Integration)           
+                                         ▼                             
+                                  ┌─────────────────────┐           
+                                  │  /api/track        │           
+                                  │  laser-tag-project │           
+                                  └──────────┬──────────┘           
+                                             │                      
+                                             ▼                      
+                                  ┌─────────────────────┐           
+                                  │  PostgreSQL        │           
+                                  │  (NeonDB)         │           
+                                  └─────────────────────┘           
+
+┌──────────────┐     GPRS       ┌─────────────────┐           ┌─────────────┐
 │   ESP32      │ ────────────→ │  simpera server │           │  Vercel     │
 │  (SIM900A)   │               │  /track.php     │           │  Dashboard  │
 └──────────────┘               └────────┬────────┘           └─────────────┘
+                                         │                             
                                          ▼                             
                                   ┌─────────────┐                    
                                   │  NeonDB     │                    
@@ -1515,7 +2011,16 @@ Artinya:
 | **Vercel** | vercel.com → Sign Up with GitHub | Login via GitHub | vercel.com |
 | **NeonDB** | console.neon.tech → Create Project | Email + Password | console.neon.tech |
 | **TTN** | console.thethings.network → Login with GitHub | Login via GitHub | console.thethings.network |
+| **ThingSpeak** | thingspeak.com → Sign Up | Email + Password | thingspeak.com |
 | **Arduino IDE** | download dari arduino.cc | - | - |
+
+### ThingSpeak Credentials
+
+| Parameter | Value |
+|-----------|-------|
+| **Channel ID** | `3268510` |
+| **Write API Key** | `N6ATMD4JVI90HTHH` |
+| **Channel URL** | `https://thingspeak.com/channels/3268510` |
 
 ---
 
@@ -1529,6 +2034,8 @@ Artinya:
 | **API Track** | `https://mygps-tracker.vercel.app/api/track` |
 | **API TTN** | `https://mygps-tracker.vercel.app/api/ttn` |
 | **Random Test** | `https://mygps-tracker.vercel.app/api/random` |
+| **ThingSpeak Channel** | `https://thingspeak.com/channels/3268510` |
+| **ThingSpeak API** | `https://api.thingspeak.com/update?api_key=N6ATMD4JVI90HTHH` |
 
 ### Links Console/Development
 
