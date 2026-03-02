@@ -1,36 +1,95 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GPS Tracker Dashboard
 
-## Getting Started
+Next.js 16 + Prisma + PostgreSQL dashboard untuk tracking data GPS dari ESP32 firmware.
 
-First, run the development server:
+## Features
+
+- **Live Data**: Polling every 2 seconds
+- **Dual Source Support**: WiFi HTTP + TTN LoRaWAN
+- **Extended Fields**: Device, Lat, Lng, Alt, IR Status, Battery, Satellites, RSSI, SNR
+- **Visual Indicators**: Battery level, signal strength, IR hit alerts
+- **Responsive Design**: Mobile + Desktop support
+
+## Tech Stack
+
+- Next.js 16 (App Router)
+- Prisma ORM
+- PostgreSQL (Vercel Postgres / Neon)
+- Tailwind CSS
+
+## Setup
 
 ```bash
+npm install
+npx prisma generate
+npx prisma db push
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Environment Variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+DATABASE_URL="postgresql://..."
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## API Endpoints
 
-## Learn More
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/track` | POST | Receive GPS data from ESP32 (WiFi) |
+| `/api/ttn` | POST | Receive GPS data from TTN webhook (LoRaWAN) |
+| `/api/logs` | GET | Fetch all logs (polled by dashboard) |
+| `/api/logs` | DELETE | Clear all logs |
+| `/api/random` | POST | Generate random test data |
 
-To learn more about Next.js, take a look at the following resources:
+## Data Schema
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```prisma
+model GpsLog {
+  id          Int      @id @default(autoincrement())
+  source      String   @default("wifi")  // "ttn" or "wifi"
+  deviceId    String
+  latitude    Float
+  longitude   Float
+  altitude    Float?
+  irStatus    String?  @default("-")
+  battery     Int?     // millivolts
+  satellites  Int?
+  rssi        Int?
+  snr         Float?
+  rawPayload  Json?
+  createdAt   DateTime @default(now())
+}
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Firmware Integration
 
-## Deploy on Vercel
+### WiFi Mode (HTTP)
+- URL: `https://laser-tag-project.vercel.app/api/track`
+- Method: `POST`
+- Body:
+```json
+{
+  "source": "wifi",
+  "id": "Player 1",
+  "lat": -6.2088,
+  "lng": 106.8456,
+  "alt": 10.5,
+  "irStatus": "HIT: 0xABCD-0x12",
+  "battery": 4123,
+  "satellites": 8,
+  "rssi": -75,
+  "snr": 7.5
+}
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### LoRaWAN Mode (TTN)
+See `../../docs/TTN_PAYLOAD_DECODER.md` for TTN configuration.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deployment
+
+1. Push to GitHub
+2. Import in Vercel
+3. Add `DATABASE_URL` environment variable
+4. Deploy
+5. Configure TTN webhook to `https://your-vercel-app.vercel.app/api/ttn`

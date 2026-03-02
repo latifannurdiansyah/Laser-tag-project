@@ -1,0 +1,6548 @@
+﻿Bidang
+Bidang
+LAPORAN
+ 
+PROYEK AKHIR
+IMPLEMENTASI RANGKAIAN ELEKTRONIK DAN SISTEM KOMUNIKASI MULTI-PEMAIN UNTUK PERMAINAN 
+LASER TAG
+ MENGGUNAKAN ESP-NOW DAN L
+ORA
+OLEH
+:
+LATIFAN NURDIANSYAH
+NIM
+:
+ 244101077012
+PROGRAM
+ 
+STUDI
+ 
+SARJANA TERAPAN
+ 
+TEKNIK
+ 
+ELEKTRONIKA
+JURUSAN TEKNIK ELEKTRO
+POLITEKNIK
+ 
+NEGERI
+ 
+MALANG
+202
+6
+LAPORAN
+ 
+PROYEK AKHIR
+IMPLEMENTASI RANGKAIAN ELEKTRONIK DAN SISTEM KOMUNIKASI MULTI-PEMAIN UNTUK PERMAINAN 
+LASER TAG
+ MENGGUNAKAN 
+ESP-NOW
+ DAN 
+L
+ORA
+Oleh:
+Latifan Nurdiansyah                       NIM
+:
+ 244101077012
+PROGRAM
+ 
+STUDI
+ 
+SARJANA TERAPAN
+ 
+TEKNIK
+ 
+ELEKTRONIKA
+JURUSAN TEKNIK ELEKTRO
+POLITEKNIK
+ 
+NEGERI
+ 
+MALANG
+202
+6
+HALAMAN PENGESAHAN 
+IMPLEMENTASI RANGKAIAN ELEKTRONIK DAN SISTEM KOMUNIKASI MULTI-PEMAIN UNTUK PERMAINAN 
+LASER TAG
+ MENGGUNAKAN 
+ESP-NOW
+ DAN 
+LoRa
+Oleh:
+Latifan Nurdiansyah
+244101077012
+Proyek Akhir ini telah dipertahankan di depan dewan penguji pada tanggal 
+3
+ 
+Februari 
+202
+6
+ dan disahkan oleh :
+Pembimbing I
+Nama Pembimbing I
+:
+Indrazno Siradjuddin, S.T., M.T., Ph.D.
+NIP.
+:
+197406242000121001
+……………….
+Pembimbing II
+Nama Pembimbing II
+:
+Gillang Al Azhar, S.S.T., M.Tr.T.
+NIP.
+:
+199506222020121003
+……………….
+Penguji I
+Nama Penguji I
+:
+NIP.
+:
+……………….
+Penguji I
+I
+Nama Penguji II
+:
+NIP.
+:
+……………….
+ 
+    
+Malang,
+Februari
+ 202
+6
+Mengetahui,
+Menyetujui,
+Ketua Jurusan Teknik Elektro
+Koordinator Program Studi 
+Sarjana Terapan
+ Teknik Elektronika
+Prof. Ir. Mohammad Noor Hidayat, S.T., M.Sc., Ph
+.
+D
+.
+Hari Kurnia Safitri, S.T., M.T.
+NIP
+.
+ 
+197409252001121003
+NIP
+.
+ 
+197307132002122002
+PERNYATAAN KEASLIAN PROYEK AKHIR
+Saya yang bertanda tangan di bawah ini:
+Nama                                       :
+Latifan Nurdiansyah
+NIM                                         :
+244101077012
+Jurusan/Program Studi            :
+Teknik Elektro/D4 Teknik Elektronika
+Judul                                        :
+Implementasi rangkaian elektronik dan sistem komuikasi multi-pemain untuk permainan laser tag menggunakan 
+esp-now dan LORA
+Menyatakan dengan sebenarnya bahwa:
+Karya tulis ini benar – benar merupakan hasil karya saya sendiri, bukan merupakan alihan penelitian, tulisan atau pikiran orang lain yang saya akui sebagai hasil proyek akhir, tulisan atau pikiran saya sendiri.
+Apabila di kemudian hari terbukti atau dapat dibuktikan bahwa karya tulis ini hasil jiplakan (plagiasi), dan saya tidak dapat memenuhi pernyataan saya ini maka saya bersedia menerima sanksi atas perbuatan saya tersebut.
+Malang.  J
+anuari
+ 202
+6
+Latifan Nurdiansyah
+ABSTRAK
+ 
+Latifan Nurdiansyah, 202
+6
+.
+ 
+Implementation of Electronic Circuits and Multi-Player Communication Systems for Laser Tag Games Using ESP-NOW and LoRa
+Proyek Akhir
+ 
+Program
+ 
+Studi
+ 
+Sarjana Terapan
+ 
+Teknik
+ 
+Elektronika,
+ 
+Jurusan
+ 
+Teknik        
+ 
+Elektro, Politeknik Negeri Malang, 202
+6
+.
+.
+Kata Kunci
+:
+ 
+KATA
+ 
+PENGANTAR
+Puji syukur kehadirat Allah SWT yang telah melimpahkan rahmat serta hidayah-Nya, serta memberikan petunjuk serta kesehatan sehingga penulis dapat menyelesaikan Laporan Akhir yang berjudul “
+Implementasi Rangkaian Elektronik dan Sistem Komunikasi Multi-Pemain 
+u
+ntuk Permainan 
+Laser Tag 
+Menggunakan 
+ESP-N
+OW
+ dan 
+LoRa
+”. Pada kesempatan ini penulis mengucapkan terimakasih kepada pihak-pihak yang telah membantu dan membimbing dalam penyusunan Laporan Akhir, yaitu kepada :
+Bapak
+ Ir.
+ Supriatna Adhisuwignjo, S.T., M.T. selaku Direktur Politeknik Negeri Malang beserta jajarannya.
+Bapak 
+Prof. 
+Ir. Mohammad Noor Hidayat, S.T., M.Sc., Ph.D. selaku Ketua Jurusan Teknik Elektro beserta jajarannya.
+Ibu Hari Kurnia Safitri, ST., MT. selaku Ketua Program Studi 
+Sarjana Terapan 
+Teknik Elektronika beserta jajarannya.
+Bapak Indrazno Siradjuddin, S.T., M.T., Ph.D. selaku Dosen Pembimbing 1, yang telah membimbing dan mendampingi sepenuh hati dari awal hingga akhir penelitian proyek akhir ini.
+Bapak Gillang Al Azhar, S.S.T., M.Tr.T. selaku Dosen Pembimbing 2, yang telah membimbing dari awal hingga akhir penelitian proyek akhir ini.
+Seluruh Dosen dan Staff Politeknik Negeri Malang, khususnya pada Program Studi 
+Sarjana Terapan
+ Teknik Elektronika
+.
+Orang tua yang telah memberi dukungan do’a dan materi
+ dan juga memberikan apapun yang aku butuhkan.
+Teman Teman Lab Robotics Polinema yang dengan senang hati bertukar ilmu dan pikiran
+Mahasiswa dengan NIM 2142520038 Jurusan Aku
+tansi yang selalu memeberikan dukungan penulis dalam mengerjakan laporan ini
+ dalama suka maupun duka
+ sampai
+ laporan ini
+ selesai 
+Teman-teman mahasiswa dan pihak yang telah membantu dalam penyusunan Laporan Akhir ini.
+Penulis menyadari masih banyak kekurangan dan pembuatan 
+proyek akhir
+ ini. Oleh karena itu, penulis mengharapkan saran dan kritik yang bersifat membangun dan semoga 
+proyek akhir
+ ini dapat bermanfaat.
+Malang,  
+Januari
+ 202
+6
+Penulis
+DAFTAR ISI
+ABSTRAK
+i
+KATA
+ 
+PENGANTAR
+ii
+DAFTAR ISI
+iv
+DAFTAR GAMBAR
+vii
+DAFTAR TABEL
+ix
+BAB I PENDAHULUAN
+10
+1.1
+Latar Belakang
+10
+1.2
+Rumusan Masalah
+11
+1.3
+Batasan Masalah
+12
+1.4
+Tujuan
+12
+1.5
+Sistematika Penulisan
+12
+1.6
+Luaran Laporan Proyek Akhir
+13
+BAB II TINJAUAN PUSTAKA
+14
+2.1
+Kajian Pustaka
+14
+2.2
+Teori Penunjang
+17
+2.2.1
+Baterai Lithium Ion
+17
+2.2.2
+Regulator Tegangan
+18
+2.2.3
+Sensor Api
+19
+2.2.4
+Sensor Suara
+21
+2.2.5
+Sensor Getar
+23
+2.2.6
+Operational Amplifier Komparator
+25
+2.2.7
+Gerbang Logika NOR
+26
+2.2.8
+Rangkaian Push Pull
+27
+2.2.9
+Transmitter Inframerah
+29
+2.2.10
+Modulasi dan Demodulasi Inframerah
+31
+2.2.11
+Gelombang Inframerah
+32
+2.2.12
+Nippon Electric Company Protocol
+33
+2.2.13
+Jarak Transmisi Bahan Optik
+33
+2.2.14
+Lensa Freshnel
+35
+2.2.15
+Push Button
+36
+2.2.16
+Global Positioning System
+ (GPS)
+37
+2.2.17
+Mikrokontroler
+38
+2.2.18
+Protokol ESP-Now
+40
+2.2.19
+Receiver Infrared Anti Cheating
+41
+2.2.20
+LoraWan
+43
+2.2.21
+RadioLib
+45
+2.2.22
+Gateway
+46
+2.2.23
+Heltec Tracker V1.1
+47
+2.2.24
+Heltec Tracker V1.1 dengan integrasi ke The Things Network (TTN)
+48
+2.2.25
+MP3 Player Module
+50
+2.2.26
+Speaker
+51
+BAB III METODOLOGI
+52
+3.1
+Kerangka Konsep Proyek Akhir
+52
+3.2
+Perancangan Sistem
+55
+3.3
+Perancangan Mekanik
+57
+3.3.1
+Perancangan SAT
+57
+3.3.2
+Perancangan Box pada Helm
+59
+3.3.3
+Perancangan pada Rompi
+59
+3.4
+Perancangan Elektronik
+60
+3.4.1
+Perancangan Rangkaian Power Source Regulator Circuit
+60
+3.4.2
+Rangkaian Sensor Suara
+63
+3.4.3
+Rangkaian Sensor Getar
+66
+3.4.4
+Rangkaian Sensor Api
+69
+3.4.5
+Rangkaian Pengkondisi sinyal
+71
+3.4.6
+Rangkaian Driver SAT
+72
+3.4.7
+Rangkaian penerima inframerah TSOP4838 anti-cheating
+79
+3.4.8
+Rangkaian
+82
+3.4.9
+Rangkaian
+82
+3.5
+Perancangan Software
+83
+BAB IV PENGUJIAN DAN ANALISA
+85
+4.1 Pengujian perblok
+85
+4.1.1
+Pengujian Rangkaian Power Regulator
+85
+4.1.2
+Pengujian Rangkaian Pemancar Inframerah
+86
+4.1.3
+Pengujian Rangkaian Penerima Inframerah
+91
+4.1.4
+Pengujian Heltec Tracker V1.1
+92
+4.1.5
+Pengujian Keseluruhan
+94
+DAFTAR PUSTAKA
+96
+LAMPIRAN
+100
+DAFTAR GAMBAR
+Gambar 1 Regulator LM7805
+19
+Gambar 2 Rangkaian Sensor Api
+20
+Gambar 3 Rangkaian Sensor Suara
+23
+Gambar 4 Rangkaian sensor getar
+25
+Gambar 5 Op-Amp
+26
+Gambar 6 Logika NOR
+27
+Gambar 7 Rangkaian Dasar Push-Pull
+28
+Gambar 8 Infrared LED
+30
+Gambar 9 Panjang Gelombang
+32
+Gambar 10 Transmisi Bahan Optik
+34
+Gambar 11 Lensa Freshnel
+35
+Gambar 12 Global Positioning System (GPS)
+38
+Gambar 13 
+ESP32
+39
+Gambar 14 TSOP43..
+42
+Gambar 15 Kerangka Konsep penyusunan proyek akhir
+53
+Gambar 16 Perancangan Sistem
+56
+Gambar 17 Perancangan SAT
+57
+Gambar 18 Focal Length Lensa Fresnel
+58
+Gambar 19 Perancangan Helm
+59
+Gambar 20 Perancangan Box pada Rompi
+59
+Gambar 21 Design Rompi
+60
+Gambar 22 Power Source Regulator
+62
+Gambar 23 Rangkaian sensor suara
+63
+Gambar 24 Rangkaian Sensor Getar
+66
+Gambar 25 Rangkaian Sensor Api
+69
+Gambar 26 Rangkaian pengkondisi sinyal
+72
+Gambar 27 Rangkaian Pengendali
+73
+Gambar 28 Rangkaian Push pull
+75
+Gambar 29 Rangkaian sederhana IR LED
+78
+Gambar 30 Gambar Rangkaian keseluruhan Infrared Driver
+79
+Gambar 31 Rangkaian Penerima Infrared Anti-Cheating
+80
+Gambar 32 Sudut penerimaan sensor TSOP4838
+81
+Gambar 33 Grafik Panjang Gelombang
+82
+Gambar 34 Flowchart
+83
+DAFTAR TABEL
+Tabel 1 
+Spesifikasi 
+ESP32
+40
+Tabel 2 Spesifikasi TSOP43..
+42
+Tabel 3 Pengujian LM7805
+86
+BAB I
+PENDAHULUAN
+Latar Belakang
+Perkembangan teknologi digital telah membawa perubahan signifikan dalam dunia hiburan interaktif, termasuk pada jenis permainan simulasi fisik seperti 
+Laser Tag
+. 
+Permainan ini menggabungkan aktivitas fisik, strategi tim, dan penggunaan perangkat elektronik berbasis sensor untuk menciptakan pengalaman bermain yang imersif. Namun, sistem 
+Laser Tag
+ komersial yang tersedia saat ini umumnya masih bersifat tertutup dan terbatas: deteksi tembakan sering kali kurang akurat karena rentan terhadap gangguan cahaya latar, tidak tersedia informasi posisi pemain secara real-time, serta tidak mendukung komunikasi data antar pemain maupun ke pusat kendali. Kondisi ini menghambat pengembangan sistem yang lebih adaptif, terukur, dan dapat digunakan tidak hanya untuk hiburan, tetapi juga untuk pelatihan atau kompetisi terstruktur
+.
+Beberapa penelitian sebelumnya telah mengembangkan sistem berbasis sinar inframerah (IR) untuk simulasi pertempuran, seperti 
+Multiple Integrated Laser Engagement System
+ (MILES), yang mampu mengidentifikasi pemain melalui kode digital dan memberikan umpan balik saat terkena tembakan 
+(Siradjuddin et al., 2024)
+. Meski efektif, sistem semacam ini biasanya membutuhkan perangkat keras mahal, konsumsi daya tinggi, dan infrastruktur yang kompleks—sehingga kurang layak untuk diterapkan dalam skenario rekreasi atau komunitas dengan anggaran terbatas.
+Perkembangan teknologi 
+Internet of Things
+ (IoT) membuka peluang baru untuk merancang sistem 
+Laser Tag
+ yang lebih terjangkau, modular, dan terhubung. Dua protokol komunikasi nirkabel yang menarik untuk diintegrasikan adalah ESP-NOW dan LoRa. ESP-NOW, yang berjalan pada mikrokontroler ESP32, memungkinkan komunikasi 
+peer-to-peer
+ berkecepatan tinggi dengan latensi sangat rendah tanpa memerlukan jaringan Wi-Fi
+ 
+(Hailan et al., 2024)
+. Protokol ini ideal untuk mengirimkan data tembakan antar pemain dalam jarak dekat (hingga ±30 meter), seperti dari helm ke rompi atau antar rompi pemain yang saling berinteraksi. Namun, jangkauannya terbatas, sehingga tidak memadai untuk arena permainan skala luas.
+.
+Di sisi lain, teknologi LoRa (Long Range) menawarkan kemampuan transmisi data hingga beberapa kilometer dengan konsumsi daya sangat rendah 
+(Konate et al., 2025; Yahya et al., 2024)
+. Dengan LoRa, data permainan—seperti skor, posisi berdasarkan modul GPS, atau status nyawa—dapat dikirim ke 
+gateway
+ pusat dan ditampilkan melalui antarmuka web, memungkinkan pemantauan real-time oleh wasit, pelatih, atau penonton. Kombinasi kedua protokol ini menciptakan arsitektur komunikasi dua lapis: ESP-NOW untuk interaksi cepat antar pemain, dan LoRa untuk integrasi ke sistem eksternal jarak jauh
+Berdasarkan latar belakang maka, pada proyek akhir ini akan dikembangkan sistem Permainan Laser Tag Menggunakan ESP-NOW dan LoRa. 
+Sistem yang dirancang terdiri dari helm dan rompi yang dilengkapi sensor infrared, modul GPS, serta modul komunikasi berbasis ESP32. Data dari hasil deteksi maupun posisi pemain akan dikirim melalui ESP-NOW dan LoRa ke server, lalu ditampilkan dalam bentuk web interface secara real-time
+.
+Hipotesis dari proyek akhir ini adalah bahwa kombinasi ESP-NOW dan LoRa dapat menghasilkan sistem Laser Tag yang lebih akurat, cepat, dan mampu digunakan dalam arena permainan berskala luas. Dengan adanya sistem pemantauan secara real-time, diharapkan permainan menjadi lebih mendalam (imersif), serta dapat dikembangkan lebih lanjut untuk keperluan pelatihan, simulasi, maupun hiburan berbasis IoT di masa depan.
+Rumusan Masalah
+Berdasarkan latar belakang di atas, dapat dirumuskan beberapa masalah sebagai berikut:
+Bagaimana mengimplementasikan rangkaian elektronik pada sistem tembak (senjata) serta rangkaian penerima (helm dan rompi), dan membangun sistem komunikasi dua arah antara server dan banyak unit pemain
+?
+Bagaimana mengintegrasikan protokol ESP-NOW dan LoRa pada mikrokontroler untuk mendukung komunikasi real-time dalam permainan Laser Tag?
+Bagaimana mengimplementasikan sistem komunikasi dua arah untuk mendukung pencatatan skor secara 
+real-time
+?
+Batasan Masalah
+Untuk memfokuskan proyek akhir, diberikan pembatasan masalah sebagai berikut:
+Komunikasi nirkabel hanya menggunakan ESP-NOW (jarak dekat antar
+ helm dan rompi
+) dan LoRa (jarak jauh ke server), dengan sistem terbatas pada maksimal 2 klien dan 1 server, serta hanya mengirim data status
+ 
+tanpa audio, video, atau enkripsi tingkat lanjut
+Sistem hanya menggunakan sensor inframerah dengan modulasi 38 kHz sesuai protokol NEC, termasuk rangkaian IR receiver anti-cheating yang dirancang untuk beroperasi di siang hari, dan khusus diterapkan dalam permainan laser tag.
+Sumber daya dibatasi pada baterai lithium-ion untuk senjata, rompi, dan helm, tanpa membahas alternatif sumber daya, pengisian daya, lokasi minim sinyal seluler, maupun aspek keamanan siber atau enkripsi data.
+Tujuan
+Berdasarkan rumusan masalah yang telah ditetapkan terdapat beberapa tujuan dari 
+proyek akhir
+ ini. Berikut merupakan tujuan dari 
+proyek akhir
+ ini:
+Mengimplementasikan 
+rangkaian elektronik pada sistem tembak (senjata) serta rangkaian penerima (helm dan rompi
+) dan
+ sistem komunikasi dua arah antara server dan banyak unit pemain
+Mengintegrasikan protokol ESP-NOW dan LoRa pada mikrokontroler untuk mendukung komunikasi real-time dalam permainan Laser Tag
+.
+Mengembangkan sistem komunikasi dua arah untuk mendukung pencatatan skor secara 
+real-time
+.
+Sistematika Penulisan
+Pembahasan dalam proyek akhir ini disusun secara terstruktur dalam lima bab utama, yang masing-masing memiliki fokus tersendiri sesuai dengan alur 
+proyek akhir
+ dan pengembangan sistem. Sistematika penulisan pada laporan proyek akhir ini :
+Bab I
+ Pendahuluan
+Bab ini berisi latar belakang pemilihan topik 
+proyek akhir
+, rumusan masalah beserta batasan masalah yang diteliti. Selain itu, juga dijelaskan tujuan 
+proyek akhir
+ 
+serta manfaat yang ingin dicapai. 
+Bab ini juga memberikan gambaran umum mengenai struktur penulisan laporan proyek akhir.
+Bab II Tinjauan Pustaka
+Bab ini membahas materi teoretis yang relevan dengan proyek akhir, termasuk konsep-konsep dasar, teknik, peralatan, atau teknologi yang digunakan dalam proses proyek akhir. Selain itu, juga disertakan referensi pustaka dan hasil proyek akhir sebelumnya yang menjadi dasar pengembangan sistem.
+Bab III Metodologi
+Bab ini menjelaskan secara rinci pendekatan atau metode yang digunakan dalam melaksanakan proyek akhir. Meliputi desain sistem, tahapan pengembangan, alur kerja, serta langkah-langkah yang dilakukan untuk mencapai tujuan proyek akhir.
+Bab IV Hasil Dan Pembahasan
+Pada bab ini disajikan hasil implementasi sistem, data pengujian perblok dan keseluruhan, serta analisis yang dilakukan berdasarkan metode proyek akhir yang telah ditetapkan. Pembahasan bertujuan untuk mengevaluasi kinerja sistem dan membandingkannya dengan tujuan serta hipotesis awal.
+Bab V Penutup
+Bab terakhir ini memuat kesimpulan utama dari seluruh rangkaian proyek akhir, berdasarkan hasil dan pembahasan yang telah diuraikan. 
+Selain itu, juga disertakan saran-saran untuk pengembangan sistem pada 
+proyek akhir
+ lanjutan.
+Luaran Laporan Proyek Akhir
+Proyek akhir ini memiliki 
+4
+ luaran yaitu
+Naskah Laporan proyek akhir
+Alat Sistem berupa 
+senjata, helm dan rompi
+Manual Book
+Artikel yang disubmit di j
+urnal yang ber-ISSN.
+BAB II
+TINJAUAN PUSTAKA
+Kajian Pustaka
+Berikut adalah beberapa hasil 
+penelitian
+ terdahulu yang relevan dengan topik 
+proyek akhir
+ ini dan dapat digunakan sebagai landasan dan tinjauan pustaka untuk mendukung acuan 
+proyek akhir
+ ini sebagai berikut.
+Dalam dunia pelatihan militer modern, simulasi tempur yang realistis dan aman menjadi kebutuhan utama untuk meningkatkan kesiapan tempur tanpa harus mengorbankan nyawa atau menggunakan amunisi aktif. Salah satu teknologi yang telah lama dikembangkan dan digunakan secara luas untuk tujuan ini adalah Multiple Integrated Laser Engagement System (MILES). Sistem ini memungkinkan simulasi pertukaran tembakan antar personel atau kendaraan tempur dengan menggunakan pancaran cahaya infrared (IR) sebagai pengganti peluru. 
+Pada sistem MILES, setiap senjata dilengkapi dengan perangkat yang disebut Small Arm Transmitter (SAT), yang memancarkan sinyal infrared saat pelatih menembakkan senjata. Sinyal ini kemudian dideteksi oleh sensor IR pada lawan, yang mencatat "kena tembak" berdasarkan data identitas pemain (Player ID/PID) yang turut dikodekan dalam sinyal tersebut. Oleh karena itu, performa SAT sangat menentukan keberhasilan simulasi, termasuk jangkauan deteksi, akurasi respon waktu, dan reliabilitas transmisi data.
+(Siradjuddin et al., 2024)
+. 
+Salah satu komponen krusial dalam SAT adalah infrared (IR) emitter driver circuit, yang mengendalikan arus listrik ke LED infrared berdaya tinggi, memastikan pancaran cahaya IR dengan intensitas optimal dan waktu respons yang cepat. Desain rangkaian ini menjadi fokus utama dalam 
+proyek akhir
+ (Siradjuddin et al., 2024), yang memperkenalkan rancangan baru sirkuit penggerak emitter infrared khusus untuk aplikasi SAT dalam sistem MILES. Tujuan dari desain ini adalah untuk memaksimalkan daya optik dan memastikan frekuensi pensaklaran 38 kHz yang sesuai dengan standar protokol komunikasi IR NEC, yang menjadi kunci dalam efektivitas komunikasi infrared.
+(Siradjuddin et al., 2024)
+Menurut jurnal 
+Wireless Infrared Communications: A Survey
+, komunikasi infrared memanfaatkan propagasi cahaya pada pita near-infrared dengan pemancar 
+berupa LED atau laser diode dan penerima berupa silicon p-i-n photodiode karena efisiensinya yang baik dan biaya rendah. Sistem ini menggunakan teknik Intensity Modulation with Direct Detection (IM/DD), di mana arus fotodetektor sebanding dengan intensitas optik yang diterima. Namun, penerimaan sinyal dapat terganggu oleh sumber cahaya sekitar seperti sinar matahari atau lampu, sehingga diperlukan filter optik dan pemilihan modulasi yang tepat untuk menjaga kualitas sinyal. Sementara itu, menurut jurnal 
+Wireless Infrared Communications
+, 
+komunikasi infrared menawarkan keunggulan dibanding radio, seperti bandwidth yang sangat besar, biaya rendah, serta keamanan tinggi karena sinyal tidak menembus dinding. Selain itu, penggunaan IM/DD dengan detektor berukuran besar mencegah terjadinya multipath fading, sehingga desain sistem lebih sederhana. Meski begitu, keterbatasan komunikasi infrared adalah jangkauannya yang terbatas, kebutuhan daya pancar relatif tinggi, serta sensitivitas terhadap noise cahaya sekitar
+.
+(Kahn & Barry, 1997; Zade et al., 2012)
+Menurut jurnal 
+Penerapan Protokol Komunikasi ESP-NOW pada Portable Traffic Light
+, implementasi komunikasi berbasis ESP-NOW dengan skema master–slave mampu bekerja stabil dengan tingkat error rata-rata hanya 3% dan jangkauan optimal hingga 25 meter meskipun terdapat halangan berupa casing modul. 
+Sementara itu, pada jurnal 
+ESPNow Protocol-Based IIoT System for Remotely Monitoring and Controlling Industrial Systems
+, ESP-NOW dimanfaatkan untuk menghubungkan beberapa node sensor dalam sistem Industrial Internet of Things (IIoT), yang terbukti mendukung pemantauan industri secara real-time dengan latensi rendah, konsumsi daya hemat, serta keamanan data yang terjamin melalui enkripsi. Di sisi lain, 
+proyek akhir
+ berjudul 
+Indoor Performance Evaluation of ESP-NOW
+ 
+ 
+mengevaluasi performa ESP-NOW dalam kondisi indoor dan menemukan bahwa meskipun faktor lingkungan seperti pantulan dan penghalang dapat memengaruhi kinerja, protokol ini tetap menunjukkan efisiensi daya lebih dari 30% dibanding WiFi serta jangkauan yang lebih baik hingga 15%. Berdasarkan temuan-temuan tersebut, ESP-NOW sangat relevan untuk digunakan pada sistem permainan Laser Tag, di mana komunikasi antar perangkat harus berlangsung cepat, stabil, dan hemat daya dalam area permainan.
+(Fajar Arofah et al., 2023; Hailan et al., 2024; Urazayev et al., 2023)
+Menurut 
+proyek akhir
+ 
+Design and Implementation of a Backscatter Communication System Based on LoRa Technology
+, 
+LoRa backscatter mampu meningkatkan efisiensi energi dan memperluas jangkauan komunikasi dengan memanfaatkan sinyal pantulan dari perangkat pasif, sehingga sangat potensial untuk aplikasi IoT berskala besar. Sementara itu, dalam jurnal 
+Analisa Performansi Komunikasi LoRa (Long Range) pada Sistem Monitoring Buoy di Laut
+, 
+komunikasi LoRa 915 MHz terbukti dapat menjaga kualitas dengan nilai RSSI rata-rata lebih baik dari -120 dB dan SNR lebih besar dari -20 dB meskipun terdapat interferensi, sehingga layak digunakan untuk sistem monitoring di lingkungan laut. Selanjutnya, hasil 
+proyek akhir
+ 
+Analisis Jarak Jangkauan LoRa (Long Range) di Lingkungan Urban
+, 
+menunjukkan bahwa jangkauan LoRa di area perkotaan dapat mencapai hingga 2 km dengan nilai RSSI relatif stabil, meskipun packet loss meningkat pada jarak yang lebih jauh. Dari ketiga kajian tersebut dapat disimpulkan bahwa LoRa tidak hanya handal untuk komunikasi jarak jauh dengan konsumsi energi rendah, tetapi juga fleksibel untuk diterapkan dalam berbagai skenario, baik di laut, lingkungan urban, maupun melalui dukungan teknologi backscatter.
+(Konate et al., 2025; Nihayatus Sa’adah et al., 2024; Yanziah et al., 2020)
+Global Positioning System (GPS) merupakan sistem navigasi berbasis satelit yang terdiri dari 24 satelit operasional yang mengorbit Bumi dan menyediakan informasi posisi secara kontinu melalui tiga segmen utama, yaitu segmen pengguna, ruang angkasa, dan kontrol, dimana menurut jurnal 
+"Implementation of GPS for Location Tracking"
+, data yang diterima berupa format NMEA-0183 yang berisi koordinat latitude dan longitude yang perlu diekstrak untuk memperoleh data posisi. Menurut jurnal 
+"Missing Pilgrims Tracking System Using GPS, GSM and Arduino Microcontroller"
+, GPS merupakan sistem navigasi universal yang dapat bekerja dalam segala kondisi cuaca dan dapat dikombinasikan dengan teknologi GSM untuk menghasilkan sistem pelacakan berbasis peta digital, sementara jurnal 
+"A GPS Receiver for High-Altitude Satellite Navigation"
+ mengatakan bahwa GPS telah digunakan untuk navigasi satelit presisi di orbit rendah Bumi (LEO), meskipun penerapannya di orbit geosinkron (GEO) masih terbatas akibat lemahnya sinyal. Lebih lanjut, GPS merupakan bagian dari GNSS (Global Navigation Satellite System) bersama dengan GLONASS, BeiDou, dan 
+Galileo, dengan akurasi 3–10 meter di lingkungan outdoor, namun menurun menjadi 30–100 meter di indoor sehingga mendorong pengembangan Indoor Positioning System (IPS) berbasis RTK dengan akurasi hingga 2 cm atau teknologi UWB dengan akurasi 20 cm, serta aspek waktu yang penting dimana distribusi UTC melalui sinyal GPS memiliki akurasi ≤30 nanodetik.
+(Ariffin et al., 2011; Itera, 2021; Parveen & Aldhlan, 2016; Winternitz et al., 2009)
+Menurut 
+proyek akhir
+ 
+Web Server Based Smart Agriculture System for Real-Time Monitoring and Control
+, 
+pemanfaatan web server dalam integrasi IoT memungkinkan penyajian data sensor secara real-time melalui dashboard interaktif yang mendukung sistem pertanian cerdas. Hal ini sejalan dengan studi 
+A Web Server-Based IoT System for Monitoring and Control of Agricultural Environment
+, 
+yang menekankan pentingnya akses global dan pengelolaan data terdistribusi secara aman melalui jaringan berbasis web. Lebih lanjut, 
+proyek akhir
+ 
+Real-Time Monitoring of Cable Sag and Overhead Line Parameters Based on a Distributed Sensor Network and Implementation in a Web Server and IoT
+, 
+menunjukkan bagaimana web server dipadukan dengan database MySQL dan IoT server untuk memantau kondisi kabel transmisi listrik secara aman, baik melalui intranet maupun internet. Sementara itu, jurnal 
+Web-Based Integration of IoT and Artificial Intelligence for Monitoring Aquariums
+, 
+menegaskan bahwa dashboard web mampu membangun visualisasi interaktif yang membantu pengawasan kondisi lingkungan, seperti suhu, pH, dan kecerahan air pada sistem akuarium pintar. Dari keempat kajian tersebut, dapat disimpulkan bahwa web server berperan penting dalam integrasi IoT, tidak hanya untuk pemantauan data sensor secara real-time, tetapi juga dalam mendukung keamanan akses, keterhubungan global, serta pengembangan dashboard interaktif yang relevan untuk berbagai bidang, mulai dari pertanian, energi, hingga sistem hiburan seperti permainan Laser Tag.
+(Deepika & Renuka Prasad, 2023; Guerbaoui et al., 2025; Nicola et al., 2024; Nugraha & Rosita, 2024)
+.
+Teori Penunjang
+Baterai Lithium Ion
+Baterai 
+Lithium-Ion
+ (Li-ion) merupakan salah satu jenis sel baterai sekunder (
+rechargeable
+) yang paling banyak digunakan dalam sistem elektronika portabel 
+dan perangkat berbasis mikrokontroler. Keunggulannya terletak pada rapat energi yang tinggi, konsumsi daya rendah, dan ukuran yang kompak 
+(Lesmana et al., 2023)
+. Dalam aplikasi sistem 
+embedded
+ seperti yang dirancang pada 
+proyek akhir
+ ini, baterai 
+Lithium-Ion
+ sering dikonfigurasi dalam bentuk pack seri untuk menghasilkan tegangan yang sesuai dengan kebutuhan sistem. Misalnya, konfigurasi 2S (2 seri) menghasilkan tegangan nominal sekitar 7,4 V, yang dapat digunakan untuk menyuplai daya ke mikrokontroler, motor, modul komunikasi, dan sensor melalui regulator tegangan (
+step-down converter
+).
+ Dengan rumus pemakaian sebagai berikut 
+Kapasitas Baterai (mAh) = Arus (mA) × Waktu (jam)
+Dalam proyek permainan laser tag ini baterai lithium ion digunakan sebagai catu daya pada senjata, helm dan juga rompi. 
+Pemilihan baterai ini didasarkan pada kemampuannya menyediakan energi secara efisien dengan bobot yang ringan, sehingga memungkinkan perangkat beroperasi secara mandiri di lapangan tanpa ketergantungan pada sumber daya eksternal. Hal ini sangat penting dalam mendukung mobilitas tinggi dan fleksibilitas gerak selama permainan berlangsung
+.
+Regulator Tegangan
+ 
+Regulator tegangan adalah perangkat yang digunakan untuk menjaga kestabilan tegangan pada suatu sistem kelistrikan, meskipun terjadi fluktuasi pada tegangan masukan. Fungsi utama regulator tegangan adalah untuk memastikan tegangan output tetap pada nilai yang diinginkan, melindungi perangkat elektronik atau sistem yang sensitif terhadap perubahan tegangan yang ekstrem. 
+Regulator tegangan dapat dibedakan menjadi dua jenis utama, yaitu regulator linear dan regulator switching. 
+Regulator linear menurunkan tegangan dengan cara mengalirkan arus melalui komponen pengatur, namun sering menghasilkan banyak panas dan kurang efisien. Sementara regulator switching menggunakan metode pemutusan dan penyambungan untuk mengatur tegangan dengan lebih efisien, menghasilkan sedikit energi terbuang.
+Prinsip kerja regulator tegangan didasarkan pada kemampuan untuk mengontrol aliran listrik sesuai dengan perbedaan antara tegangan masukan dan tegangan output yang diinginkan. Regulator linear mengurangi tegangan melalui komponen elektronik seperti transistor, 
+Rangkaian dasar regulator tegangan yang 
+digunakan dalam sistem ini ditunjukkan pada 
+Gambar 
+1
+ 
+regulator ini mampu menghasilkan tegangan keluaran stabil pada 5 V dengan toleransi antara 4,75 V hingga 5,25 V, meskipun terdapat variasi pada tegangan masukan (7–25 V) maupun perubahan arus beban (5 mA hingga 1,5 A). 
+Regulator ini memiliki tingkat penolakan ripple yang tinggi (62–78 dB), resistansi output sangat rendah (sekitar 0,017 
+Ω
+), serta noise output kecil (sekitar 40 µV), sehingga mampu memberikan suplai daya yang bersih untuk rangkaian sensitif. Selain itu, dropout voltage sekitar 2 V menunjukkan bahwa tegangan masukan minimal harus lebih besar dari 7 V untuk menghasilkan 5 V stabil pada keluaran. Dengan adanya proteksi arus pendek hingga 750 mA serta kemampuan arus puncak hingga 2,2 A, LM7805 menjadi regulator tegangan yang handal untuk berbagai aplikasi elektronika..
+Gambar 
+1
+ 
+Regulator
+ LM7805
+Sumber: Datasheet
+ LM7805
+(Texas, 1976)
+Sensor Api
+Sensor api merupakan komponen kritis dalam sistem deteksi kebakaran modern, terutama dalam aplikasi yang memerlukan respons cepat terhadap keberadaan nyala api. Berbeda dengan sensor asap atau sensor suhu yang mengandalkan perubahan kondisi lingkungan sekunder, sensor api mendeteksi radiasi elektromagnetik yang dipancarkan langsung oleh nyala api—khususnya pada rentang inframerah dekat (NIR) antara 760 nm hingga 1100 nm (A132002 Datasheet, n.d.). Modul sensor api yang umum digunakan dalam sistem embedded, seperti yang berbasis fototransistor YG1006 dan komparator LM393, menawarkan solusi berbiaya rendah dengan keandalan tinggi untuk aplikasi deteksi dini kebakaran
+.
+Sensor ini memanfaatkan fototransistor YG1006, yang sensitif terhadap radiasi inframerah dalam rentang 760–1100 nm—rentang spektral di mana 
+nyala api karbon-hidrokarbon (seperti api kayu, gas alam, atau bensin) memancarkan intensitas maksimum 
+(Khan, 2023)
+. Ketika radiasi inframerah mengenai basis fototransistor, pasangan elektron-lubang dihasilkan, meningkatkan arus kolektor-emitor secara proporsional terhadap intensitas cahaya yang diterima.
+Modul ini menyediakan dua jenis output:
+Analog Output (AO): tegangan kontinu yang merepresentasikan intensitas radiasi inframerah,
+Digital Output (DO): sinyal biner yang dihasilkan oleh komparator LM393 berdasarkan perbandingan antara sinyal analog dan ambang referensi yang diatur melalui potensiometer.
+Dalam kondisi normal (tanpa api), output digital berada pada logika HIG
+H
+; ketika intensitas radiasi melebihi ambang batas, output berubah menjadi LOW. Indikator LED hijau menyala sebagai konfirmasi deteksi.
+Gambar 
+2
+ Rangkaian Sensor Api
+Sumber: 
+(Khan, 2023)
+Pada rangkaian diats 
+merupakan sistem deteksi analog-digital berbasis komparator op-amp LM393, yang membandingkan tegangan dari sensor resistif dengan tegangan referensi tetap sebesar setengah VCC. 
+Tegangan referensi (V₋) dihasilkan oleh pembagi tegangan dua resistor 10 k
+Ω
+, sehingga 
+ dapa
+t dirumuskan sebagai berikut:
+(1.0)
+Sementara itu, tegangan input non-inverting (V₊) berasal dari pembagi tegangan antara sensor dan resistor 10 kΩ, dirumuskan sebagai
+(1.
+1
+)
+Output komparator akan HIGH (mendekati VCC) jika V₊ > V₋, dan LOW (mendekati 0V) jika V₊ < V₋. Titik pemicu (threshold) terjadi ketika V₊ = V₋ = 2.5V (dengan asumsi VCC = 5V), yang secara matematis menghasilkan nilai resistansi sensor kritis sebesar 
+. Artinya, rangkaian akan “menyala” (output HIGH) ketika resistansi sensor turun di bawah 10 kΩ — misalnya, saat cahaya meningkat pada LDR atau suhu naik pada NTC thermistor.
+Output digital (DO) dari komparator dapat langsung dihubungkan ke mikrokontroler untuk pengolahan lebih lanjut, sementara LED indikator memberikan visualisasi status secara real-time. 
+Kapasitor 104 (0.1 µF) berfungsi sebagai decoupling dan filter noise, menstabilkan suplai daya dan meminimalkan gangguan pada input sensor. Namun, karena tidak ada hysteresis (umpan balik positif), rangkaian ini rentan terhadap osilasi output akibat fluktuasi kecil pada sinyal sensor.
+Sensor Suara
+S
+ensor suara sering menggunakan teknologi piezoelektrik atau elektret untuk mendeteksi perubahan tekanan akibat gelombang suara dan menghasilkan sinyal listrik yang sesuai. Dalam prinsip kerjanya, sensor ini mendeteksi getaran suara dan mengonversinya menjadi tegangan listrik melalui efek piezoelektrik atau lapisan dielektrik permanen pada mikrofon elektret. Sinyal yang dihasilkan oleh sensor suara umumnya sangat lemah, sehingga sering memerlukan amplifikasi sebelum diproses lebih lanjut oleh mikrokontroler seperti ESP32
+.
+Sensor suara memiliki berbagai aplikasi, termasuk deteksi aktivitas dalam sistem keamanan, kontrol perangkat elektronik berbasis suara, perekaman audio, dan bahkan penggunaan dalam sistem senjata otomatis. Menurut Brown et al. (2019) , sensor piezoelektrik sangat sensitif terhadap getaran dan cocok untuk aplikasi deteksi suara pada jarak dekat, sementara mikrofon elektret lebih sering 
+digunakan dalam aplikasi elektronika modern karena keluarannya yang stabil dan rendah impedansi.
+Beberapa spesifikasi umum sensor suara yang sering digunakan:
+Rentang Frekuensi: Biasanya berkisar dari 20 Hz hingga 20 kHz (rentang frekuensi suara manusia).
+Sensitivitas: Diukur dalam dBV/Pa (
+decibel volt per pascal
+), yang menunjukkan respons sensor terhadap intensitas suara.
+Impedansi 
+Output
+: Biasanya rendah (sekitar 2 kΩ hingga 600 Ω), sehingga kompatibel dengan mikrokontroler atau IC pengolah sinyal.
+ Integrasi sensor suara dengan mikrokontroler memungkinkan pengembangan aplikasi cerdas seperti asisten suara virtual atau sistem deteksi suara otomatis, sebagaimana dijelaskan oleh Miller & Lee (2021).
+. 
+Gambar 
+3
+ 
+Rangkaian Sensor Suara
+Sumber: 
+(Zhengyihong, 2025)
+Pada rangkaiaan diiats
+ merupakan sistem deteksi berbasis sensor kapasitif (Q1) yang diproses oleh dua channel komparator LM393, di mana channel pertama (U1.1) menghasilkan output analog (AO) melalui perbandingan antara tegangan input sensor dan referensi variabel yang dikendalikan potensiometer VR1. Tegangan referensi pada pin inverting U1.1 dihitung dengan rumus
+(1.
+2
+)
+memungkinkan kalibrasi sensitivitas secara manual dari 0 hingga 5V (dengan asumsi VCC=5V). Sementara itu, tegangan input sensor (V₊) diasumsikan sebanding dengan sinyal DC yang dihasilkan oleh sensor kapasitif — meskipun dalam praktiknya, sensor kapasitif memerlukan modulasi AC untuk menghasilkan sinyal terukur. Output AO, meskipun dinamis, tidak bersifat linier murni karena kurangnya feedback negatif penuh, sehingga lebih tepat diinterpretasikan sebagai representasi analog dari selisih antara input dan referensi
+,
+ bukan amplifier analog konvensional.
+(1.
+3
+)
+Channel kedua (U1.2) berfungsi sebagai komparator digital yang membandingkan output U1.1 dengan ground (0V), sehingga menghasilkan sinyal digital DO yang HIGH ketika output U1.1 positif — mencerminkan keadaan “deteksi aktif”. Output DO kemudian digunakan untuk mengendalikan LED indikator L1 (melalui R5=1 kΩ) dan L2 (melalui R4=10 kΩ), dengan arus LED dihitung menggunakan rumus
+(1.
+4
+)
+menunjukkan bahwa L1 menyala lebih terang (≈3 mA) dibanding L2 (≈0.3 mA), sesuai fungsinya sebagai indikator utama dan sekunder. 
+Secara akademik, rangkaian ini menunjukkan integrasi antara deteksi non-kontak, pengolahan sinyal analog-digital, dan antarmuka visual — namun memiliki keterbatasan stabilitas karena tidak adanya hysteresis dan ketergantungan pada karakteristik sensor kapasitif yang non-linear. 
+Untuk aplikasi real-world, diperlukan penambahan rangkaian kondisioning sinyal (C-to-V converter) serta filter atau hysteresis untuk meningkatkan akurasi dan reliabilitas sistem.
+Sensor Getar
+Sensor getaran merupakan komponen penting dalam sistem pemantauan kondisi mesin, deteksi keamanan, hingga sistem peringatan dini bencana seperti gempa bumi. Salah satu jenis sensor getaran yang umum digunakan dalam aplikasi berbasis mikrokontroler adalah modul berbasis SW-420, yang merupakan normally closed (NC) vibration switch dengan karakteristik mekanis sederhana namun efektif.
+ 
+Sensor SW-420 bekerja berdasarkan prinsip mechanical switch displacement. 
+Di dalamnya terdapat sebuah roller-type conductive switch yang dalam keadaan stabil—tanpa getaran—berada dalam posisi tertutup (closed), sehingga menghasilkan impedansi rendah dan memungkinkan aliran arus listrik. Ketika terjadi gangguan vibrasi atau perubahan orientasi, elemen mekanis di dalam switch bergerak secara dinamis, menyebabkan pemutusan sementara aliran arus 
+(open circuit). Perubahan ini menghasilkan pulsa tegangan transien yang dapat dideteksi oleh rangkaian eksternal, khususnya oleh komparator analog untuk konversi menjadi sinyal digital.
+Modul SW-420 umumnya dilengkapi dengan komparator LM393 dan potensiometer pengatur sensitivitas, sehingga output digital dapat disesuaikan berdasarkan ambang batas (threshold) yang diinginkan. Dalam kondisi normal (tanpa getaran), output sensor berada pada logika LOW (0 V); sebaliknya, ketika amplitudo getaran melebihi ambang sensitivitas yang telah ditentukan, output berubah menjadi HIGH (biasanya 3.3–5 V, tergantung tegangan supply). Desain rangkaian elektronik pendukung sensor ini didasarkan pada prinsip-prinsip dasar analisis rangkaian analog-digital, khususnya dalam pengaturan referensi tegangan dan pembatas arus untuk indikator visual maupun antarmuka digital. 
+Gambar 
+4
+ Rangkaian sensor getar
+Sumber: 
+(Electronics, 2020)
+Rangkaian ini merupakan sistem deteksi analog-digital berbasis komparator LM393, yang membandingkan tegangan dari sensor resistif (terhubung ke pin INA+) dengan tegangan referensi tetap sebesar 
+(1.
+5
+)
+dihasilkan oleh pembagi tegangan dua resistor 10 kΩ (R2 dan ground). 
+(1.
+6
+)
+Tegangan input sensor
+ 
+bersifat dinamis dan berubah sesuai perubahan resistansi sensor. Titik pemicu (threshold) terjadi ketika 
+,
+ 
+yang secara matematis 
+menghasilkan nilai resistansi sensor kritis sebesar 
+. 
+Artinya, output komparator akan berubah state (HIGH/LOW) saat resistansi sensor melewati nilai tersebut. 
+Dengan demikian, rangkaian ini berfungsi sebagai 
+analog-to-digital converter
+ sederhana, mengonversi perubahan fisik menjadi sinyal logika digital.
+Output digital (OUTA) diimplementasikan melalui LED indikator (D2) dan resistor pembatas arus (R4), yang juga berfungsi sebagai pull-up untuk output open-collector LM393. Arus LED dihitung dengan rumus
+(1.
+7
+)
+memberikan intensitas cahaya yang aman dan cukup terlihat. Sementara itu, output analog (AO) diambil dari pembagi tegangan antara R5 dan R2, menghasilkan 
+(1.
+8
+)
+sehingga merepresentasikan level logika dalam bentuk voltase analog (misalnya 2.5V untuk HIGH, 0V untuk LOW). Kapasitor decoupling (C1, C2 = 0.1 µF) menstabilkan suplai daya dan meredam noise, namun karena tidak ada hysteresis, rangkaian rentan osilasi di sekitar titik trigger. Dalam konteks akademik, rangkaian ini menjadi studi kasus ideal untuk memahami prinsip komparator, desain antarmuka sensor, dan konversi sinyal analog-ke-digital — meskipun untuk aplikasi nyata, penambahan hysteresis sangat direkomendasikan demi stabilitas sistem.
+Operational Amplifier Komparator
+ 
+Operational Amplifier (Op-Amp) merupakan komponen fundamental dalam elektronika analog yang berfungsi sebagai penguat tegangan diferensial dengan penguatan sangat tinggi, impedansi masukan yang besar, dan impedansi keluaran yang rendah. Secara ideal, op-amp memiliki penguatan tegangan tak hingga, impedansi masukan tak hingga, impedansi keluaran nol, serta offset tegangan nol saat kedua masukannya berada pada potensial yang sama (Sedra & Smith, 2021)
+. 
+Dalam konfigurasi komparator, Op-Amp bekerja tanpa umpan balik (
+open-loop configuration
+), sehingga 
+gain
+ sangat besar, hampir tak terbatas. 
+ 
+Hal ini menyebabkan 
+output
+ langsung jenuh (+Vsat atau −Vsat) ketika ada perbedaan kecil antara kedua 
+input
+ 
+Gambar 
+5
+ Op-Amp
+Sumber: M. Rahman et al.  
+(2021)
+Komparator memiliki dua 
+input
+:
+Input Non-Inverting
+(+): Digunakan untuk menerima tegangan referensi (Vref). 
+Input Inverting
+(-): Digunakan untuk menerima sinyal input (V in). 
+Prinsip kerja komparator sangat sederhana:
+Jika Vin>Vref, 
+output
+ akan menjadi 
+HIGH
+ (mendekati +Vcc).
+ 
+Jika Vin<Vref, 
+output
+ akan menjadi 
+LOW
+ (mendekati −Vee).
+Gerbang Logika NOR
+Menurut Floyd (2019), gerbang NOR adalah salah satu dari lima jenis dasar gerbang logika digital yang menghasilkan 
+output HIGH
+ hanya ketika semua input bernilai 
+LOW
+ (Floyd, T. L., 2019). Gerbang NOR merupakan kependekan dari 
+NOT-OR
+, yaitu inversi dari gerbang OR. Gerbang ini sangat penting dalam desain 
+rangkaian logika karena kemampuan kombinasinya untuk membentuk semua fungsi logika lainnya jika digunakan secara tepat.
+ 
+Prinsip Kerja dan Fungsi Logika gerbang NOR bekerja berdasarkan tabel kebenaran yang ditunjukkan pada Gambar 
+7
+Gambar 
+6
+ Logika NOR
+Sumber: A. Kumar et al. 
+(2019)
+IC NOR seperti 
+M
+74HC4078 atau 74LS02 merupakan contoh penerapan NOR dalam bentuk sirkuit terpadu (IC) TTL atau CMOS yang sering digunakan dalam sistem digital dan 
+embedded
+. IC ini memiliki beberapa saluran 
+input
+ dan 
+output
+, serta dirancang untuk beroperasi pada tegangan tertentu (misalnya 5V untuk TTL, 2–6 V untuk CMOS).
+Rangkaian Push Pull
+Rangkaian 
+push-pull
+ merupakan konfigurasi elektronika daya yang menggunakan dua transistor aktif (biasanya satu NPN dan satu PNP atau satu NMOS dan PMOS) untuk mengendalikan arus beban ke atas dan ke bawah secara bergantian. Konfigurasi ini memungkinkan sirkuit menghasilkan 
+output
+ dengan impedansi rendah, kemampuan sinkronisasi tinggi, serta respon frekuensi yang baik. 
+Rangkaian 
+push-pull
+ banyak digunakan dalam penguat daya 
+(
+power amplifier
+)
+, penggerak motor, dan aplikasi digital seperti driver MOSFET atau buffer logika.
+ 
+Berikut merupakan 
+g
+ambar 
+Rangkaian Dasar Push-Pull
+ dapat dilihat pada Gambar 
+7.
+Gambar 
+7
+ Rangkaian Dasar Push-Pull
+Sumber: 
+(Azarov et al., 2025)
+Dalam konteks sistem simulasi tembakan berbasis sensor, rangkaian 
+push-pull 
+dapat diterapkan sebagai unit penguat (
+amplifier
+) untuk pulsa 
+infrared
+ atau sebagai driver untuk aktuator seperti buzzer, LED, atau motor miniatur senjata pada alat pelatihan tempur.
+Prinsip Kerja Rangkaian 
+Push-Pull
+Rangkaian 
+push-pull
+ bekerja dengan prinsip bahwa salah satu transistor "menarik" arus 
+(pull)
+ sedangkan transistor lainnya "mendorong" arus 
+(push)
+ tergantung polaritas sinyal 
+input
+. Dengan demikian, rangkaian mampu menghasilkan gelombang keluaran yang simetris dan hampir tidak terdistorsi.
+Konfigurasi Dasar:
+Transistor atas 
+(push)
+: Biasanya PNP atau PMOS. 
+Transistor bawah 
+(pull)
+: NPN atau NMOS. 
+Beban 
+(load)
+: Terhubung di tengah kedua transistor. 
+Ketika sinyal positif masuk, transistor atas 
+(pull) cut-off
+ dan transistor bawah 
+(push)
+ aktif, sehingga menyediakan jalur arus ke tanah. Sebaliknya, ketika sinyal negatif masuk, transistor atas aktif dan transistor bawah 
+cut-off
+, sehingga menyediakan arus dari tegangan catu daya ke beban
+Transmitter Inframerah
+Transmiter 
+infrared
+ adalah perangkat elektronik yang menggunakan sinyal 
+infrared
+ untuk mengirimkan data atau perintah kepada perangkat penerima. Sinyal 
+infrared
+ dihasilkan oleh 
+Light Emitting Diode
+ (LED) 
+infrared
+ yang mengubah data digital menjadi pulsa cahaya. Pulsa ini diterima oleh sensor penerima seperti 
+Phototransistor
+, yang kemudian mendekodekannya menjadi data digital kembali. 
+Panjang gelombang 
+infrared
+ yang umum digunakan berkisar antara 700 nm hingga 1 mm, tergantung pada aplikasinya.
+Transmitter 
+infrared
+ menawarkan kecepatan transfer data yang tinggi, keamanan yang baik karena sinyalnya tidak menembus dinding, serta biaya produksi yang relatif rendah. Namun, teknologinya memiliki keterbatasan, seperti kebutuhan akan jalur pandang langsung antara transmitter dan receiver serta kerentanan terhadap interferensi dari cahaya matahari 
+(Yunardi, 2017)
+.
+Infra
+m
+erah LED (IR LED) adalah jenis dioda emisi cahaya (LED) yang memancarkan radiasi elektromagnetik pada panjang gelombang 
+infrared
+ (~700 nm hingga 1 mm), yang tidak terlihat oleh mata manusia namun dapat dideteksi oleh 
+photodiode
+ atau fototransistor IR. Cahaya 
+infrared
+ yang
+ 
+dipancarkan oleh LED ini sering digunakan dalam sistem 
+remote control
+, 
+proximity
+ 
+sensing
+, pendeteksi gerakan, dan komunikasi nirkabel jarak dekat
+.
+ 
+Berikut merupakan 
+g
+ambar 
+Infrared
+ LED
+ dapat dilihat pada Gambar 
+9.
+Gambar 
+8
+ 
+Infrared
+ LED
+Sumber: M. Ali et al. (2021)
+Prinsip kerja IR LED pada gambar 2.15 mirip dengan LED biasa, yaitu mengubah arus listrik menjadi foton cahaya. 
+Namun, material semikonduktor yang digunakan dirancang agar memancarkan cahaya di rentang 
+infrared
+. 
+Pada sistem permainan
+ laser tag
+, IR LED digunakan sebagai bagian dari 
+Small Arms Transmitter
+ (SAT) untuk memancarkan pulsa 
+infrared
+ setiap kali pelatuk senjata ditarik. 
+Pulsa tersebut membawa informasi identifikasi senjata dan waktu penembakan yang akan diterima oleh sensor IR pada target.
+IR LED dalam SAT harus dirancang untuk bekerja dalam kondisi lapangan yang keras, termasuk paparan debu, guncangan fisik, dan variasi suhu. Oleh karena itu, banyak modul IR LED dilengkapi dengan lensa Fresnel untuk meningkatkan jarak pancar dan akurasi deteksi. Selain itu, pulsa yang dikirimkan bersifat 
+encoded
+ 
+agar dapat dibedakan antara tembakan dari satu senjata dengan senjata lain, memastikan evaluasi hasil tembakan akurat dan 
+real-time.
+Modulasi dan Demodulasi Inframerah
+Modulasi dan demodulasi 
+infrared
+ merupakan dua proses yang saling terkait dalam komunikasi berbasis cahaya 
+infrared
+. Modulasi adalah proses menumpangkan sinyal informasi (misalnya data digital) pada gelombang pembawa 
+infrared
+, sedangkan demodulasi adalah proses memisahkan kembali sinyal informasi dari gelombang pembawa yang telah dimodulasi.
+Modulasi 
+Infrared
+Modulasi 
+infrared
+ adalah proses memodifikasi sinyal 
+infrared
+ untuk 
+membawa
+ informasi spesifik seperti perintah kontrol 
+maupun
+ data digital. Teknologi ini sangat penting 
+pada
+ aplikasi seperti sistem komunikasi nirkabel 
+yang menggunakan
+ diod
+e
+ 
+pemancar
+ 
+infrared
+ (IR)
+ dan penerima 
+IR
+, 
+misalnya pada perangkat
+ kontrol jarak jauh, 
+sensor
+ kedekatan, 
+serta
+ sistem 
+pengenalan
+ dan keamanan serupa lainnya.
+Dalam modulasi 
+infrared
+, impuls cahaya yang dipancarkan oleh 
+IR-LED
+ 
+dimodulasi
+ sesuai dengan pola biner yang mewakili data. Proses ini dilakukan dengan 
+mengatur
+ arus 
+penggerak pada 
+IR-LED
+, sehingga intensitas cahaya 
+infrared
+ berubah sesuai dengan data yang 
+ingin 
+ditransmisikan.
+Metode modulasi yang 
+paling umum
+ digunakan adalah 
+Carrier Frequency Modulation
+ 
+(CFM)
+, 
+yaitu
+ modulasi 
+pada 
+frekuensi pembawa
+. Pada sistem ini,
+ sinyal data digunakan untuk 
+mendukung
+ atau mengubah fase dan amplitudo gelombang pembawa 
+infrared
+ pada frekuensi tertentu (
+biasanya 
+36-38kHz). 
+Teknik ini memungkinkan
+ penerima 
+infrared
+ dapat membedakan sinyal yang 
+sengaja
+ 
+dikirim dan noise dari cahaya lingkungan sekitar
+.
+Demodulasi 
+Infrared
+Demodulasi 
+infrared
+ adalah proses pemulihan sinyal informasi 
+dari 
+gelombang 
+infrared
+ yang 
+telah
+ dimodulasi di sisi pemancar. Proses ini dilakukan oleh penerima 
+infrared
+ 
+(IR receiver)
+ untuk mengubah impuls optik menjadi data biner atau perintah digital
+, yang selanjutnya 
+dapat diproses oleh sistem kontrol atau mikro
+kontroler.
+Pada
+ sistem komunikasi 
+infrared
+ seperti kontrol jarak jauh dan sensor nirkabel, sinyal data 
+umumnya
+ tidak ditransmisikan sebagai cahaya kontinu, 
+melainkan
+ dimodulasi pada frekuensi pembawa (36-38kHz). 
+Proses d
+emodulasi 
+di penerima digunakan
+ untuk memisahkan frekuensi pembawa dan mengekstrak 
+data
+ asli yang 
+dibawa
+ 
+oleh sinyal
+ 
+infrared
+.
+Gelombang Inframerah
+Gelombang 
+infrared
+ merupakan bagian dari spektrum elektromagnetik yang terletak di antara cahaya tampak dan gelombang mikro, dengan panjang gelombang berkisar antara 700nm hingga 1mm. Meskipun tidak dapat dilihat oleh mata manusia, radiasi 
+infrared
+ dapat dirasakan sebagai panas dan telah dimanfaatkan dalam berbagai aplikasi teknologi, seperti pemantauan suhu, deteksi gerakan, serta sistem komunikasi nirkabel.
+ 
+Berikut merupakan 
+g
+ambar 
+dari
+ 
+Panjang Gelombang
+ dapat dilihat pada Gambar 
+5
+.
+Gambar 
+9
+ Panjang Gelombang
+Sumber: National Radio Astronomy Observatory (2012)
+Dalam system permainan laser tag, gelombang 
+infrared
+ digunakan untuk mentransmisikan data tembakan dari senjata ke sensor penerima pada target. 
+Pulsa 
+infrared
+ 
+ini 
+membawa informasi penting seperti ID senjata, waktu penembakan, dan lokasi tembakan. Sensor penerima kemudian menganalisis data tersebut untuk menentukan apakah tembakan tersebut mengenai area vital atau tidak. 
+Proses ini 
+memastikan bahwa sistem dapat memberikan umpan balik instan kepada para pemain terkait status “terkena tembakan” secara akurat.
+Pulsa 
+infrared
+ yang digunakan 
+pada senjata
+ 
+umumnya
+ berada 
+pada
+ rentang 
+Near 
+Infrared
+ 
+(NIR)
+, yaitu antara 700–1
+.
+400nm. 
+Rentang ini dipilih karena banyak 
+material
+ optik memiliki transmisi tinggi di wilayah 
+tersebut
+, sehingga pulsa dapat diterima dengan baik oleh sensor 
+infrared
+. Selain itu, sinar 
+infrared
+ dalam rentang ini relatif aman untuk penggunaan
+ luar ruang
+ 
+(outdoor)
+ dan tidak terganggu oleh cahaya tampak, menjadikannya pilihan ideal dalam sistem pelatihan tempur
+ modern.
+Nippon Electric Company Protocol
+Nippon Electric Company
+ 
+(NEC)
+ adalah salah satu standar komunikasi 
+infrared
+ yang sering digunakan pada perangkat kontrol jarak jauh, televisi, pendingin ruangan, pemutar DVD, serta berbagai alat elektronik lainnya, terutama yang dibuat di Jepang. Protokol ini dikembangkan oleh perusahaan Jepang bernama NEC dan telah menjadi salah satu protokol komunikasi 
+infrared
+ yang paling banyak digunakan karena sifatnya yang mudah dipahami, efisien, serta mudah diimplementasikan dalam berbagai aplikasi teknologi terhubung (IoT).
+Pada protokol NEC, komunikasi terjadi melalui pengiriman sinyal cahaya 
+infrared
+ dari remote control ke penerima di perangkat yang dituju. Sinyal tersebut berupa pola waktu yang mewakili data berbentuk biner. Protokol NEC memiliki beberapa ciri khas seperti frekuensi 38 kHz, panjang data sebanyak 32 bit atau 4 byte, alamat perangkat sepanjang 8 bit, serta mampu mengulang sinyal setiap 110 ms.
+Jarak Transmisi Bahan Optik
+Jarak transmisi bahan optik merujuk pada kemampuan suatu material untuk meneruskan gelombang elektromagnetik—seperti cahaya tampak atau inframerah—tanpa banyak menyerap atau memantulkannya (Smith, W. J., 2020). Setiap bahan memiliki karakteristik transmisi berbeda tergantung pada panjang gelombang cahaya yang digunakan. Misalnya, kaca borosilikat memiliki transmisi tinggi pada cahaya tampak, sementara polikarbonat atau akrilik lebih cocok untuk transmisi inframerah dekat (NIR).
+Gambar 
+10
+ Transmisi Bahan Optik
+Sumber: Applied Optics (2008)
+Panjang gelombang cahaya sangat mempengaruhi seberapa besar cahaya dapat ditransmisikan melalui bahan. Beberapa bahan seperti silikon (Si) dan selenium seng (ZnSe) memiliki transmisi tinggi di rentang inframerah dekat (NIR), sehingga sangat cocok untuk aplikasi seperti LED IR dan sensor IR. Di sisi lain, bahan seperti fluorit kalsium (CaF₂) dan fluorit barium (BaF₂) memiliki transmisi tinggi di rentang UV hingga NIR, menjadikannya pilihan populer dalam sistem optik tingkat tinggi.
+Ketebalan dan kejernihan bahan juga memainkan peran penting dalam transmisi cahaya. Bahan yang lebih tipis dan bebas cacat atau gelembung udara akan memiliki transmisi yang lebih baik. Sudut datang cahaya juga memengaruhi efisiensi transmisi, di mana cahaya yang datang tegak lurus memberikan hasil transmisi maksimum. 
+Oleh karena itu, dalam sistem simulasi tembakan berbasis 
+laser, pemilihan bahan optik harus mempertimbangkan faktor-faktor ini agar sistem tetap akurat dan efisien.
+Lensa Freshnel
+Lensa Fresnel adalah jenis lensa optik yang dirancang untuk memiliki sifat konvergen seperti lensa cembung biasa, tetapi dengan struktur bertingkat yang memungkinkan pengurangan ketebalan dan berat secara signifikan (Hecht, E., 2017). Lensa ini ditemukan oleh Augustin-Jean Fresnel dan awalnya digunakan dalam mercusuar untuk memfokuskan cahaya sejauh mungkin. Struktur uniknya terdiri dari lingkaran konsentris yang berfungsi sebagai permukaan refraksi individual, sehingga cahaya dapat difokuskan tanpa memerlukan bahan yang tebal.
+Gambar 
+11
+ Lensa Freshnel
+Sumber: Meetoptics (2002)
+Secara prinsip, lensa Fresnel bekerja dengan cara membelokkan (refraksi) sinar cahaya yang melewatinya menuju satu titik fokus tertentu. 
+Dibandingkan dengan lensa cembung konvensional, lensa ini lebih efisien dalam hal transmisi cahaya karena mengurangi pembelokan internal dan distorsi. Meskipun demikian, lensa Fresnel cenderung memiliki sedikit distorsi optik di tepi, namun tetap sangat berguna dalam aplikasi yang tidak memerlukan resolusi tinggi seperti proyektor, lampu sorot, atau sensor jarak jauh.
+Lensa Fresnel banyak digunakan dalam aplikasi optik yang membutuhkan fokus cahaya kuat namun dengan ukuran yang ringkas. Contoh penggunaannya meliputi lampu mobil, proyektor LCD, dan sistem pendeteksi inframerah. Dalam sistem MILES
+ dan permainan laser tag
+, lensa Fresnel digunakan dalam SAT untuk 
+memfokuskan pulsa inframerah agar mencapai jarak yang lebih jauh dengan intensitas tetap stabil, meningkatkan akurasi deteksi saat target terkena tembakan.
+Untuk menentukan 
+focal length
+ (jarak fokus) lensa Fresnel, kita menggunakan prinsip dasar optik geometri. Lensa Fresnel dirancang untuk memfokuskan atau menyebarkan cahaya dengan cara yang mirip dengan lensa konvensional, tetapi dengan profil yang lebih tipis dan ringan. Berikut adalah rumus dasar yang digunakan untuk menghitung 
+focal length
+ lensa Fresnel:
+(
+1
+.
+9
+)
+Dimana
+:
+ = Focal Length
+R = Radius Kelengkungan Permukaan Lensa
+ = Indeks Bias Material Lensa
+Push Button
+Push button switch, atau saklar tombol tekan, merupakan perangkat dasar namun penting dalam sistem kontrol elektronik. Push button berfungsi sebagai penghubung atau pemutus aliran arus listrik, dengan sistem kerja "unlock", yang berarti saklar hanya akan mengalirkan arus saat tombol ditekan, dan kembali ke posisi semula (off) saat tombol dilepas. 
+Sistem operasi "on-off" ini mengatur kondisi 1 (on) dan 0 (off), yang menjadi dasar pengoperasian banyak perangkat listrik yang memerlukan pengendalian aliran listrik dengan dua kondisi utama. Hal ini sangat relevan dalam dunia industri dan teknologi, di mana kehadiran push button switch sangat krusial untuk mengatur pengoperasian mesin dan peralatan lainnya. 
+Dalam aplikasi industri dan otomasi, push button switch sering digunakan sebagai alat untuk memulai dan menghentikan proses kerja mesin. Meskipun mesin atau sistem kontrol yang lebih canggih mungkin digunakan, sistem push button tetap menjadi elemen kunci dalam kontrol manual dan otomatis. Keandalan, kesederhanaan, dan daya tahannya menjadikan push button sebagai komponen yang sangat digunakan dalam berbagai aplikasi industri, dari pengoperasian mesin hingga perangkat rumah tangga otomatis. 
+(Munandar et al., 2023)
+Dengan peranannya yang begitu fundamental dalam pengoperasian sistem-sistem elektronik dan otomatisasi, push button switch menjadi komponen yang tak terhindarkan dalam dunia teknik dan rekayasa sistem kontrol. Sifatnya yang sederhana namun efektif membuatnya sangat sesuai untuk aplikasi yang membutuhkan interaksi langsung antara operator dan perangkat.
+Global Positioning System
+ 
+(GPS)
+Global Positioning System
+ (GPS) adalah teknologi navigasi berbasis satelit yang memungkinkan penentuan lokasi dan waktu secara akurat di seluruh permukaan bumi. 
+GPS bekerja dengan menerima sinyal dari minimal empat satelit dan menghitung posisi melalui proses trilaterasi berdasarkan perbedaan waktu sinyal diterima. Teknologi ini awalnya dikembangkan untuk keperluan militer, namun kini telah digunakan secara luas di berbagai sektor seperti transportasi, pertanian, navigasi darat dan laut, hingga sistem otonom dan 
+Internet of Things
+ (IoT). Perangkat GPS modern menggunakan teknik pemrosesan sinyal canggih seperti RTK (
+Real-Time Kinematic
+) dan DGPS (
+Differential
+ GPS) untuk meningkatkan akurasi hingga tingkat sentimeter. Meskipun menghadapi tantangan seperti gangguan sinyal dan kondisi atmosfer, integrasi GPS dengan sistem GNSS lain seperti Galileo, GLONASS, dan BeiDou, serta dukungan teknologi seperti 5G, semakin meningkatkan keandalan dan presisi GPS untuk berbagai aplikasi masa kini dan masa depan 
+(Sunil Fulzele & Athawale, 2024)
+.
+Prinsip kerja GPS didasarkan pada metode trilaterasi, yaitu teknik penentuan posisi dengan menghitung jarak antara penerima GPS dan setidaknya tiga satelit GPS. Setiap satelit mengorbit bumi dan secara periodik memancarkan sinyal yang berisi informasi mengenai waktu dan posisi satelit tersebut. Perangkat penerima GPS mengukur waktu tempuh sinyal dari masing-masing satelit untuk menghitung jarak secara presisi. Dengan memanfaatkan data dari minimal empat satelit, sistem GPS mampu menentukan posisi tiga dimensi suatu objek, yakni lintang, bujur, dan ketinggian, dengan tingkat akurasi yang tinggi
+(Prettz et al., 2017)
+. 
+Berikut merupakan 
+g
+ambar 
+dari
+ 
+GPS
+ 
+dapat dilihat pada Gambar 
+12
+.
+Gambar 
+12
+ 
+Global Positioning System (GPS)
+Sumber : 
+(Prettz et al., 2017)
+Mikrokontrole
+r
+Mikrokontroler adalah 
+Integrated Circuit
+ 
+(IC)
+ yang dirancang untuk mengendalikan fungsi elektronik tertentu dalam 
+suatu
+ sistem. 
+Mikrokontroler memiliki elemen-elemen utama seperti prosesor 
+(CPU)
+, memori (
+RAM
+ dan 
+ROM/Flash
+), serta 
+modul
+ 
+Input/Output (I/O)
+ yang terintegrasi dalam satu chip.
+Salah satu fungsi utama mikrokontroler adalah mengelola komunikasi data antar perangkat yang berbeda. Mikrokontroler umumnya dilengkapi dengan modul komunikasi seperti 
+UART, SPI, I2C
+, atau 
+CAN
+, yang memungkinkan transfer data dengan perangkat eksternal seperti sensor, aktuator, atau mikrokontroler lain. Dalam jaringan sensor nirkabel, mikrokontroler bertugas mengolah data dari 
+node sensor
+, mengonversinya menjadi format yang dapat diterima, dan mengirimkan data ke node berikutnya atau 
+gateway
+. Mikrokontroler menawarkan efisiensi biaya, keandalan tinggi, dan fleksibilitas untuk aplikasi-aplikasi khusus. Namun, keterbatasan mikrokontroler meliputi kemampuan komputasi yang relatif rendah dan kapasitas memori yang terbatas dibandingkan mikroprosesor
+.
+ESP32
+ adalah salah satu 
+mikrokontroler 
+yang paling populer
+ dan menjadi varian board
+ 
+pengembangan keluaran
+ DOIT. Board ini menyediakan akses lengkap ke semua fitur 
+ESP32
+ dengan layout pin yang 
+user-friendly
+.
+ 
+Berikut merupakan 
+g
+ambar 
+dari
+ 
+ESP32 DevKit V1
+ 
+dapat dilihat pada Gambar 
+13
+.
+ 
+Gambar 
+13
+ 
+ESP32
+ 
+(
+Sumber: 
+(Pratama & Kiswantono, 2023)
+Berikut merupakan tabel spesifikasi dari ESP32 dapat dilihat pada Tabel 1.
+Tabel 
+1
+ 
+Spesifikasi 
+ESP32
+Fitur
+Spesifikasi
+Chip
+ESP32
+ S3 Supermini
+Core
+Dual-core Xtensa LX7
+ 
+CPU
+Clock Speed
+hingga 240 MHz (600 DMIPS)
+Wi-Fi
+802.11 b/g/n (2.4 GHz
+)
+Bluetooth
+Bluetooth 5 (BLE)
+Flash
+4 MB
+SRAM
+512 KB internal SRAM + 8 MB PSRAM eksternal (umumnya)
+GPIO
+~20+ pin GPIO
+ADC
+2x 12-bit SAR ADC (8 channel)
+Touch Sensor
+hingga 14 channel capacitive touch sensing
+PWM
+11
+ channel
+Interface
+UART, I²C, SPI, I²S, RMT, TWAI, USB OTG
+Power Supply
+5V via USB, regulated to 3.3V
+Protokol ESP-Now
+ESP-NOW merupakan protokol komunikasi nirkabel berbasis 
+link layer
+ yang dikembangkan oleh 
+Espressif Systems
+ untuk memungkinkan pertukaran data secara langsung antar perangkat yang menggunakan chip ESP seperti ESP32 dan ESP8266. Protokol ini dirancang untuk mendukung komunikasi cepat dengan latensi rendah serta konsumsi daya yang efisien, sehingga sangat cocok digunakan dalam aplikasi 
+Internet of Things 
+(IoT) dan sistem embedded. 
+ESP-NOW
+ tidak memerlukan koneksi infrastruktur Wi-Fi seperti router atau jaringan internet, melainkan bekerja secara 
+peer-to-peer
+ (P2P) menggunakan frekuensi 2.4 GHz. Dalam pengoperasiannya, 
+ESP-NOW
+ memanfaatkan teknologi 
+Wi-Fi Direct
+ melalui 
+action frames
+ untuk mentransmisikan data tanpa perlu koneksi TCP/IP, sehingga proses pengiriman data dapat dilakukan secara cepat dan sederhana. Komunikasi dapat dilakukan dalam mode unicast maupun broadcast dengan batasan payload maksimal sebesar 250 byte per paket. Selain itu, 
+ESP-NOW
+ juga mendukung enkripsi AES 128-bit untuk menjaga keamanan data selama proses pengiriman. Kelebihan utamanya termasuk kemampuan komunikasi langsung tanpa infrastruktur tambahan, hemat daya, latensi rendah, serta mudah diimplementasikan dalam berbagai proyek IoT seperti smart home automation, 
+sensor jaringan nirkabel, kontrol robot, dan sistem alarm. Meskipun memiliki keterbatasan dalam jumlah node maksimum dan ukuran payload, ESP-NOW tetap menjadi solusi komunikasi nirkabel yang efektif dan efisien bagi pengembangan sistem berbasis mikrokontroler ESP
+.
+(Adolfo & Setia Budi, 2023)
+ESP-NOW menggunakan 
+frame
+ data Wi-Fi jenis 
+Action Frames
+, yang memungkinkan pengiriman data dalam bentuk payload berukuran maksimal 250 byte. Komunikasi ini dapat berlangsung antara :
+Perangkat ESP sebagai satu lawan satu (
+Peer-To-Peer
+)
+Satu pengirim ke banyak penerima (
+One-To-Many
+)
+Beberapa pengirim ke satu penerima (
+Many-To-One
+)
+Receiver Infrared Anti Cheating
+Penelitian ini bertujuan untuk mendokumentasikan eksperimen implementasi fitur anti-cheating pada sistem MILES (Multiple Integrated Laser Engagement System), yang dirancang guna mencegah kecurangan berupa penutupan sengaja terhadap sensor inframerah pada rompi peserta latihan. Dalam konfigurasi standar, rompi dilengkapi penerima TSOP
+4838
+ untuk mendeteksi sinyal inframerah termodulasi 38 kHz yang dipancarkan oleh SAT (Simulated Ammunition Transmitter) lawan. Namun, praktik umum menunjukkan bahwa peserta sering menutupi sensor tersebut dengan bahan buram (misalnya lakban), sehingga membuat mereka kebal terhadap deteksi tembakan.
+Sebagai solusi, dirancang unit sensor tambahan yang terintegrasi dalam satu dome bersama TSOP
+4838
+, terdiri atas LED inframerah sebagai sumber cahaya aktif dan photodiode sebagai detektor refleksi lokal. Prinsip kerjanya didasarkan pada hilangnya sinyal pantulan inframerah ketika dome ditutupi
+ 
+kondisi ini menyebabkan output photodiode turun ke logika rendah. Delapan unit sensor (empat di bagian depan dan empat di belakang rompi) dihubungkan ke gerbang logika NOR 8-input IC 74HC4078, sehingga keberadaan setidaknya satu dome yang ditutupi menghasilkan logika tinggi pada keluaran gerbang tersebut. Sinyal ini kemudian dibaca oleh mikrokontroler ESP32 melalui salah satu pin GPIO-nya sebagai indikator kecurangan.
+Eksperimen utama difokuskan pada verifikasi bahwa pancaran LED inframerah
+ 
+yang bersifat kontinu dan tidak termodulasi
+ 
+tidak mengganggu kemampuan 
+TSOP
+4838
+ dalam mendeteksi dan mendekode sinyal modulasi 38 kHz dari SAT lawan. Desain rangkaian memastikan isolasi spektral dan temporal antara kedua fungsi optoelektronik tersebut, sehingga integritas sistem MILES tetap terjaga sambil menambahkan lapisan keamanan tambahan terhadap manipulasi fisik sensor. Dokumentasi ini mencakup prinsip kerja, arsitektur rangkaian, prosedur pengujian, serta analisis hasil eksperimen secara sistematis untuk keperluan akademik dan implementasi praktis dalam sistem pelatihan militer berbasis MILES.
+Gambar 
+14
+ TSOP43..
+Sumber: 
+(Vishay Semiconductors, 2025)
+Berikut merupakan tabel spesifikasi 
+TSOP43.. 
+dapat dilihat pada Tabel 2.
+Tabel 
+2
+ Spesifikasi TSOP43
+..
+Product Attribute
+Attribute Value
+Manufacturer
+Vishay
+Product Category
+Infrared
+ Receivers
+RoHS
+Details
+Mounting Style
+Through Hole
+Carrier Frequency
+38 kHz
+Transmission Distance
+45 m
+Beam Angle
+90 deg
+Output Current
+5 mA
+Operating Supply Voltage
+2.5 V to 5.5 V
+Operating Supply Current
+700 uA
+Minimum Operating Temperature
+-25 °C
+Maximum Operating Temperature
++85 °C
+Package/Case
+Side Looker
+Packaging
+Tube
+Brand
+Vishay Semiconductors
+Product Type
+IR Receivers
+Factory Pack Quantity
+2160
+Subcategory
+Infrared
+ Data Communications
+Unit Weight
+2.338 g
+LoraWan
+LoRaWAN (
+Long Range Wide Area Network
+) merupakan protokol jaringan komunikasi nirkabel berdaya rendah yang dirancang untuk mendukung aplikasi 
+Internet of Things
+ (IoT) skala luas. Protokol ini dibangun di atas teknologi modulasi LoRa (
+Long Range
+), yang merupakan implementasi fisik dari 
+Chirp Spread Spectrum
+ (CSS) yang memungkinkan transmisi data jarak jauh dengan konsumsi daya yang sangat rendah 
+(Adelantado et al., 2017)
+.
+Arsitektur LoRaWAN mengadopsi topologi 
+star-of-stars
+, di mana 
+end-devices
+ (perangkat akhir) berkomunikasi secara langsung dengan satu atau lebih 
+gateways
+. 
+Gateway
+ kemudian meneruskan data ke 
+network server
+ melalui jaringan backhaul (misalnya internet), yang selanjutnya mengarahkan data ke 
+application server
+ yang sesuai. Komunikasi dalam LoRaWAN bersifat asinkron dan menggunakan mekanisme 
+ALOHA
+ untuk akses media, sehingga mengurangi kompleksitas sinkronisasi antar perangkat 
+(Alliance, 2023)
+LoRaWAN mendefinisikan tiga kelas perangkat berdasarkan pola komunikasi:
+Kelas A: Komunikasi dua arah dengan jendela penerimaan (
+receive windows
+) setelah transmisi dari perangkat. Paling hemat energi.
+Kelas B: Menambahkan 
+beacon
+-based scheduling untuk penerimaan periodik, menyeimbangkan antara latensi dan efisiensi energi.
+Kelas C: Perangkat selalu dalam keadaan siap menerima, kecuali saat mengirim data—cocok untuk aplikasi berdaya tinggi.
+Keamanan dalam LoRaWAN dijamin melalui dua lapis enkripsi: 
+Network Session Key
+ (NwkSKey) dan 
+Application Session Key
+ (AppSKey), serta mekanisme autentikasi berbasis 
+Join Accept
+ selama proses 
+over-the-air activation
+ (OTAA).
+Di Indonesia, penggunaan spektrum frekuensi radio untuk perangkat telekomunikasi diatur oleh Kementerian Komunikasi dan Informatika (Kominfo) melalui Peraturan Menteri Kominfo Nomor 21 Tahun 2019 tentang 
+Penggunaan Spektrum Frekuensi Radio untuk Perangkat Telekomunikasi Short Range Device (SRD)
+. Meskipun LoRaWAN secara global menggunakan beberapa pita frekuensi (misalnya EU868, US915, AS923), di Indonesia pita frekuensi yang umum digunakan dan diizinkan untuk SRD termasuk 920–923 MHz, yang secara teknis mengacu pada rencana regional AS923 (Asia 923 MHz).
+Pita 920–923 MHz di Indonesia memiliki karakteristik sebagai berikut (Kominfo, 2019):
+Lebar pita: 3 MHz (920–923 MHz)
+Daya pancar maksimum: +14 dBm (25 mW) ERP (
+Effective Radiated Power
+)
+Duty cycle: Tidak secara eksplisit dibatasi seperti di Eropa, namun penggunaan harus mematuhi prinsip 
+non-interference
+ dan 
+non-exclusive
+.
+Modulasi: Diizinkan untuk teknologi 
+spread spectrum
+, termasuk LoRa.
+Perlu dicatat bahwa meskipun pita ini mengacu pada profil AS923, implementasi LoRaWAN di Indonesia sering kali menyesuaikan sub-band yang diizinkan. 
+Misalnya, hanya channel 0–7 (923.2–923.8 MHz) yang umum digunakan karena ketersediaan spektrum dan kebijakan lokal. 
+Beberapa 
+network server
+ (seperti The Things Network/TTN) menyediakan profil khusus “AS923-1” atau “AS923-ID” untuk menyesuaikan dengan regulasi nasional.
+Penggunaan frekuensi di luar ketentuan Kominfo dapat dikenai sanksi administratif atau pencabutan izin, sehingga penting bagi pengembang IoT untuk memastikan perangkat LoRaWAN mereka mematuhi batasan daya, frekuensi, dan protokol yang ditetapkan.
+RadioLib
+RadioLib merupakan sebuah open-source library yang dikembangkan untuk memfasilitasi komunikasi nirkabel pada berbagai modul radio, terutama yang digunakan dalam platform mikrokontroler seperti Arduino dan ESP32. Library ini dirancang untuk menyederhanakan proses pengembangan sistem komunikasi jarak jauh dengan menyediakan antarmuka pemrograman yang konsisten dan komprehensif untuk berbagai jenis modul radio, termasuk LoRa, FSK, OOK, dan lainnya 
+(Gromes, 2025)
+. Dengan dukungan terhadap berbagai chip transceiver seperti SX127x, SX126x, RF69, dan CC1101, RadioLib memungkinkan pengembang untuk mengimplementasikan protokol komunikasi nirkabel secara efisien tanpa harus menulis kode tingkat rendah secara manual.
+Salah satu keunggulan utama RadioLib adalah abstraksi perangkat keras yang memungkinkan portabilitas kode antar platform. Hal ini sangat penting dalam pengembangan sistem Internet of Things (IoT), di mana fleksibilitas dan skalabilitas menjadi pertimbangan utama. Menurut dokumentasi resminya, RadioLib menyediakan fungsi-fungsi tingkat tinggi untuk konfigurasi modul, pengiriman dan penerimaan data, serta pengelolaan status perangkat, sehingga mempercepat siklus pengembangan dan pengujian 
+(Gromes, 2025)
+Dalam konteks pendidikan dan penelitian, penggunaan library seperti RadioLib memungkinkan mahasiswa dan peneliti untuk fokus pada aspek desain sistem dan protokol komunikasi, bukan pada kompleksitas implementasi perangkat keras. Sebagai contoh, dalam eksperimen berbasis LoRa, RadioLib memungkinkan pengaturan parameter seperti spreading factor, bandwidth, dan coding rate melalui fungsi-fungsi sederhana, sehingga memudahkan eksplorasi karakteristik jaringan LoRaWAN 
+(Gromes, 2025)
+.
+Perbandingan dengan library lain seperti LoRa.h (yang hanya mendukung modul berbasis SX127x) menunjukkan bahwa RadioLib menawarkan cakupan perangkat yang lebih luas dan konsistensi antarmuka lintas chip. Hal ini menjadikannya pilihan yang lebih fleksibel untuk proyek-proyek yang memerlukan interoperabilitas atau migrasi antar platform perangkat keras 
+(Gromes, 2025)
+.
+Gateway
+Gateway merupakan komponen kritis dalam arsitektur jaringan modern, berfungsi sebagai titik perantara yang menghubungkan dua atau lebih jaringan yang berbeda, baik dalam hal protokol, arsitektur, maupun teknologi fisik. Secara umum, gateway bertindak sebagai perangkat jaringan yang mampu menerjemahkan komunikasi antar sistem heterogen, sehingga memungkinkan interoperabilitas antara perangkat yang menggunakan standar berbeda (Tanenbaum & Wetherall, 2021)
+.
+Dalam konteks jaringan berbasis Internet of Things (IoT), gateway sering kali menjadi penghubung antara perangkat edge (seperti sensor atau aktuator) dengan infrastruktur cloud atau jaringan inti. Perangkat ini tidak hanya meneruskan data, tetapi juga dapat melakukan pra-pemrosesan, agregasi, enkripsi, dan manajemen protokol. Misalnya, dalam arsitektur LoRaWAN
+ 
+salah satu teknologi LPWAN (Low Power Wide Area Network)
+ 
+gateway berfungsi menerima sinyal radio dari node end-device menggunakan modulasi LoRa, lalu meneruskannya ke server jaringan melalui koneksi backhaul berbasis IP seperti Ethernet, Wi-Fi, atau selule
+r.
+ 
+(Adelantado et al., 2017)
+Fungsi utama gateway mencakup konversi protokol (protocol conversion), routing, dan keamanan jaringan. Berbeda dengan router atau switch yang beroperasi pada lapisan jaringan atau lapisan data link dalam model OSI, gateway umumnya beroperasi pada lapisan aplikasi (lapisan 7), sehingga mampu memahami dan memproses konten pesan secara semantik (Forouzan, 2013). Hal ini menjadikan gateway lebih kompleks dibanding perangkat jaringan lainnya, namun juga lebih fleksibel dalam mengintegrasikan sistem yang beraga
+.
+Dalam implementasi dasar (basic gateway), fungsionalitas biasanya dibatasi pada penerusan data tanpa pemrosesan lanjutan. Contohnya adalah gateway LoRaWAN sederhana yang hanya menerima frame LoRa dan meneruskannya ke The Things Network (TTN) atau server LoRaWAN lain melalui protokol UDP. Meskipun demikian, bahkan gateway dasar tetap memerlukan konfigurasi jaringan yang tepat, sinkronisasi waktu, serta manajemen keamanan minimal untuk mencegah serangan seperti spoofing atau denial-of-service 
+(Augustin et al., 2016)
+.
+Heltec Tracker V1.1
+Heltec Tracker V1.1 adalah perangkat pelacak berbasis LoRa (Long Range) yang dikembangkan oleh Heltec Automation. Perangkat ini dirancang untuk aplikasi IoT berdaya rendah dan jangkauan jauh, seperti pelacakan aset, kendaraan, atau logistik. Heltec Tracker V1.1 mengintegrasikan modul LoRa SX1276, mikrokontroler ESP32, serta sensor pendukung seperti GNSS (Global Navigation Satellite System) untuk menentukan posisi geografis secara real-time
+. 
+(Automation, 2021)
+Perangkat ini mendukung protokol komunikasi LoRaWAN, sehingga kompatibel dengan jaringan publik maupun privat seperti The Things Network (TTN). Dengan konsumsi daya rendah dan kemampuan transmisi data hingga beberapa kilometer (tergantung kondisi lingkungan), Heltec Tracker V1.1 menjadi pilihan populer dalam implementasi sistem IoT berbasis lokasi (Zhang et al., 2022).
+Fitur utama Heltec Tracker V1.1 meliputi:
+Mikrokontroler ESP32 dengan dukungan Wi-Fi dan Bluetooth (meski dalam mode LoRaWAN, fitur ini sering dinonaktifkan untuk menghemat daya),
+Modul LoRa SX1276 yang mendukung frekuensi sub-GHz (misalnya 868 MHz di Eropa atau 915 MHz di Amerika),
+Modul GNSS (biasanya u-blox NEO-6M atau sejenis) untuk akuisisi koordinat GPS,
+Baterai isi ulang dengan manajemen daya cerdas,
+Antarmuka USB untuk pemrograman dan debugging 
+(Chengdu, 2023)
+Dalam konteks akademik dan penelitian, Heltec Tracker V1.1 telah digunakan dalam berbagai studi, termasuk sistem pelacakan logistik berbasis LoRaWAN (Kurniawan & Setiawan, 2023) dan pemantauan lingkungan bergerak (mobile environmental monitoring)
+.
+ 
+(Shi et al., 2022)
+ Keunggulan utamanya terletak pada integrasi perangkat keras yang lengkap dalam satu board, mempermudah pengembangan prototipe tanpa perlu merancang PCB tambahan
+.
+Namun, tantangan utama dalam penggunaannya meliputi optimasi konsumsi daya (terutama saat GNSS aktif terus-menerus) dan konfigurasi OTAA/ABP pada 
+jaringan LoRaWAN, yang sering menjadi hambatan bagi pemula (seperti mahasiswa yang baru mempelajari TTN dan pemrograman LoRaWAN).
+Heltec Tracker V1.1 dengan integrasi ke The Things Network (TTN)
+Sistem komunikasi berbasis LoRaWAN (Long Range Wide Area Network) telah menjadi pilihan utama dalam pengembangan solusi Internet of Things (IoT) berdaya rendah dan jangkauan jauh. Dalam implementasi ini, perangkat 
+end-node
+ berbasis Heltec Tracker V1.1yang menggunakan modul radio SX1262
+ 
+dikonfigurasi untuk berkomunikasi dengan infrastruktur jaringan LoRaWAN melalui The Things Network (TTN), sebuah platform jaringan LoRaWAN berbasis cloud yang bersifat terbuka dan komunitas-driven (The Things Industries, 2025).
+Komunikasi antara perangkat dan jaringan diimplementasikan menggunakan pustaka RadioLib, yaitu pustaka universal untuk komunikasi nirkabel pada perangkat 
+embedded
+ seperti Arduino. RadioLib menyediakan dukungan penuh terhadap protokol LoRaWAN, termasuk mekanisme aktivasi Over-The-Air Activation (OTAA), manajemen sesi, enkripsi end-to-end, serta penanganan 
+uplink
+ dan 
+downlink
+ sesuai spesifikasi LoRaWAN 1.0.3 (Gromes, 2025a). OTAA dipilih karena menawarkan keamanan yang lebih tinggi dibandingkan metode ABP (
+Activation by Personalization
+), dengan proses autentikasi dinamis yang melibatkan pertukaran kunci jaringan (
+NwkKey
+) dan kunci aplikasi (
+AppKey
+) selama fase 
+join
+.
+Konfigurasi perangkat mencakup definisi pin SPI dan kontrol khusus untuk modul SX1262, seperti 
+chip select
+ (CS), 
+reset
+ (RST), 
+busy
+ (BUSY), dan 
+digital input/output
+ (DIO1). Parameter wilayah frekuensi disetel ke AS923, yang merupakan alokasi spektrum LoRaWAN yang berlaku di wilayah Asia Tenggara, termasuk Indonesia.Hal ini penting untuk memastikan kepatuhan terhadap regulasi spektrum nasional dan kompatibilitas dengan 
+gateway
+ yang tersedia di wilayah tersebut.
+ 
+Pada sisi keamanan, perangkat dikonfigurasi dengan tiga parameter kriptografi utama:
+DevEUI (
+Device Extended Unique Identifier
+): identitas unik 64-bit perangkat,
+AppKey: kunci 128-bit untuk enkripsi lapisan aplikasi,
+NwkKey: kunci 128-bit untuk enkripsi lapisan jaringan.
+Pada The Things Stack versi 3 (TTN v3), nilai 
+NwkKey
+ secara fungsional identik dengan 
+AppKey
+, sehingga kedua parameter tersebut menggunakan nilai yang sama yang dihasilkan dari antarmuka TTN Console (The Things Industries, 2025). Setelah proses 
+join
+ berhasil—ditandai dengan kode status RADIOLIB_LORAWAN_NEW_SESSION (nilai -1118)
+ 
+perangkat memasuki sesi aktif dan siap mengirim data.
+Dalam siklus operasi, perangkat mengirim 
+payload
+ berukuran 3 byte setiap 10 detik. Payload terdiri dari:
+1
+ 
+byte untuk nilai sensor simulasi pertama (
+value1
+),
+2 byte (MSB dan LSB) untuk nilai sensor simulasi kedua (
+value2
+).
+Data dikirim melalui metode sendReceive(), yang secara otomatis membuka jendela penerimaan (
+RX1
+ dan 
+RX2
+) untuk memungkinkan penerimaan 
+downlink
+ dari server jaringan. Setiap transmisi diverifikasi melalui kode status RadioLib; misalnya, RADIOLIB_ERR_NO_JOIN_ACCEPT (-1116) menunjukkan kegagalan menerima respons 
+JoinAccept
+ dari jaringan, yang umumnya disebabkan oleh ketidaksesuaian kunci atau jangkauan sinyal yang tidak memadai 
+(Gromes et al., 2025)
+Verifikasi keberhasilan transmisi dilakukan melalui antarmuka TTN Console. Data yang diterima ditampilkan dalam format JSON dengan 
+frame payload
+ berupa string Base64. Sebagai contoh, payload "BgcV" didekode menjadi urutan heksadesimal 06 07 15, yang merepresentasikan nilai numerik 6 dan 1813—sesuai dengan logika pengkodean di sisi perangkat. Hal ini menunjukkan bahwa enkapsulasi data, enkripsi, transmisi, dan dekripsi di sisi server berjalan sesuai spesifikasi LoRaWAN.
+Pustaka RadioLib juga menyediakan mekanisme diagnosis kesalahan yang komprehensif melalui serangkaian kode status terstandarisasi. Misalnya, RADIOLIB_ERR_CHIP_NOT_FOUND (-2) mengindikasikan kesalahan pada koneksi perangkat keras, sedangkan RADIOLIB_ERR_MIC_MISMATCH (-1112) menandakan ketidaksesuaian 
+Message Integrity Code
+ (MIC), yang dapat disebabkan oleh ketidaksesuaian kunci atau 
+frame counter
+ yang tidak 
+sinkron
+(Gromes et al., 2025)
+. Fungsi bantu seperti stateDecode() digunakan untuk memetakan kode numerik menjadi pesan deskriptif, mempermudah proses 
+debugging
+ selama pengembangan.
+Secara keseluruhan, implementasi ini menunjukkan integrasi yang robust antara perangkat 
+end-node
+ berbasis SX1262, pustaka RadioLib, dan infrastruktur The Things Network. Arsitektur ini tidak hanya memenuhi prinsip keamanan dan efisiensi daya LoRaWAN, tetapi juga memberikan fondasi yang dapat dikembangkan lebih lanjut untuk aplikasi IoT riil, seperti pemantauan lingkungan, pelacakan aset, atau sistem pertanian presisi.
+SIM900L
+SIM900L adalah modul GSM/GPRS miniatur yang dikembangkan oleh SIMCom Wireless Solutions. Modul ini mendukung komunikasi suara, SMS, dan data GPRS pada frekuensi quad-band (850/900/1800/1900 MHz), sehingga memungkinkan konektivitas global di jaringan 2G. Modul ini sering digunakan dalam sistem IoT berbasis seluler karena konsumsi daya rendah, ukuran kecil, dan antarmuka serial TTL yang kompatibel dengan mikrokontroler seperti ESP32, Arduino, dan STM32.
+(Maurya et al., 2012)
+Karakteristik Teknis (berdasarkan Datasheet SIM900L)
+Tegangan Operasi: 3.4 – 4.4 V
+Arus Puncak: ~2 A saat transmisi RF (namun rata-rata < 300 mA)
+Antarmuka: UART (TTL level, 3.3V logic)
+Protokol AT: Mendukung perintah AT standar untuk panggilan, SMS, dan GPRS
+Kecepatan Data GPRS: hingga 85.6 kbps (downlink)
+Modul ini memerlukan antena eksternal (biasanya PCB trace antenna atau whip antenna) dan power supply stabil karena lonjakan arus saat registrasi jaringan dapat menyebabkan reset jika tidak didukung kapasitor buffer atau regulator berkualitas.
+Modul Kartu SD
+Modul kartu SD memungkinkan mikrokontroler untuk menyimpan dan membaca data dalam format file sistem (biasanya FAT16/FAT32). Modul ini berkomunikasi melalui protokol SPI (Serial Peripheral Interface), yang ringan dan didukung luas oleh platform mikrokontroler modern.
+(Satheesh et al., 2016)
+Karakteristik Teknis (berdasarkan spesifikasi SD Card & Modul Adapter)
+Tegangan Operasi: 3.3 V (kartu SD asli); modul adapter biasanya memiliki regulator onboard untuk input 5V
+Protokol Komunikasi: SPI mode (default untuk mikrokontroler)
+Kecepatan Transfer: Tergantung kelas kartu (Class 4, 6, 10, UHS-I)
+Kapasitas: Mendukung hingga 32 GB (SDHC) secara native; SDXC (>32 GB) memerlukan driver tambahan
+Modul ini terdiri dari:
+Slot fisik untuk kartu microSD
+Regulator tegangan (misal: AMS1117-3.3)
+Level shifter (opsional, untuk kompatibilitas 5V logic)
+Pertimbangan Desain
+Gunakan pull-up resistor pada CS (Chip Select) untuk stabilitas
+Pastikan clock SPI ≤ 20 MHz (direkomendasikan ≤ 10 MHz untuk keandalan)
+Format kartu menggunakan FAT32 agar kompatibel dengan pustaka seperti SD.h (Arduino) atau sdmmc (ESP-IDF)
+MP3 Player Module
+MP3 Player Module adalah perangkat elektronik yang dirancang untuk memainkan file audio berformat MP3 (MPEG-1 Audio Layer III) atau format lain seperti WAV dan ADPCM dari media penyimpanan eksternal seperti microSD card atau USB flash drive. Modul ini dilengkapi dengan prosesor audio internal, DAC (Digital to Analog Converter), antarmuka komunikasi serial (UART), serta output suara langsung ke speaker atau headphone. Dengan ukuran fisik yang kecil dan konsumsi daya rendah, MP3 Player Module banyak digunakan dalam proyek DIY, alat edukasi, sistem informasi berbasis suara, robot interaktif, dan perangkat IoT.
+MP3 Player Module bekerja melalui beberapa tahapan proses, yaitu:
+Pembacaan File Audio :
+Modul membaca file audio dari kartu microSD menggunakan protokol SPI atau SDIO. File harus disimpan dalam struktur tertentu agar dapat dikenali oleh firmware modul.
+Dekode Format Audio :
+Prosesor audio mendekode file audio sesuai formatnya (MP3/WAV/ADPCM) menjadi sinyal PCM (Pulse Code Modulation).
+Konversi Digital ke Analog :
+Sinyal digital hasil dekoding dikonversi menjadi sinyal analog menggunakan DAC (Digital to Analog Converter).
+Output Suara :
+Sinyal analog dialirkan ke speaker melalui penguat onboard atau ke headphone secara langsung.
+Kontrol Serial :
+Modul menerima perintah kontrol dari mikrokontroler via UART untuk menjalankan fungsi seperti play, pause, next track, volume
+Speaker
+Modul Amplifier PAM8403 merupakan penguat audio digital kelas D yang dikembangkan oleh Texas Instruments, dirancang untuk memberikan kualitas suara yang jernih dengan efisiensi daya yang tinggi. Modul ini menggunakan teknologi 
+Pulse Width Modulation (PWM) 
+untuk memperkuat sinyal audio tanpa kehilangan banyak energi dalam bentuk panas, sehingga sangat cocok digunakan dalam perangkat audio portabel seperti speaker mini, headphone, sistem audio mobil, hingga proyek DIY elektronika. PAM8403 memiliki kemampuan untuk menghasilkan daya output hingga 3 watt per channel (dengan beban 4Ω) pada tegangan suplai sekitar 5 volt, menjadikannya ideal untuk aplikasi berdaya rendah namun tetap membutuhkan kualitas suara yang baik. Modul ini mendukung dua saluran audio (stereo) dan dilengkapi dengan fitur perlindungan terhadap overheating, overcurrent, serta under-voltage, sehingga meningkatkan keandalan dan umur pakai perangkat. Selain itu, desainnya yang kompak dan konsumsi daya 
+yang rendah membuat PAM8403 banyak digunakan dalam integrasi sistem berbasis mikrokontroler seperti Arduino, ESP32, Raspberry Pi, maupun perangkat audio miniaturisasi lainnya. Penggunaannya yang luas di berbagai bidang menunjukkan bahwa modul amplifier PAM8403 merupakan solusi efektif untuk kebutuhan penguatan suara dalam sistem audio digital modern.
+BAB III
+METODOLOGI
+Kerangka Konsep Proyek Akhir
+Proyek akhir
+ ini dilakukan melalui beberapa tahap. Tahap pertama adalah studi literatur, dimana peneliti mengumpulkan dan menganalisis teori-teori yang berkaitan dengan topik proyek akhir dari buku, jurnal, artikel, dan 
+proyek akhir
+ sebelumnya. Selanjutnya, konsep alat dirancang dan spesifikasinya ditentukan. Tahap ketiga adalah perancangan rangkaian elektronik. Kemudian, desain mekanik sebagai casing alat dibuat. Setelah itu, rangkaian elektronik dirakit ke dalam mekanik dan dilakukan pengujian fungsionalitas. Tahap keenam, program untuk keseluruhan sistem dikembangkan dan diuji coba. Selanjutnya, pengambilan data dilakukan dan dilakukan analisa untuk menghasilkan kesimpulan dari alat yang telah dibuat. Terakhir, laporan akhir disusun berdasarkan hasil dari 
+proyek akhir
+ ini. 
+Gambar 
+15
+ Kerangka Konsep penyusunan p
+royek akhir
+Berikut merupakan flowchart dari kerangka konsep perancangan alat dapat dilihat pada Gambar 12.
+ 
+Adapun Deskripsi Alur Perancangan Alat sebagai berikut 
+Mulai, mempersiapkan segala kebutuhan 
+proyek akhir
+Studi Literatur,
+ Studi 
+proyek akhir
+ mengenai MILES sebagai sistem permainan berbasis sinyal 
+infrared
+, studi 
+proyek akhir
+ mengenai transmitter dan receiver 
+infrared
+, Studi 
+Proyek akhir
+ mengenai komunikasi nirkabel menggunakan ESP-NOW dan LoRa, studi 
+proyek akhir
+ mengenai jenis data yang dikirim, seperti ID, koordinat GPS, dan waktu serta studi 
+proyek akhir
+ mengenai feedback suara yang diberikan kepada pengguna.
+Perencanaan dan Penentuan Spesifikasi Sistem, merumuskan spesifikasi alat secara rinci meliputi aspek elektrik dan mekanik, disesuaikan dengan kinerja sistem yang diinginkan.
+Perancangan Mekanik, mendesain fisik senjata, helm, dan rompi. 
+Termasuk menentukan penempatan sensor, jalur pengkabelan, dan penggunaan lensa untuk optimasi penerimaan sinyal.
+Perancangan Elektronik dan Layout PCB, membuat desain skema rangkaian dan tata letak PCB yang mencakup sumber daya, mikrokontroler, dan transmitter 
+infrared
+ pada bagian senjata, Sumber daya, mikrokontroler, dan sensor 
+infrared
+ pada bagian helm, sumber daya, mikrokontroler, sensor 
+infrared
+, modul GPS, modul LoRa, dan speaker pada bagian rompi
+Perancangan Software, mengembangkan logika sistem meliputi perancangan implementasi logika sistem pada mikrokontroler untuk deteksi sensor dan mengendalikan output, pengiriman data serta menampilkan data pada web interface.
+Pengujian Awal Komponen, Setelah perancangan selesai, dilakukan pengujian awal pada setiap komponen utama secara terpisah. 
+Hal ini bertujuan untuk memastikan setiap subsistem, seperti sensor, aktuator, dan driver, berfungsi dengan baik sebelum diintegrasikan.
+Perakitan Sistem, jika pengujian awal berhasil, semua komponen yang telah dirancang dan diuji dirakit menjadi sebuah prototipe fisik..
+Pengujian Sistem Keseluruhan, apakah alat berjalan baik tanpa kendala? jika ada kendala dilakukan perbaikan, kalibrasi dan pengecekan hingga bekerja normal. 
+Setelah pengujian alat, akan mendapatkan hasil yaitu alat berjalan baik atau tidak..
+Pengambilan Data, dari hasil pengujian yang dilakukan diambil data mengenai performa system secara keseluruhan. 
+Penyusunan laporan akhir, melakukan pengujian dan mencatat hasil serta analisa alat yang sudah selesai dalam bentuk laporan. 
+Selesai.
+Secara konsep, kerangka yang ditampilkan pada Gambar 
+12
+ menggambarkan tahapan pengembangan sistem secara terstruktur dari awal hingga akhir. Jika semua tahapan berhasil, maka 
+Implementasi Rangkaian Elektronik Dan Sistem Komunikasi Multi-Pemain Untuk Permainan 
+Laser Tag
+ Menggunakan ESP-NOW dan LoRa
+ dinyatakan siap digunakan. Konsep ini bersifat iteratif, artinya setiap hasil pengujian yang tidak sesuai akan dikembalikan ke tahap sebelumnya untuk diperbaiki.
+Perancangan Sistem
+Penentuan spesifikasi sistem dilakukan sebagai dasar dalam proses pengimplementasian permainan laser tag. Spesifikasi ini disusun berdasarkan kebutuhan fungsional sistem, komponen yang digunakan, serta tujuan utama dari proyek akhir, yaitu mendeteksi tembakan 
+infrared
+ dan mencatat skor secara real-time melalui sensor IR yang kemudian datanya dikirim ke server menggunakan komunikasi ESP-NOW dan LoRa untuk ditampilkan pada 
+Web Interface atau 
+GUI monitoring
+.
+Gambar 
+16
+ Perancangan Sistem
+Prinsip kerja sistem laser tag berdasarkan gambar 20 di atas dimulai dari integrasi tiga komponen utama, yaitu senjata, helm, dan rompi, yang masing-masing dikendalikan oleh mikrokontroler ESP32. Ketika pemain menekan tombol tembak pada senjata, mikrokontroler tidak langsung memancarkan sinyal inframerah, melainkan terlebih dahulu membaca status dari tiga sensor pendukung: sensor suara, sensor cahaya, dan sensor getar (vibration). Jika ketiga sensor memberikan respons yang sesuai atau dengan kata lain, kondisi yang dipersyaratkan terpenuhi maka mikrokontroler akan mengaktifkan transmitter inframerah (IR) untuk memancarkan sinyal tembakan yang membawa informasi ID pemain dan waktu. Sinyal ini kemudian dapat diterima oleh sensor IR yang terpasang pada helm atau rompi lawan.
+Jika sinyal inframerah diterima oleh sensor pada helm, data tembakan tersebut akan dikirimkan secara nirkabel ke mikrokontroler di rompi menggunakan protokol ESP-NOW. 
+J
+ika sinyal langsung mengenai sensor IR yang terpasang pada rompi, maka mikrokontroler pada rompi akan memprosesnya secara langsung tanpa melalui helm. Setelah menerima informasi tembakan,  baik dari helm maupun dari sensor rompi, mikrokontroler pada rompi mencatat kejadian “terkena tembakan”, lalu mengambil data lokasi real-time dari modul GPS. Informasi lengkap, termasuk ID penembak, ID pemain yang tertembak, waktu kejadian, dan koordinat lokasi, kemudian dikemas dan dikirim melalui modul LoRa menuju LoRa Gateway. Gateway berfungsi sebagai jembatan, meneruskan data tersebut ke server pusat dalam bentuk permintaan HTTP POST. 
+Di sisi server, data diproses oleh script/e
+ndpoint
+ PHP dan disimpan ke dalam database. 
+Hasil akhir permainan 
+kemudian divisualisasikan secara real-time melalui antarmuka berbasis web HTML, yang menampilkan statistik seperti skor, riwayat tembakan, dan peta lokasi kejadian..
+Perancangan Mekanik
+Perancangan SAT
+Tempat Baterai
+Tempat Baterai
+Tempat Modul
+Tempat Modul
+Toggle Switch
+Toggle Switch
+Indikator Sensor
+Indikator Sensor
+Saklar ON/OFF
+Saklar ON/OFF
+Indikator button
+Indikator button
+Pemicu
+Pemicu
+Flame sensor
+Flame sensor
+Lensa
+Lensa
+IR Led
+IR Led
+Laser
+Laser
+Gambar 
+17
+ Perancangan SAT
+Perancangan Lensa
+Untuk membuat cahaya yang diteruskan oleh lensa Fresnel menjadi paralel, kita perlu memastikan bahwa sumber cahaya (
+focal length
+ atau jarak fokus) ditempatkan pada titik fokus lensa Fresnel. Lensa Fresnel dirancang untuk memfokuskan atau mengkolinearkan (membuat sejajar) cahaya dengan cara yang mirip dengan lensa konvensional.
+Dengan parameter yang diketahui berupa material lensa yakni 
+polycarbonate
+ , diameter lensa sebesar 20mm dan radius lengkung permukaan lensa 14.5mm, maka 
+focal length 
+/ titik focus cahaya dapat dirumuskan dengan persamaan 
+1.9
+. Dengan demikian titik fokus lensa sebagai berikut: 
+Nilai 1.58 merupakan indeks bias material lensa yakni 
+polycarbonate. 
+Didapatkan 
+focal length 
+sebesar 25mm. Dapat dilihat pada Gambar 3.30
+Gambar 
+18
+ 
+Focal Length Lensa Fresnel
+Dimana dengan jarak 
+focal length
+ sesuai dengan perhitungan, maka akan menghasilkan cahaya yang pararel dengan lebar lensa.
+Perancangan Box pada Helm
+Indikator Sensor
+Indikator Sensor
+Lubang soket kiri
+Lubang soket kiri
+Lubang soket kanan
+Lubang soket kanan
+Saklar
+Saklar
+Receiver
+Receiver
+Gambar 
+19
+ Perancangan Helm
+Perancangan pada Rompi
+Box
+Gambar 
+20
+ Perancangan Box pada Rompi
+ 
+Desain alat mencakup pengembangan desain fisik dari alat ini, mulai dari konsep struktur hingga detail implementasi. Sistem ini didesain agar semua komponen dalam masuk dan sesuai dengan seluruh kebutuhan sistem yang dibuat untuk rompi dan helm. Dimensi dibuat secompact mungkin agar memaksimalkan dimensi dan ruangan yang dibutuhkan dan tidak mengganggu pergerakan pada saat 
+permainan
+.
+Design Rompi
+Gambar 
+21
+ Design Rompi
+Pada merupakan d
+esain mekanik pada sistem rompi dimana menggunakan bahan kain yang dijahit dengan model dan ukuran kurang lebih  seperti pada gambar. Terdapat 8 buah jumlah lubang yang terdapat pada rompi tersebut digunakan sebagai tempat atau wadah dari sensor penerima inframerah TSOP4838. Pada lubang tersebut sensor ditutup menggunakan lensa cembung yang berfungsi untuk memfokuskan Cahaya atau sinyal yang diterima. 
+Keberadaan lensa tersebut 
+cukup penting mengingat kemampuan sensor menerima hanya berkisar kurang lebih 45⁰
+.
+Perancangan Elektronik
+Perancangan 
+R
+angkaian Power Source Regulator Circuit
+Perancangan rangkaian regulator sumber daya yang menggunakan baterai lithium-ion Black Cell tipe 14500 dalam konfigurasi dua sel seri (2S). Susunan seri ini menghasilkan tegangan nominal 7,4 V (2 × 3,7V per sel), dengan rentang operasional antara 6 V hingga 8,2 V. Baterai berkapasitas 5.000 mAh ini mampu menyediakan arus hingga 15 A, memadai untuk kebutuhan sistem. Tegangan keluaran baterai diatur menjadi 5 V stabil menggunakan IC regulator 7805, yang dikombinasikan dengan transistor MJD2122G sebagai penguat arus untuk meningkatkan kemampuan arus keluaran regulator. Rangkaian ini juga dilengkapi dioda D10–D11 dan kapasitor C1–C4 untuk menyaring noise serta memperkuat stabilitas respons transient terhadap perubahan beban
+. 
+Gambar 
+22
+ 
+Power Source Regulator
+Sistem power regulator ini menyuplai tegangan 5V untuk seluruh komponen elektronik SAT dan HARNESS, termasuk ESP32 S3 Supermini, berbagai sensor, IC, LED infrared, serta transistor/MOSFET. Berdasarkan perhitungan asumsi arus maksimum totalnya adalah 
+290mA
+.
+sebagai berikut:
+Tabel 
+3
+ Asumsi arus
+KOMPONEN
+ ASUMSI ARUS
+ESP32
+S3 Supermini
+8
+0
+–
+150
+mA
+Sensor Suara
+20–40mA
+Sensor Cahaya
+15–30mA
+Sensor Getar
+an
+15–30mA
+IC 74HC4078
+5–10 mA
+Laser
+10–20 mA
+BC847
+1-5mA
+MCP1406
+1-5mA
+Berdasarkan pengukuran tegangan keluaran 
+, nilai tersebut masih dalam toleransi regulator 7805, yaitu:
+(
+2.0
+)
+Jika transistor Q4 tidak aktif (beban ringan), keluaran berasal langsung dari pin output 7805, sehingga:
+Dalam konfigurasi emitter follower (jika aktif)
+:
+(
+2.1
+)
+Namun karena 
+, maka Q4 kemungkinan tidak beroperasi sebagai emitter follower pada kondisi pengukuran.
+ 
+Arus keluaran dihitung berdasarkan hukum Ohm:
+(
+2.2
+)
+Arus basis yang diperlukan untuk mengaktifkan Q4 (jika digunakan sebagai penguat arus):
+(
+2.3
+)
+Dengan 
+sebagai penguatan arus DC transistor. Daya disipasi pada Q4:
+(
+2.4
+)
+Selama arus beban kecil dan Q4 tidak jenuh, keluaran tetap mengikuti tegangan regulator 7805 tanpa penurunan 
+.
+Perancangan Rangkaian Pemancar Inframerah
+Rangkaian Sensor Suara
+Gambar 25 menampilkan rangkaian deteksi suara yang menggunakan IC LM393 sebagai komparator analog. IC LM393 merupakan komparator dua saluran yang membandingkan dua tegangan masukan dan menghasilkan keluaran logika digital berdasarkan selisih antara keduanya. Rangkaian ini dirancang untuk mengubah sinyal suara analog dari mikrofon menjadi sinyal digital berupa logika HIGH atau LOW
+. 
+Gambar 
+23
+ Rangkaian sensor suara
+T
+egangan
+ 
+masukan
+ 
+non-
+inverting (
++
+) dari LM393 terhubung ke pembagi tegangan dari R3 dan R4,
+yaitu 
+R3 = 100 k
+Ω
+ (dari 5V ke titik A)
+R4 = 100 k
+Ω
+ (dari titik A ke GND)
+sehingga tegangan dapat dihitung dengan persamaan 1.2:
+Kemudian arus yang digunaka
+n
+ pada rangkaian tersebut dihitung sebagai berikut:
+(
+2.5
+)
+Tegangan masukan di inverting(-) dari LM39. Titik ini terhubung ke 
+mic + kapasitor C₁ + resistor R₂, dan juga ke pembagi tegangan R₁ dan R₂
+. yaitu 
+R₁ = 10kΩ
+R₂ = 150Ω
+sehingga tegangan dapat dihitung dengan persamaan 1.2
+Kemudian arus yang digunakan pada rangkaian tersebut dihitung
+ seperti persamaa
+n 2.5
+ sebagai berikut:
+Karena tanpa suara, pin + = 2.5V dan pin – = 0.074V 
+maka
+ pin + lebih besar, jadi outputnya HIGH (5V).
+ akan tet
+api
+,
+ ketika ada suara, mic mengirimkan sinyal yang bisa membuat pin – naik sedikit. Kalau naik melebihi 2.5V, maka output akan turun ke LOW (0V)
+. 
+Tegangan di LED
+ merah
+ saat nyala = 2 V. 
+Maka, tegangan jatuh
+ 
+ 
+. 
+Sehingga 
+a
+rus LED 
+dapat dihitung menggunaka persamaan 1.4:
+Rangkaian Sensor Getar
+Gambar 24 memperlihatkan rangkaian sensor getaran yang menggunakan sensor vibrasi analog dan IC komparator LM393. Rangkaian ini ber
+fungdsi
+ mengubah sinyal fisik berupa getaran menjadi sinyal digital yaitu logika HIGH atau LOW sehingga mudah diolah oleh sistem mikrokontroler.
+Gambar 
+24
+ Rangkaian Sensor Getar
+Berikut adalah perhitungan dan pertimbangan desainnya:
+Tegangan
+ masukan
+ 
+non-
+inverting (
++
+) dari LM393 terhubung ke pembagi tegangan dari R
+7
+ dan R
+8
+,yaitu 
+R
+7
+ = 100 k
+Ω
+ (dari 5V ke titik A)
+R
+8
+ = 100 k
+Ω
+ (dari titik A ke GND)
+sehingga tegangan dapat dihitung dengan persamaan 1.
+6
+:
+Kemudian arus yang digunakan pada rangkaian tersebut dihitung
+ seperti persamaa
+n 2.5
+ sebagai berikut:
+Tegangan masukan di inverting(-) dari LM39. Titik ini terhubung ke 
+mic + kapasitor C₁ + resistor R₂, dan juga ke pembagi tegangan R
+9
+ dan R
+10
+. yaitu 
+R
+9
+ = 10kΩ
+R
+10
+ = 1
+0
+0Ω
+sehingga tegangan dapat dihitung dengan persamaan 1.
+6
+Kemudian arus yang digunakan pada rangkaian tersebut dihitung 
+seperti persamaan
+ 2.5 
+sebagai berikut:
+Karena tanpa suara, pin + = 2.5V dan pin – = 0.
+05
+V 
+maka
+ pin + lebih besar, jadi outputnya HIGH (5V).
+ akan tet
+api
+,
+ ketika ada suara, mic mengirimkan sinyal yang bisa membuat pin – naik sedikit. Kalau naik melebihi 2.5V, maka output akan turun ke LOW (0V)
+. 
+Tegangan di LED merah saat nyala = 2 V. 
+Maka, tegangan jatuh
+ 
+ 
+. 
+Sehingga 
+a
+rus LED 
+dapat dihitung menggunaka persamaan 1.
+7
+:
+Rangkaian Sensor Api
+Gambar 25 menunjukkan rangkaian sensor api (flame sensor) berbasis IC LM393 yang berfungsi sebagai komparator. Rangkaian ini dirancang untuk mendeteksi keberadaan api atau sumber cahaya berintensitas tinggi dengan memanfaatkan respons optik dari photodiode terhadap cahaya inframerah yang dipancarkan oleh api.
+Gambar 
+25
+ Rangkaian Sensor Api
+Berikut adalah perhitungan dan pertimbangan desainnya 
+Resistansi photodiode berubah tergantung intensitas cahaya. Pada jarak pengujian tertentu, resistansinya terukur sekitar 900 k
+Ω
+.Resistor 
+ 
+dipasang bersama photodiode membentuk pembagi tegangan yang disuplai 5V. Tujuannya adalah agar tegangan di titik antara keduanya (yang diumpankan ke komparator) berada sedikit di atas ambang batas, yaitu sekitar 2,6 V. Dengan nilai 
+, nilai ideal 
+dapat dihitung menggunakan rumus pembagi tegangan:
+(2.6)
+Karena resistor dengan nilai tepat 975 kΩ sulit ditemukan di pasaran, dipilih nilai standar terdekat yang umum tersedia, yaitu 1 MΩ.
+Untuk mengatur sensitivitas sensor, digunakan potensiometer 
+. Potensiometer ini mengatur tegangan referensi di input positif (+) komparator. Dengan memutar potensiometer, bisa menaikkan atau menurunkan ambang deteksi  artinya, sensor bisa diatur agar hanya merespons api yang kuat, atau bahkan responsif terhadap cahaya IR yang lemah.
+ 
+Tegangan di LED merah saat nyala = 2 V. 
+Maka, tegangan jatuh
+ 
+ 
+. 
+Sehingga a
+rus LED 
+dapat dihitung menggunaka
+n
+ persamaan 1.7:
+Rangkaian Pengkondisi sinyal
+Gambar 3.4.5 merupakan rangkaian pengkondisi sinyal 
+memanfaatkan IC 74HC4078B1R sebagai penggabung sinyal dari tiga sensor utama: getar (S₁), api/flame (S₂), dan suara (S₃), yang masing-masing dihubungkan ke input A, B, dan C dari gerbang NOR 8-input. Input sisanya (D sampai H) dihubungkan ke GND (logika 0) karena tidak digunakan, sehingga hanya ketiga sensor tersebut yang memengaruhi output. Tujuannya adalah menggabungkan sinyal dari ketiga sensor menjadi satu sinyal 
+output
+.
+Output diambil dari pin X (keluaran NOR). Gerbang NOR menghasilkan logika “1” jika semua input bernilai “0”. Artinya, 
+jika
+ ada 
+ketiga
+ sensor yang mendeteksi gangguan (getar, api, atau suara), input NOR menjadi “
+0
+”, dan output X langsung berubah menjadi “
+1
+”. Perubahan ini digunakan untuk menyalakan LED 
+indikator
+yang kemudian 
+dihubungkan langsung ke pin 8 mikrokontroler untuk memberi sinyal digital yang jelas ke mikrokontroler untuk diproses lebih lanjut
+.
+Gambar 
+26
+ Rangkaian pengkondisi sinyal
+Rangkaian Driver SAT
+Pada Gambar 
+30
+ merupakan rangkaian 
+driver
+ untuk sistem SAT, dimana rangkaian tersebut bertujuan untuk memaksimalkan keluaran daya namun tetap menjaga kompabilitas dengan sistem 
+embedded
+ berdaya rendah seperti ESP32. Selain itu rangkaian pada Gambar
+ 28
+ bertujuan untuk mempercepat 
+switching
+, mempercepat waktu naik dan turun sehingga membantu pembentukan gelombwang pulsa agar sempurna. Terdapat beberapa rangkaian penyusun pada 
+driver
+ 
+infrared
+, diantaranya:
+Rangkaian pengendali
+Rangkaian yang ditampilkan pada Gambar 
+2
+7
+ merupakan 
+Rangkaian pengendali ini menggunakan mikrokontroler ESP32-S3 Supermini sebagai otak sistem. 
+Ketika
+ tombol IO5 ditekan, sinyal logika dari rangkaian sensor (melalui IC 74HC4078) akan mengaktifkan pin IO8 sebagai input ke ESP32-S3. Mikrokontroler kemudian merespons dengan menyalakan output di pin GPIO 2 (IO2), yang memicu transistor BC847B untuk menghidupkan LED indikator D6. Dengan demikian, LED D6 berfungsi sebagai indikator visual bahwa sistem telah terpicu dan siap mengaktifkan beban utama (IRLED) melalui rangkaian driver berikutnya.
+Gambar 
+27
+ Rangkaian Pengendali
+Menurut datasheet BC847B VCE =0.2V, maka 
+IC(sat) 
+dapat dihitung:
+(2.
+7
+)
+Se
+telah tahu IC = 4.8mA, maka IB(min) 
+dapat dihitung
+:
+(2.
+8
+)
+Ketika GPIO2 aktif tegangan base (VB) transistor 
+,
+VLED 
+, 
+VBE 
+ maka 
+tegangan yang jatuh di VR17 
+dapat dihitung:
+(2.
+9
+)
+A
+rus
+ yang mengalir di jalur 
+basis atau IB(Aktual)
+ dapat dihitung dengan rumus
+(
+3.0
+)
+Maka, gain arus efektif dalam saturasi (sering disebut forced β atau β_forced) dapat dihitung sebagai:
+(3.1)
+Nilai ini jauh di bawah hFE minimum transistor pada daerah aktif (100–200), mengonfirmasi bahwa transistor beroperasi dalam daerah saturasi, sesuai dengan prinsip desain rangkaian switching.
+Rangkaian Driver MOSFET dengan IC MCP1406 untuk Pengendalian Beban
+Untuk menghidupkan atau mematikan perangkat berdaya tinggi
+ yaitu inframerah diperlukan sinyal digital bertegangan rendah dari rangkaian logika dan switch daya berbasis MOSFET. Pada sistem ini, sinyal digital yang dihasilkan dari keluaran kolektor transistor Q1 dikonversi menjadi sinyal penggerak yang mampu mengaktifkan MOSFET daya (IRFZ44N) secara efisien dan responsif. Konversi ini dilakukan dengan memanfaatkan IC MCP1406 sebagai gate driver MOSFET, yang berfungsi meningkatkan arus dan mempercepat transisi penyalaan/pemadaman MOSFET. Dengan karakteristik output push-pull dan kemampuan mengalirkan arus hingga ±2A, MCP1406 memastikan switching MOSFET berlangsung cepat, stabil, dan minim disipasi daya
+.
+Gambar 
+28
+ 
+Rangkaian Driver MOSFET dengan IC MCP1406 untuk Pengendalian Beban
+Input MCP1406 diambil dari keluaran kolektor transistor Q1 (rangkaian sebelumnya), yang diberi pull-up resistor R
+18
+ = 1kΩ ke 5V. Saat Q1 OFF keluaran kolektor ≈ 5V
+,
+ input MCP1406 = HIGH
+ maka
+ output MCP1406 = VDD (≈8V) 
+sehingga 
+MOSFET ON. Saat Q1
+ 
+ON keluaran kolektor ≈ 0V
+,
+ input MCP1406 = 
+LOW 
+maka 
+output MCP1406 = 0V 
+sehingga 
+MOSFET OFF.
+ 
+Untuk arus input dari MCP1406 dapat dihitung
+:
+(
+3
+.
+2
+)
+Output MCP1406 terhubung langsung ke gate MOSFET Q3 (IRFZ44N) melalui resistor R19 = 100
+Ω
+. Resistor ini berfungsi sebagai pembatas arus gate mencegah lonjakan arus saat switching, dan membantu mengurangi noise/ringing.
+LED D
+8
+ terhubung antara VDD (8V) dan output MCP1406 melalui R
+21
+ = 1kΩ
+, Maka arus pada led dapat dihitung
+ seperti persamaan 1.7
+:
+Arus 
+pubcak 
+gate mosfet dapat dihitun
+g :
+(
+3
+.
+3
+)
+Tengagan pada gate mosfet, Saat MCP1406 output HIGH
+, 
+V_GS = 8V
+sehingga
+ MOSFET menyala penuh.
+ 
+Saat MCP1406 output LOW
+,
+ V_GS = 0V 
+maka 
+MOSFET mati
+.
+Mosfet
+MOSFET (Metal-Oxide-Semiconductor Field-Effect Transistor) merupakan perangkat semikonduktor yang berfungsi sebagai sakelar atau penguat. Pada tipe-N (NMOS), arus drain (
+) mengalir ketika tegangan gate-source (
+) melebihi tegangan ambang (
+). Operasinya terbagi menjadi dua wilayah:
+Wilayah linear (ohmik): 
+,
+(
+3.4
+)
+Wilayah saturasi: 
+,
+(
+3.5
+)
+dengan 
+ 
+sebagai parameter konduksi (A/V²).
+Dalam aplikasi enggerak inframerah pada sistem ini MOSFET dioperasikan sebagai sakelar yang hanya berada dalam dua keadaan: mati total (
+) atau nyala penuh (
+). Pada kondisi nyala, 
+sangat kecil sehingga perangkat berada di ujung bawah wilayah linear, di mana ia berperilaku seperti resistor dengan nilai rendah 
+. Rugi daya saat konduksi diberikan oleh:
+(
+3.6
+)
+Untuk MOSFET daya seperti IRLZ44N, 
+. Dengan tegangan gate penggerak 
+, MOSFET memasuki kondisi fully on dengan 
+minimal (misal: 22 mΩ), sehingga efisiensi termal terjaga dan mampu mengalirkan arus tinggi tanpa pemanasan berlebih
+.
+IR LED
+Rangkaian ini m
+enggerakkan LED inframerah berdaya tinggi (JH-7070IR18S40-T8A-LS940) dengan arus operasi 3.5 A, menggunakan MOSFET Q3 (IRLZ44N) sebagai sakelar daya, dan rangkaian LC serta resistor paralel untuk mengatur arus dan mengurangi noise/ripple.
+Gambar 
+29
+ Rangkaian sederhana IR LED
+Berdasarkan datasheet
+ 
+JH-7070IR18S40-T8A-LS940
+:
+ 
+Arus operasi (Iop) = 3.5 A (dengan kondisi T=50°C)
+Tegangan operasi (Vop) = 2.0 V (typical)
+Resistansi seri (Rs) = 0.19 Ω
+Daya optik (Po) = 2.9 W (typical)
+Efisiensi konversi (PCE) = 37%
+Saat mosfet ON maka, VLED = 2.0 V (typical), ILED = 3.5 A (operating current). Maka rugi
+ dayanya:
+(
+3.7
+)
+Menurut
+ datasheet, daya optik hanya 2.9W  artinya:
+(
+3.8
+)
+Tegangan di L1 berfungsi sebagai filter arus.Saat steady-state (DC), induktor berperilaku seperti kabel  tidak ada drop tegangan.
+ 
+Jadi, tegangan di L1 ≈ 0V
+/
+Tegangan sumber yang dibutuhkan 
+=
+ 
+(
+3.9
+)
+MOSFET IRLZ44N memiliki 
+(dengan 
+). Ma
+ka rugi dayanya:
+(
+4.0
+)
+C₄ = 1nF sebyagai kapasitor bypass, mengurangi noise RF tidak mempengaruhi arus DC. 
+D₈ (SS12) sebagai dioda freewheeling, melindungi MOSFET dari spike tegangan saat dimatikan arusnya hanya saat switching
+.
+Gambar 
+30
+ Gambar Rangkaian keseluruhan Infrared Driver
+Perancangan Rangkaian Penerima Inframerah Anti Chea
+ting
+Rangkaian ini dirancang sebagai sistem deteksi 
+cheating
+ berbasis inframerah (IR), di mana keberadaan objek yang menutupi sinyal IR akan menghasilkan perubahan logika yang dapat diproses oleh mikrokontroler (ESP32-S3 Supermini) melalui rangkaian logika (74HC4078) dan komparator (LM393)
+.
+Gambar 
+31
+ 
+Rangkaian Penerima Infrared Anti-Cheating
+TSOP4838 dan 
+LM393
+Rangkaian penerima inframerah anti-cheating yang diimplementasikan menggunakan modul TSOP4838 dan komparator ganda LM393 dirancang untuk mendeteksi sinyal inframerah 38 kHz dengan akurasi tinggi dan respons logika yang terstruktur. Analisis berikut bertujuan untuk mengkarakterisasi perilaku tegangan dan arus pada setiap tahap rangkaian, serta mengevaluasi integritas logika output dalam konteks aplikasi deteksi kecurangan.
+Saat TSOP4838 aktif (output LOW
+)
+ LED menyala. 
+ maka 
+arus LED dihitung dengan hukum Ohm
+ seperti persamaan 1.7
+:
+Komparator Pertama (U1 - LM393A). Input Non-Inverting (+): Terhubung ke pembagi tegangan dari R₆ = 4kΩ dan R₅ = 2kΩ  menghasilkan referensi. Input Inverting (-): Terhubung ke output TSOP4838 melalui R₇ = 1kΩ dan LED (dengan R₈ = 4kΩ sebagai pull-up)
+ 
+Output U1: Terhubung ke input inverting (-) dari komparator kedua (U2) melalui R₁₀ = 10kΩ.
+ Maka tehgangan referensi dapat dihitung
+ seperti persamaan 1.6
+:
+Komparator Kedua (U2 - LM393A)
+ 
+Input Non-Inverting (+): Terhubung ke pembagi tegangan dari R₁₀ = 4kΩ dan R₉ = 2kΩ → referensi 3.3V.
+ 
+Input Inverting (-): Terhubung ke output U1 melalui R₁₀ = 10kΩ. Output U2: Terhubung ke OUTPUT LM melalui R₁₁ = 1kΩ (pull-up ke sumber 3.3V)
+. 
+Maka tehgangan referensi dapat dihitung
+ seperti persamaan 1.6
+:
+Sensor TSOP4838 memiliki sudut penerimaan efektif ±45° dari sumbu utama (axis)
+. 
+Dengan kata lain, jika remote control diarahkan langsung ke sensor (0°), maka sinyal diterima dengan kuat dan optimal
+. 
+Jika remote digerakkan hingga membentuk sudut 45° ke kiri atau ke kanan , sensor masih bisa menerima sinyal , meskipun kekuatannya mulai berkurang
+. 
+Di luar sudut tersebut (>45°), kemungkinan besar sensor tidak akan mendeteksi sinyal .
+(Toyib et al., 2019)
+.
+Gambar 
+32
+ Sudut penerimaan sensor TSOP4838
+ Gambar 34 
+menunjukkan grafik yang berkaitan dengan sudut penerimaan (
+directivity
+) sensor. Sumbu radial (sumbu horizontal) menyatakan 
+relative transmission distance
+ (d_rel), yaitu jarak transmisi relatif . Nilai d_rel = 1.0 pada sumbu ini menunjukkan jarak transmisi maksimum saat sinyal datang langsung ke arah tengah sensor (0°). Semakin kecil nilai d_rel , semakin rendah sensitivitas sensor terhadap sinyal IR dari sudut tertentu. Sumbu sudut (sumbu lingkaran) menyatakan sudut datang sinyal IR terhadap sumbu utama sensor (arah 0°). 
+Sudut dinyatakan dalam derajat (0° hingga ±90°) di sekitar sumbu utama sensor. Garis kurva hitam pada polar plot menunjukkan hubungan antara sudut datang sinyal dan sensitivitas sensor. Pada 0°,
+ 
+garis mencapai nilai maksimum (d_rel = 1.0), yang menunjukkan bahwa sensitivitas sensor paling tinggi ketika sinyal datang langsung ke arah tengah. 
+Semakin menjauh dari 0°, nilai d_rel menurun, menunjukkan bahwa sensitivitas sensor berkurang. Saat sinyal datang tepat di depan sensor (0°), sensitivitasnya mencapai nilai maksimum (d_rel = 1.0). Ini berarti sensor dapat menerima sinyal dengan jarak transmisi maksimal. Dari datasheet, diketahui bahwa sudut penerimaan efektif adalah ±45°. Pada ±45°, nilai d_rel turun menjadi sekitar 0.4–0.5, yang menunjukkan bahwa sensitivitas masih cukup baik tetapi sudah menurun dibandingkan dengan posisi 0°. Di luar sudut ±45°, sensitivitas menurun drastis, sehingga sensor cenderung tidak dapat menerima sinyal dengan akurat, garis kurva menunjukkan bahwa d_rel mendekati nol. 
+Ini berarti sensitivitas sensor sangat rendah atau hampir tidak ada.
+TSOP4838 memiliki kemampuan untuk merespons panjang gelombang cahaya tertentu, yang disebut 
+Relative Spectral Sensitivity
+ (RSS). Dalam konteks TSOP4838, ini mengacu pada seberapa sensitif sensor terhadap berbagai panjang gelombang cahaya inframerah (IR), relatif terhadap panjang gelombang optimalnya LED inframerah memancarkan Cahaya dengan Panjang gelombang 930-950 nm. Agar komunikasi berjalan dengan efisien. LED pemancar harus bekerja pada panjang gelombang yang sesuai dengan puncak RSS dari TSOP483
+8
+.
+Gambar 
+33
+ Grafik Panjang Gelombang
+Grafik ini menunjukkan bagaimana respons sensitivitas sensor TSOP4838 berubah terhadap berbagai Panjang gelombang yang diterima. Jika Panjang gelombang mencapai 950nm maka sensitivitas akan mencapai nilai puncak yang berarti pada titik maksimal kemampuan sensitivitas sensor TSOP4838. Jika Panjang gelombang yang diterima tidak sesuai dengan puncak sensitivitas sensor, maka akan mengurangi sensitivitas sensor penerima bahkan dapat menyebabkan er
+r
+or atau sinyal tidak terbaca
+Rangkaian Anti-Cheating
+Cara kerjanya 
+konfigurasi photodiode: mode reverse bias. Photodiode disambungkan antara ground dan output, dengan resistor pull-up ke 5V. Saat terkena cahaya IR arus photocurrent mengalir tegangan di node output turun sehingga logika LOW. Saat tidak terkena cahaya (IR ditutup)
+ 
+arus bocor sangat kecil tegangan di node output ≈ 5V sehingga logika HIGH
+.
+Kondisi 1: IR MENYALA (Photodiode TERKENA CAHAYA)
+ 
+Arus photocurren
+t
+ 
+(
+berdasarkan datasheet)
+ 
+dan r
+esistor pull-up R₁ = 100kΩ.
+ Maka dapat dihitung sebagai berikut
+:
+(4.1)
+Namun, untuk VR = 5 V, nilai Ira = 60 µA adalah nilai maksimum artinya, jika sumber cahaya cukup kuat (Ee = 1 mW/cm²), photodiode akan menghasilkan arus ~60 µA
+. 
+Jadi, tegangan output tidak akan turun di bawah 0 V
+ maka
+ akan jatuh ke ~0 V (saturasi).
+ 
+VA
+BC
+ =
+ 0 V 
+dengan 
+logika LOW
+Kondisi 2: IR DITUTUP (Photodiode TIDAK TERKENA CAHAYA). 
+Arus dark current: 
+(typical) 
+dan r
+esistor pull-up R₁ = 100kΩ.
+ Maka dapat dihitung sebagai berikut
+.
+(4.
+2
+)
+Maka 
+VA
+BC
+ = 
+4.9
+V 
+dengan l
+ logika HIGH
+Logika Sistem Anti-Cheating: Saat semua photodiode menerima 
+Cahaya 
+input A=B=C=LOW maka output NOR = HIGH aman. Saat salah satu photodiode tidak menerima cahaya (IR ditutup) input = HIGH maka output NOR = LOW deteksi cheating.
+Rangkaian
+ 
+Heltec
+Rangkaian
+ 
+Perancangan Software
+Berikut merupakan flowchart sistem dari alat yang akan dirancang dapat dilihat pada Gambar
+……..
+ 
+Gambar 
+34
+ Flowchart
+Deskripsi Flowchart:
+Proses dimulai dari tahap pengaktifan alat. Saat sistem sudah siap, pemain menekan tombol push button pada senjata untuk menembak. Tindakan ini membuat transmitter IR memancarkan sinyal 
+infrared
+ yang berisi data ID penembak. Sinyal ini bisa diterima oleh helm atau rompi lawan. Jika helm yang menerima, sistem akan memeriksa terlebih dahulu apakah sinyal sesuai dengan protokol NEC. Jika sesuai, helm akan membaca data ID dan mengirimkannya ke rompi melalui ESP-NOW. Rompi kemudian meneruskan data ini ke LoRa Gateway melalui jaringan LoRa. Jika tidak sesuai, tembakan dianggap meleset.
+Jika sinyal diterima langsung oleh rompi, prosesnya serupa. Rompi akan memeriksa protokol NEC, dan jika sesuai, rompi membaca data ID, lokasi, dan waktu tembakan. Data ini kemudian dikirimkan ke LoRa Gateway melalui LoRa. Jika tidak sesuai, tembakan juga dianggap meleset. Setelah LoRa Gateway menerima data dari rompi, gateway akan mengirimkan data tersebut ke server menggunakan HTTP POST request. Di sisi server, endpoint PHP akan membaca data dari gateway dan menyimpannya ke dalam database server. Selanjutnya, Server-Sent Events (SSE) akan mengambil data dari server dan menampilkannya secara real-time di GUI. Proses ini dinyatakan berakhir ketika pemain terkena tembakan dan statusnya telah ditampilkan pada GUI
+.
+.
+BAB IV PENGUJIAN DAN ANALISA
+Pada bab ini disajikan hasil pengujian sistem yang telah dilakukan baik secara per blok komponen maupun secara keseluruhan, beserta analisis terhadap data yang diperoleh dari hasil pengujian. Proses pengujian dimulai dari masing-masing blok rangkaian elektronik dan modul komunikasi, kemudian dilanjutkan dengan pengujian integrasi sistem secara menyeluruh.
+ 
+Hasil pengujian tersebut selanjutnya akan dianalisis untuk mengetahui apakah sistem telah bekerja sesuai dengan rancangan yang direncanakan, termasuk kemampuan deteksi serangan, akurasi pengiriman data, serta keandalan komunikasi dalam berbagai kondisi medan latihan yang beragam.
+4.1 Pengujian perblok
+Pengujian sistem perblok bertujuan untuk memverifikasi fungsi masing-masing komponen dalam Sistem Senjata sebelum melakukan pengujian keseluruhan. Dengan menguji setiap blok secara terpisah, kita dapat memastikan bahwa tidak ada masalah pada komponen individu yang dapat menyebabkan gangguan pada sistem keseluruhan.
+ 
+Pengujian Rangkaian Power Regulator
+LM7805
+Pengujian dilakukan dengan memberikan 
+input
+ tegangan yang bervariasi (dari 7.
+0
+V hingga 8.
+2
+V). Setiap level tegangan masukan diukur menggunakan multimeter digital, dan tegangan keluaran regulator dicatat.
+ 
+Pengujian dilakukan masing masing sebanyak lima kali percobaan dengan kondisi tanpa beban
+.
+ 
+ dihitung menggunakan rumus
+ sebagai berikut:
+(.1)
+Hasil pengujian ditunjukkan pada Tabel .7 dengan hasil pengujian sebagai      berikut
+Tabel 
+4
+ Pengujian LM7805
+REGULATOR LM7805
+ 
+INPUT
+OUTPUT
+TARGET 
+OUTPUT
+E
+R
+ROR
+1
+7.98V
+5.0
+8
+V
+5V
+0.
+16
+%
+2
+8.02V
+5.0
+8
+V
+5V
+0.
+16
+%
+3
+8.10V
+5.0
+8
+V
+5V
+0.
+16
+%
+4
+8.11V
+5.0
+8
+V
+5V
+0.
+16
+%
+5
+8.12V
+5.08V
+5V
+0.
+16
+%
+6
+8.14V
+5.0
+8
+V
+5V
+0.
+16
+%
+ 
+Pengujian Rangkaian Pemancar Inframerah
+Sensor suara
+Pengujian dilakukan dengan memberikan suara berintensitas 30–90 dB (diukur menggunakan sound level meter), lalu mencatat tegangan keluaran sensor dan kondisi outputnya. Tegangan referensi dipantau untuk stabilitas sistem, dengan threshold ditetapkan pada 
+setengah VCC 
+sebagai acuan pembanding logika tinggi dan rendah. Hasil pengujian ditampilkan pada Tabel 5.
+Tabel 
+5
+SENSOR SUARA
+N
+o
+Desible (dB)
+Tegangan Refrensi
+T
+h
+reshold
+Kondisi Ouput
+1.
+35
+2.83
+V
+2.5V
+1
+2
+.
+59
+2.77V
+2.5V
+1
+3
+.
+8
+2
+1
+.
+82
+V
+2.5V
+0
+4.
+86
+1.67V
+2.5V
+0
+Berdasarkan Tabel 5, sistem sensor suara beroperasi dengan logika invers terhadap threshold: ketika tegangan referensi melebihi nilai threshold (2,5 V), kondisi output bernilai logika 1 yang menandakan keadaan 
+“
+tidak aktif
+”
+; sebaliknya, ketika tegangan referensi berada di bawah threshold, output menghasilkan logika 0 yang menyatakan keadaan “aktif”
+.
+Sensor getar
+Pengujian dilakukan dengan memberikan 
+input
+ getaran berupa  guncangan yang bervariasi (diam, diayunkan, ketukan, dijatuhkan). Respon sensor dicatat dalam bentuk tegangan keluaran serta kondisi 
+output
+. Tegangan referensi juga diamati untuk memastikan stabilitas sistem selama pengujian. 
+Threshold
+ diberi masukan setengah dari nilai tegangan VCC sebagai titik refrensi pembanding antara logika tinggi dan logika rendah. 
+Tabel 
+………..
+ berikut menunjukkan hasil pengujian rangkaian sensor suara.
+Tabel 
+6
+SENSOR 
+GETAR
+NO
+Input
+Tegangan Refrensi
+T
+h
+reshold
+Kondisi Ou
+t
+put
+1
+Diam
+2.88
+V
+2.5V
+1
+2
+Diayunkan
+ 2.71
+V
+2.5V
+1
+3
+Diketuk
+1.
+91
+V
+2.5V
+0
+4
+Dijatuhkan
+120m
+V
+2.5V
+0
+Berdasarkan Tabel 6, sensor getar dihubungkan ke suatu komparator dengan tegangan referensi (threshold) tetap sebesar 
+2
+,5 V. Output komparator dinyatakan sebagai logika 1 (misalnya HIGH) jika tegangan input lebih kecil dari threshold, dan logika 0 (LOW) jika tegangan input lebih besar dari threshold.
+Sensor Api
+Pengujian dilakukan dengan memberikan cahaya korek api pada jarak 0–30 cm (diukur menggunakan alat ukur jarak), lalu mencatat tegangan keluaran photodiode dan kondisi outputnya. Tegangan referensi dipantau untuk memastikan stabilitas sistem, dengan threshold ditetapkan pada setengah VCC sebagai acuan pembanding antara logika tinggi dan rendah
+.
+ 
+Tabel 
+……… 
+ berikut menunjukkan hasil pengujian rangkaian sensor suara.
+Tabel 
+7
+SENSOR 
+API
+N
+o
+Jarak (cm)
+Tegangan Ref
+e
+rensi
+T
+h
+reshold
+Kondisi Ouput
+1
+265
+2.88V
+2.5V
+1
+2
+246
+530mV
+2.5V
+0
+3
+227
+200mV
+2.5V
+0
+4
+208
+163mV
+2.5V
+0
+5
+189
+161mV
+2.5V
+0
+6
+170
+161mV
+2.5V
+0
+7
+151
+160mV
+2.5V
+0
+8
+132
+160mV
+2.5V
+0
+9
+113
+160mV
+2.5V
+0
+10
+94
+160mV
+2.5V
+0
+11
+75
+160mV
+2.5V
+0
+12
+56
+160mV
+2.5V
+0
+13
+37
+160mV
+2.5V
+0
+14
+18
+160mV
+2.5V
+0
+15
+0
+160mV
+2
+.5V
+0
+Tabel menunjukkan respons sensor api terhadap variasi jarak dari sumber api dengan nilai threshold komparator sebesar 
+2
+,5 V. Pada jarak 265 cm, tegangan keluaran sensor sebesar 2,88 V berada di atas nilai threshold sehingga output bernilai 0 yang menandakan api tidak terdeteksi. Sementara itu, pada jarak 246 cm hingga 0 cm, tegangan keluaran sensor berada pada rentang 160 mV–530 mV, lebih kecil dari nilai threshold, sehingga output bernilai 1 yang menunjukkan api terdeteksi
+.
+IC 74HC4078
+Pengujian dilakukan dengan memberikan kombinasi tegangan 
+input
+ yang bervariasi pada pin 
+input
+ A, B, dan C.
+ Pin 
+input
+ D, E, F, G dan H selalu diberi logika 0, sehingga hanya ada 3 
+input
+ yang memiliki 8 kombinasi 
+input
+.
+ Setiap kombinasi 
+input
+ dicatat, dan tegangan 
+output
+ pada pin X dan Y diamati menggunakan multimeter digital. Hasil pengukuran kemudian dianalisis untuk memastikan akurasi IC dalam menghasilkan 
+output
+ yang sesuai dengan tabel kebenaran NOR.
+ Tabel 
+……
+ 
+menunjukkan hasil pengujian IC 74HC4078.
+Tabel 
+8
+IC 74HC4078
+NO
+TEGANGAN 
+INPUT
+ (LOGIKA)
+TEGANGAN 
+OUTPUT
+ (LOGIKA) 
+A
+B
+C
+X
+Y
+1
+2.80
+V(
+1
+)
+2.80
+V(
+1
+)
+2.80
+V(
+1
+)
+0V(0)
+2.
+93
+V(
+1
+)
+2
+2.77V(
+1
+)
+2.79V(
+1
+)
+110mV(
+0
+)
+90mV(0)
+2.82V(1)
+3
+2.89V(
+1
+)
+170mV(
+0
+)
+2.88V(
+1
+)
+0
+mV(0)
+2.85V(1
+ 
+)
+4
+2.81V(
+1
+)
+1.08V(
+0
+)
+110mV(
+0
+)
+0mV(0)
+2.78V(1)
+5
+1.51V(
+0
+)
+2.80V(
+1
+)
+2.80V(
+1
+)
+90mV(0)
+2.93V(1)
+6
+1.75V(
+0
+)
+2.80V(
+1
+)
+160mV(
+0
+)
+90mV(0)
+2.93V(1)
+7
+1.79V(
+0
+)
+1.91V(
+0
+)
+2.80V(
+1
+)
+90mV(0)
+2.93V(1)
+8
+1.70V(
+0
+)
+1.29V(
+0
+)
+120mV(
+0
+)
+2.60
+V(1)
+100mV(0)
+Setelah didapatkan data hasil pengujian IC 74HC4078, selanjutnya data hasil pengujian tersebut dibandingkan dengan tabel kebenaran gerbang NOR 3 
+input
+, sebagai berikut:
+Tabel 
+9
+ Tabel Kebanaran Logika N
+OR
+INPUT
+OUT
+A
+B
+C
+X
+0
+0
+0
+1
+0
+0
+1
+0
+0
+1
+0
+0
+0
+1
+1
+0
+1
+0
+0
+0
+1
+0
+1
+0
+1
+1
+0
+0
+1
+1
+1
+0
+Berdasarkan hasil pengujian terhadap tiga input (A, B, dan C) yang berasal dari 
+ketiga 
+sensor berbasis komparator LM393. Output X menghasilkan logika tinggi (3,37 V) hanya ketika seluruh input berada pada kondisi logika rendah (di bawah 0,8 V; dalam pengujian berkisar 110–160 mV), sedangkan pada semua kombinasi lain, yaitu ketika minimal satu input berada pada logika tinggi (di atas 2,0 V; dalam 
+pengujian sekitar 3,40 V), output X berada pada logika rendah (mendekati 0 V). Hal ini mengonfirmasi bahwa X merepresentasikan fungsi NOR(A,B,C), sementara output Y yang bersifat komplementer secara implisit berfungsi sebagai OR(A,B,C).
+Pengujian protocol komunikasi ESP-NOW
+Pengujian protokol ESP-NOW dilakukan untuk mengevaluasi komunikasi nirkabel satu arah antara unit Helm dan Rompi berbasis ESP32, tanpa bergantung pada infrastruktur Wi-Fi atau perangkat perantara. Pada pengujian ini, ESP32-S3 Supermini yang berperan sebagai Helm berfungsi sebagai pengirim (sender), sedangkan Heltec Tracker V1.
+2
+ sebagai Rompi berfungsi sebagai penerima (receiver). Kedua perangkat ditempatkan pada jarak sekitar 4 meter, masing-masing dimasukkan ke dalam kardus dan dipisahkan oleh dinding sebagai penghalang. Helm mengirimkan data secara broadcast berupa pesan teks real-time “Hello, World! #n” (dengan n sebagai nomor urut pesan). Tujuan pengujian adalah memverifikasi keandalan pengiriman data dalam kondisi lingkungan yang menantang. Hasil pengujian ini disajikan pada Tabel 10.
+Tabel 
+10
+No
+Halo Status
+Data Send
+Harness Status
+Data Receive
+RSSI
+1
+Sent
+Hello, World! #
+4
+Receive
+Hello, World! #
+4
+-95Bm
+2
+Sent
+Hello, World! #
+5
+Receive
+Hello, World! #
+5
+-94dBm
+3
+Sent
+Hello, World! #
+6
+Receive
+Hello, World! #
+6
+-91dBm
+4
+Sent
+Hello, World! #
+7
+Receive
+Hello, World! #
+7
+-91dBm
+5
+Sent
+Hello, World! #
+8
+Receive
+Hello, World! #
+8
+-91dBm
+6
+Sent
+Hello, World! #
+9
+Receive
+Hello, World! #
+9
+-92dBm
+7
+Sent
+Hello, World! #
+10
+Receive
+Hello, World! #
+10
+-92dBm
+8
+Sent
+Hello, World! #
+11
+Receive
+Hello, World! #
+11
+-92dBm
+9
+Sent
+Hello, World! #
+12
+Receive
+Hello, World! #
+12
+-93dBm
+10
+Sent
+Hello, World! #
+13
+Receive
+Hello, World! #
+13
+-93dBm
+Berdasarkan hasil pengujian komunikasi dua arah menggunakan protokol ESP-NOW 
+menunjukkan bahwa semua pesan 
+"Hello, World! 
+#n"
+ berhasil diterima oleh rompi tanpa error, meskipun perangkat ditempatkan di dalam kardus dan terhalang dinding. Nilai RSSI berkisar antara –91 dBm hingga –95 dBm, menandakan sinyal lemah namun masih cukup andal untuk komunikasi jarak dekat
+.
+Pengujian Rangkaian Penerima Inframerah
+Tujuan dari pengujian rangkaian penerima inframerah adalah untuk memastikan data yang diterima oleh rangkaian penerima inframerah sama dengan data yang dikirim oleh rangkaian pemancar inframerah
+.
+Parameter Jarak
+Tabel 
+11
+ Pengujian 
+Jarak Penerimaan
+No
+Jarak
+Indikator LED
+Output Sensor
+Status Data
+1
+50 meter
+Aktif
+Diterima
+2
+150 meter
+Aktif
+Diterima
+170 meter
+Aktif
+Diterima
+3
+200 meter
+Aktif
+Diterima
+4
+250 meter
+Aktif
+Tak Diterima
+5
+300 meter
+Aktif
+Tak Diterima
+Berdasarkan 
+data pada tabel dapat dianalisa bahwa sensor TSOP4838 dapat menerima sinyal inframerah dari jarak 50 meter sampai 500 meter. 
+Hal ini juga di pengaruhi oleh kemampuan pemancar yang sangat kuat yang membuat pemancar bisa memancar dalam jarak yang cukup jauh. Pengujian dilakukan pada malam hari agar tidak ada gangguan dari cahaya lain seperti cahaya matahari bertujuan untuk memaksimalkan kinerja pemancar maupun penerima sinyal atau cahaya inframerah
+Parameter Sudut
+Tabel 
+12
+ 
+Pengujian Sudut Penerimaan
+No
+Parameter Sudut
+Tanpa Lensa
+Menggunakan Lensa
+1
+0⁰
+Respon
+Respon
+2
+15⁰
+Respon
+Respon
+3
+30⁰
+Respon
+Respon
+4
+45⁰
+Respon
+Respon
+5
+60⁰
+Tidak Respon
+Respon
+6
+75⁰
+Tidak Respon
+Respon
+7
+90⁰
+Tidak Respon
+Respon
+8
+105⁰
+Tidak Respon
+Respon
+9
+135⁰
+Tidak Respon
+Respon
+10
+180⁰
+Tidak Respon
+Respon
+Berdasarkan hasil pengujian sudut inframerah, sistem hanya mampu mendeteksi sinyal secara konsisten hingga sudut 45° tanpa lensa dan hingga 180° saat menggunakan lensa; namun, pada sudut 180°, meskipun respons tercatat, jangkauan deteksi maksimalnya terbatas hanya sekitar 50-60 meter, menunjukkan bahwa meskipun lensa memperluas cakupan sudut deteksi, efektivitas jaraknya tetap terbatas dan tidak optimal dibandingkan pada sudut lebih kecil
+.
+Receiver Anti-Cheating
+Tabel 
+13
+No
+Kondisi Anti-Cheating
+Output 
+NOR
+A
+B
+C
+D
+X
+1
+0
+0
+0
+0
+1
+2
+0
+0
+0
+1
+0
+3
+0
+0
+1
+0
+0
+4
+0
+0
+1
+1
+0
+5
+0
+1
+0
+0
+0
+6
+0
+1
+0
+1
+0
+7
+0
+1
+1
+0
+0
+8
+0
+1
+1
+1
+0
+9
+1
+0
+0
+0
+0
+10
+1
+0
+0
+1
+0
+11
+1
+0
+1
+0
+0
+12
+1
+0
+1
+1
+0
+13
+1
+1
+0
+0
+0
+14
+1
+1
+0
+1
+0
+15
+1
+1
+1
+0
+0
+16
+1
+1
+1
+1
+0
+Pengujian Heltec Tracker V1.1
+Pengujian GPS
+Tujuan dari pengujian modul GPS adalah untuk memastikan tingkat keakuratan modul serta memastikan bahwa data yang diterima dari satelit dapat diproses dengan benar oleh mikrokontroler 
+Heltec Wireless Tracker
+. 
+Selanjutnya, modul GPS dipindahkan sejauh 5 meter setiap 1 menit sambil diamati nilai koordinat geografis berupa 
+Latitude
+, 
+Longitude
+, dan Satellite
+ melalui serial monitor
+ dan TFT
+ pada 
+Heltec Wireless Tracker
+. Perubahan posisi dimaksudkan untuk mengevaluasi respon dan akurasi pembacaan lokasi oleh sistem. Hasil pengujian modul GPS disajikan pada 
+Tabel 4.
+5
+ berikut
+No
+Posisi
+Latitude
+Longitude
+Satelite
+1
+Posisi 1
+-7.94293
+9
+112.613
+513
+12
+2
+Posisi 
+2
+-7.94293
+7
+112.61351
+2
+12
+3
+Posisi 
+3
+-7.9429
+40
+112.61351
+4
+12
+4
+Posisi 
+4
+-7.942
+7
+3
+8
+112.613
+485
+22
+5
+Posisi 
+5
+-7.942
+7
+3
+7
+112.613
+483
+21
+6
+Posisi 
+6
+-7.942
+755
+112.613
+568
+23
+7
+Posisi 
+7
+-7.942
+758
+112.613
+727
+18
+8
+Posisi 
+8
+-7.942
+7
+60
+112.613
+731
+18
+9
+Posisi 
+9
+-7.942
+808
+112.613
+787
+10
+10
+Posisi 
+10
+-7.942
+817
+112.613
+767
+0
+Pengujian modul GSM
+Pengujian modul GSM dilakukan untuk mengevaluasi kemampuan mikrokontroler ESP32 dalam mengirimkan data status permainan ke database melalui jaringan seluler, serta memastikan bahwa koneksi antara ESP32 dan web server berjalan secara stabil dan andal. Tujuan utama dari pengujian ini adalah untuk memverifikasi apakah data yang dikirim oleh mikrokontroler ESP32 dapat dikirim secara akurat, tersimpan dengan baik di server, serta sesuai dalam hal format data, waktu pengiriman, dan kesesuaian nilai
+.
+Selain itu, pengujian ini juga bertujuan untuk menilai stabilitas koneksi komunikasi data menggunakan protokol HTTP-POST, serta mengevaluasi kemampuan ESP32 dalam melakukan proses autentikasi dan 
+Handshake
+ awal dengan server. 
+Pengujian dilakukan dengan cara mengirimkan data berupa bit acak ke 
+basis data 
+server melalui 
+Endpoint
+ PHP, kemudian diamati status pengiriman data, status penyimpanan data pada database, serta waktu respons dari server
+.
+No
+Bit Kirim
+Status
+Bit Terima
+Status Data
+Waktu Respon
+1
+1
+Send
+1
+Received
+2.4 detik
+Pengujian LoRa 
+Pengujian modul 
+LoRa
+ dilakukan untuk mengevaluasi kemampuan mikrokontroler ESP32 dalam mengirimkan data status permainan ke database melalui jaringan seluler, serta memastikan bahwa koneksi antara ESP32 dan web server berjalan secara stabil dan andal. Tujuan utama dari pengujian ini adalah untuk memverifikasi apakah data yang dikirim oleh mikrokontroler ESP32 dapat dikirim secara akurat, tersimpan dengan baik di server, serta sesuai dalam hal format data, waktu pengiriman, dan kesesuaian nilai
+.
+Selain itu, pengujian ini juga bertujuan untuk menilai stabilitas koneksi komunikasi data menggunakan protokol HTTP-POST, serta mengevaluasi kemampuan ESP32 dalam melakukan proses autentikasi dan 
+Handshake
+ awal dengan server. 
+Pengujian dilakukan dengan cara mengirimkan data berupa bit acak ke 
+basis data 
+server 
+melalui 
+Endpoint
+ PHP, kemudian diamati status pengiriman data, status penyimpanan data pada database, serta waktu respons dari server
+No
+Bit Kirim
+Status
+Bit Terima
+Status Data
+Waktu Respon
+1
+1
+Send
+1
+Received
+2.4 detik
+Pengujian Keseluruhan
+Pengujian sistem secara keseluruhan dilakukan untuk memastikan bahwa seluruh komponen dan modul dalam sistem 
+Laser Tag
+ dapat berfungsi sesuai dengan yang direncanakan, stabil, dan andal dalam kondisi operasional nyata. Pengujian ini mencakup aspek perangkat keras, firmware mikrokontroler ESP32, protokol komunikasi, serta akurasi dalam penerimaan dan pemrosesan data.
+Langkah pertama yang dilakukan adalah menyiapkan semua dua set unit Laser Tag yang terdiri dari SAT, Helm dan Rompi. Setelah dua pemain siap selanjutnya semua peralatan dinyalakan agar mikrokontroler ESP32 pada setiap komponen dapat segera mulai menginisialisasi program masing masing yang ditandai dengan nyala LED merah pada Ro
+mpi
+. Setelah proses inisialisasi selesai dan semua unit sudah terbungung ke server yang ditandai dengan matinya LED merah pada Ro
+mpi
+ simulasi latihan perang dua arah dapat dimulai
+.
+Pengujian pertama unit dengan ID “1” melakukan lima kali tembakan kearah Helm dan Rompi dari unit dengan ID “2” pada jarak 60 m. Data yang diterima oleh server dari hasil pengujian ini disajikan pada 
+Tabel 4.
+9
+.
+ID
+Status
+Penembak
+Helm / Rompi
+Waktu
+Lokasi Unit
+Pengujian kedua unit dengan ID “2” melakukan lima kali tembakan kearah Helm dan Rompi dari unit dengan ID “1” pada jarak 60 m. Data yang diterima oleh server dari hasil pengujian ini disajikan pada 
+Tabel 4.
+10
+. berikut ini
+Tabel 4.
+10
+ Pengujian Unit ID 2
+ID
+Status
+Penembak
+Helm / Rompi
+Waktu
+Lokasi Unit
+BAB V
+   
+Kesimpulan
+Saran
+Uji Coba Lapangan dan Kondisi Ekstrem:
+Disarankan pengujian sistem secara berkelanjutan di berbagai kondisi lingkungan, seperti saat hujan, panas, maupun kabut, guna memastikan keandalan pancaran dan penerimaan sinyal IR pada simulasi permainan sesungguhnya.
+Optimalisasi Konsumsi Daya dan Efisiensi Driver:
+Agar waktu operasional alat semakin optimal, riset tambahan terkait efisiensi rangkaian driver LED dan manajemen energi pada baterai perlu dilakukan, misalnya melalui seleksi komponen dengan konsumsi daya rendah atau penggunaan algoritma sleep mode pada mikrokontroler
+.
+Pengembangan Antarmuka Sistem:
+Pengembangan fitur antarmuka (misal melalui aplikasi mobile atau dashboard berbasis web) sangat direkomendasikan, sehingga operator dapat memantau status perangkat secara real time serta melakukan rekapitulasi data latihan de
+DAFTAR PUSTAKA
+Adelantado, F., Vilajosana, X., Tuset-Peiro, P., Martinez, B., Melia-Segui, J., & Watteyne, T. (2017). Understanding the Limits of LoRaWAN. 
+IEEE Communications Magazine
+, 
+55
+(9), 34–40. https://doi.org/10.1109/MCOM.2017.1600613
+Adolfo, V., & Setia Budi, A. (2023). Perancangan Sistem Deteksi Node Baru Otomatis dalam Basis ESP-NOW dengan Tree Topology WSN. 
+Jurnal Pengembangan Teknologi Informasi Dan Ilmu Komputer
+, 
+7
+(5), 2475–2480. http://j-ptiik.ub.ac.id
+Alliance, L. (2023). 
+About LoRaWAN® - LoRa Alliance®
+. Https://Lora-Alliance.Org/about-Lorawan/. https://lora-alliance.org/about-lorawan/
+Ariffin, A. A. Bin, Aziz, N. H. A., & Othman, K. A. (2011). 
+Implementation of GPS for Location Tracking. In 
+IEEE Control and System Graduate Research Colloquium
+. IEEE.
+Augustin, A., Yi, J., Clausen, T., & Townsley, W. M. (2016). A study of Lora: Long range & low power networks for the internet of things. 
+Sensors (Switzerland)
+, 
+16
+(9). https://doi.org/10.3390/s16091466
+Automation, H. (2021). 
+Heltec Products Operation Documention
+. Https://Docs.Heltec.Org/?Spm=a2ty_o01.29997173.0.0.16715171k9VBi2. https://docs.heltec.org/?spm=a2ty_o01.29997173.0.0.16715171k9VBi2
+Azarov, O., Obertyukh, M., Prokofiev, M., Kalizhanova, A., & Kosaruk, O. (2025). PUSH-PULL VOLTAGE BUFFER WITH IMPROVED LOAD CAPACITY. 
+Informatyka, Automatyka, Pomiary w Gospodarce i Ochronie Srodowiska
+, 
+15
+(2), 100–103. https://doi.org/10.35784/iapgos.7257
+Chengdu, H. A. T. Co. , Ltd. (2023). 
+Wireless Tracker V1.1
+. Heltec Automation. https://heltec.org
+Deepika, K., & Renuka Prasad, B. (2023). 
+IoT-Based Dashboards for Monitoring Connected Farms Using Free Software and Open Protocols
+ (pp. 529–543). https://doi.org/10.1007/978-981-19-6004-8_43
+Electronics, R. (2020, April 29). 
+Vibration Sensor
+. Www.Rajguruelectronics.Com. www.rajguruelectronics.com
+Fajar Arofah, M., Mandayatma, E., & Nurcahyo, S. (2023). Penerapan Protokol Komunikasi ESP-Now pada Portable Traffic Light. 
+Jurnal Elektronika Dan Otomasi Industri
+, 
+10
+(1), 52–59. https://doi.org/10.33795/elkolind.v10i1.2749
+Gromes, J. (2025). 
+Universal wireless communication library for embedded devices
+. Https://Github.Com/Jgromes/RadioLib. https://github.com/jgromes/RadioLib
+Gromes, J., Daniel, V., Svoboda, P., Tremouillhe, O., Kubik, M., Jon, J., & Stejskal, M. (2025). Scalable small satellite platform for earth observation and scientific missions. 
+Journal of Physics: Conference Series
+, 
+3078
+(1). https://doi.org/10.1088/1742-6596/3078/1/012067
+Guerbaoui, M., El Faiz, S., Ed-Dahhak, A., Lachhab, A., Benhala, B., Bakziz, Z., Ichou, I., & Selmani, A. (2025). From Data to Decisions: A Smart IoT and 
+Cloud Approach to Environmental Monitoring. 
+E3S Web of Conferences
+, 
+601
+. https://doi.org/10.1051/e3sconf/202560100008
+Hailan, M. A., Ghazaly, N. M., & Albaker, B. M. (2024). ESPNow Protocol-Based IIoT System for Remotely Monitoring and Controlling Industrial Systems. 
+Journal of Robotics and Control (JRC)
+, 
+5
+(6), 1924–1942. https://doi.org/10.18196/jrc.v5i6.21925
+Itera. (2021). 
+BAB II LANDASAN TEORI II.1 Global Navigation Satellite System (GNSS)
+.
+Kahn, J. M., & Barry, J. R. (1997). Wireless Infrared Communications. 
+IEEE
+, 
+85
+, 265–298.
+Khan, H. (2023, June 23). 
+Fire/Flame Sensor Module
+. Https://Www.Datasheethub.Com/Ir-Flame-Sensor-Module/.
+Konate, S., Li, C., Pranolo, A., & Traore, M. (2025). Modeling LoRa Backscatter Communication Range. 
+Global Journal of Computer Science and Technology: G Interdisciplinary
+, 
+25
+(1).
+Lesmana, B., Heryana, G., & Jatira. (2023). Perancangan Sistem Kendali Mesin CNC (Computer Numerical Control) laser Cutting CO2 2 Axis Berbasis Arduino Uno. 
+Journal of Applied Mechanical Technology
+, 
+2
+(2), 28–33. https://doi.org/10.31884/jamet.v2i2.43
+Maurya, K., Singh, M., & Jain, N. (2012). Real Time Vehicle Tracking System using GSM and GPS Technology-An Anti-theft Tracking System. 
+IJECSE
+, 
+1
+, 1103–1107. www.ijecse.org
+Munandar, A., David Maria Veronika, N., Abdulllah, D., & Sahputra, E. (2023). Miniature Design of Liquid Filling Machine Automatically Using ESP32 Based IOT (Internet of Things) Perancangan Miniatur Mesin Pengisi Cairan Otomatis Menggunakan ESP32 Berbasis IOT (Internet of Things). 
+JURNAL KOMITEK
+, 
+3
+(1), 69–78. https://doi.org/10.53697/jkomitek.v3i1
+Nicola, C. I., Nicola, M., Sacerdoțianu, D., & Pătru, I. (2024). 
+Real-time Monitoring of Cable Sag and Overhead Line Parameters Based on a Distributed Sensor Network and Implementation in a Web server and IoT
+. https://doi.org/10.20944/preprints202405.1414.v1
+Nihayatus Sa’adah, Aries Pratiarso, Faridatun Nadziroh, Nailul Muna, Karimatun Nisa’, I Gede Puja Astawa, Tri Budi Santoso, & Sultan Syahputra Yulianto. 
+(2024). Analisa Performansi Komunikasi Lora (Long Range) pada Sistem Monitoring Buoy di Laut. 
+The Indonesian Journal of Computer Science
+, 
+13
+(6). https://doi.org/10.33022/ijcs.v13i6.4462
+Nugraha, A. I., & Rosita, Y. D. (2024). Web-Based Integration of IoT and Artificial Intelligence for Monitoring Aquariums. 
+MATICS: Jurnal Ilmu Komputer Dan Teknologi Informasi (Journal of Computer Science and Information Technology)
+, 
+16
+(1), 7–12. https://doi.org/10.18860/mat.v16i1.23471
+Parveen, Z., & Aldhlan, K. A. (2016). 
+Missing Pilgrims Tracking System Using GPS, GSM and Arduino Microcontroller. In 
+International Conference on Recent Advances in Computer Systems
+.
+Pratama, E. W., & Kiswantono, A. (2023). Electrical Analysis Using ESP-32 Module In Realtime. 
+JEECS (Journal of Electrical Engineering and Computer Sciences)
+, 
+7
+(2), 1273–1284. https://doi.org/10.54732/jeecs.v7i2.21
+Prettz, J. B., Da Costa, J. P. C. L., Alvim, J. R., Miranda, R. K., & Zanatta, M. R. (2017). 
+Efficient and low cost MIMO communication architecture for smartbands applied to postoperative patient care. 
+RPC 2017 - Proceedings of the 2nd Russian-Pacific Conference on Computer Technology and Applications
+, 
+2017-December
+, 1–5. https://doi.org/10.1109/RPC.2017.8168055
+Satheesh, M. B., Senthilkumar, B., Veeramanikandasamy, T., & Saravanakumar, O. M. (2016). Microcontroller and SD Card Based Standalone Data Logging System using SPI and I2C Protocols for Industrial Application. 
+International Journal of Advanced Research in Electrical, Electronics and Instrumentation Engineering (An ISO
+, 
+5
+(4), 2208–2214. https://doi.org/10.15662/IJAREEIE.2016.0504002
+Shi, Z., Chow, C. W. K., Fabris, R., Liu, J., & Jin, B. (2022). Applications of Online UV‐Vis Spectrophotometer for Drinking Water Quality Monitoring and Process Control: A Review. In 
+Sensors
+ (Vol. 22, Number 8). MDPI. https://doi.org/10.3390/s22082987
+Siradjuddin, I., Nurwicaksana, W. A., Riskitasari, S., Al Azhar, G., Rahman Hidayat, A., & Wicaksono, R. P. (2024). An Infrared Emitter Driver Circuit of SAT for MILES Application. In 
+Journal of Evrimata: Engineering and Physics
+ (Vol. 02, Number 02).
+Sunil Fulzele, V., & Athawale, S. V. (2024). IJIRID International Journal of Ingenious Research, Invention and Development GPS Technology: A Review, 
+Architecture, and Working. 
+International Journal of Ingenious Research, Invention and Development
+, 
+3
+, 543–549. https://doi.org/10.5281/zenodo.14230440
+Texas, I. (1976). 
+µA7800 SERIES POSITIVE-VOLTAGE REGULATORS
+. www.ti.com/sc/package.
+Toyib, R., Bustami, I., Abdullah, D., & Onsardi, O. (2019). Penggunaan Sensor Passive Infrared Receiver (PIR) Untuk Mendeteksi Gerak Berbasis Short Message Service Gateway. 
+Pseudocode
+, 
+6
+(2). https://doi.org/10.33369/pseudocode.6.2.114-124
+Urazayev, D., Eduard, A., Ahsan, M., & Zorbas, D. (2023). 
+Indoor Performance Evaluation of ESP-NOW
+. https://github.com/espressif/esp-now
+Vishay Semiconductors. (2025). IR Receiver Modules for Remote Control Systems. 
+In 
+www.vishay.com
+. www.vishay.com
+Winternitz, L. M. B., Bamford, W. A., & Heckler, G. W. (2009). 
+A GPS receiver for high-altitude satellite navigation. 
+IEEE Journal on Selected Topics in Signal Processing
+, 
+3
+(4), 541–556. https://doi.org/10.1109/JSTSP.2009.2023352
+Yahya, M. S., Soeung, S., Chinda, F. E., Musa, U., & Yunusa, Z. (2024). Dual-band GPS/LoRa antenna for internet of thing applications. 
+Bulletin of Electrical Engineering and Informatics
+, 
+13
+(2), 986–995. https://doi.org/10.11591/eei.v13i2.6428
+Yanziah, A., Sopian, S., & Rose, M. M. (2020). ANALISIS JARAK JANGKAUAN LORA DENGAN PARAMETER RSSI DAN PACKET LOSS PADA AREA URBAN. 
+JURNAL TEKNOLOGI TECHNOSCIENTIA
+, 
+13
+, 59–67.
+Yunardi, R. T. (2017). Analisa Kinerja Sensor Inframerah dan Ultrasonik untuk Sistem Pengukuran Jarak pada Mobile Robot Inspection. 
+Setrum : Sistem Kendali-Tenaga-Elektronika-Telekomunikasi-Komputer
+, 
+6
+(1), 33. https://doi.org/10.36055/setrum.v6i1.1583
+Zade, Prof. M. N., Nikose, Prof. M. D., & Aerkewar, Prof. P. N. (2012). Wireless Infrared Communications :A Survey. 
+International Journal of Engineering Research & Technology (IJERT)
+, 
+1
+(3), 1–8. www.ijert.org
+Zhengyihong. (2025, August 29). 
+KY-038 Sound Sensor Module
+. Https://Easyelecmodule.Com/Ky-038-Sound-Sensor-Module/. https://easyelecmodule.com/ky-038-sound-sensor-module/
+ 
+LAMPIRAN
+Gambar Lampiran  
+1
+ Proses
+ dan 
+pengambilan data GPS
+Gambar Lampiran  
+2
+ proses peracangan Electrical Rompi
+Gambar Lampiran  
+3
+ proses pengambilan data sensor dan pengukuran tegangan
+Gambar Lampiran  
+4
+ Proses peracangan electrical SAT
+Program Transmitter Infrared
+#include
+ 
+<Arduino.h>
+#include
+ 
+<IRremote.hpp>
+// =============================
+// Configuration
+// =============================
+#define
+ 
+IR_SEND_PIN
+     
+2
+#define
+ 
+BUTTON_PIN
+      
+5
+#define
+ 
+STATUS_LED
+      LED_BUILTIN
+#define
+ 
+SERIAL_BAUD
+     
+115200
+#define
+ 
+TASK_PRIORITY_BUTTON
+    
+1
+#define
+ 
+TASK_PRIORITY_SERIAL
+    
+1
+#define
+ 
+TASK_PRIORITY_IR
+        
+2
+#define
+ 
+TASK_STACK_SIZE_BUTTON
+  
+2048
+#define
+ 
+TASK_STACK_SIZE_SERIAL
+  
+3072
+#define
+ 
+TASK_STACK_SIZE_IR
+      
+2048
+// =============================
+// Data Structure
+// =============================
+struct
+ IRCommand 
+{
+  
+uint32_t
+ address;
+  
+uint8_t
+  command;
+  
+uint8_t
+  repeat;
+}
+;
+// =============================
+// Global Shared Resources
+// =============================
+IRCommand lastIRCommand = 
+{
+0x
+04
+, 0x
+04
+, 
+1
+}
+;
+ // Default + shared
+SemaphoreHandle_t
+ xCommandMutex = 
+nullptr
+;
+   // Protects lastIRCommand
+QueueHandle_t
+ irSendQueue = 
+nullptr
+;
+         // Queue to trigger send
+// =============================
+// Task Declarations
+// =============================
+void
+ 
+taskIRSender
+(
+void
+ 
+*
+pvParameters)
+;
+void
+ 
+taskSerialCommand
+(
+void
+ 
+*
+pvParameters)
+;
+void
+ 
+taskButtonPress
+(
+void
+ 
+*
+pvParameters)
+;
+// =============================
+// Setup
+// =============================
+void
+ 
+setup
+()
+ 
+{
+  
+Serial
+.
+begin
+(
+SERIAL_BAUD
+)
+;
+  
+pinMode
+(
+BUTTON_PIN, INPUT_PULLUP
+)
+;
+  
+pinMode
+(
+STATUS_LED, OUTPUT
+)
+;
+  
+pinMode
+(
+IR_SEND_PIN, OUTPUT
+)
+;
+  
+IrSender
+.
+begin
+(
+IR_SEND_PIN
+)
+;
+  
+// Create mutex and queue
+  xCommandMutex = 
+xSemaphoreCreateMutex
+()
+;
+  irSendQueue = 
+xQueueCreate
+(
+10
+, sizeof
+(
+bool
+))
+;
+ // Just a trigger
+  
+if
+ 
+(
+xCommandMutex == 
+nullptr
+ || irSendQueue == 
+nullptr
+)
+ 
+{
+    
+Serial
+.
+println
+(
+"
+❌
+ Failed to create RTOS resources!"
+)
+;
+    
+while
+ 
+(
+1
+)
+ 
+delay
+(
+10
+)
+;
+  
+}
+  // Start tasks
+  
+xTaskCreate
+(
+taskButtonPress,   
+"Button"
+, TASK_STACK_SIZE_BUTTON,   
+NULL
+, TASK_PRIORITY_BUTTON,  
+NULL
+)
+;
+  
+xTaskCreate
+(
+taskSerialCommand, 
+"Serial"
+, TASK_STACK_SIZE_SERIAL,   
+NULL
+, TASK_PRIORITY_SERIAL,  
+NULL
+)
+;
+  
+xTaskCreate
+(
+taskIRSender,      
+"IRSend"
+, TASK_STACK_SIZE_IR,       
+NULL
+, TASK_PRIORITY_IR,      
+NULL
+)
+;
+  
+Serial
+.
+println
+(
+"
+✅
+ SIMPERA TEST IR TX & RX"
+)
+;
+  
+Serial
+.
+println
+(
+"
+👤
+ Indrazno Siradjuddin"
+)
+;
+  
+Serial
+.
+println
+(
+"
+📅
+ 2025"
+)
+;
+  
+Serial
+.
+println
+(
+"System Ready."
+)
+;
+  
+Serial
+.
+printf
+(
+"
+💡
+ Default IR: Addr=0x%04X, Cmd=0x%02X\n"
+, 
+lastIRCommand
+.
+address
+, 
+lastIRCommand
+.
+command
+)
+;
+  
+Serial
+.
+println
+(
+"
+👉
+ Send 'F' or 'F,<addr>,<cmd>' via serial"
+)
+;
+  
+Serial
+.
+println
+(
+"
+🖐️
+  Press button to send LAST received command"
+)
+;
+}
+void
+ 
+loop
+()
+ 
+{
+  
+delay
+(
+1000
+)
+;
+}
+// =============================
+// Task: IR Sender
+// =============================
+void
+ 
+taskIRSender
+(
+void
+ 
+*
+pvParameters)
+ 
+{
+  
+bool
+ trigger;
+  
+(
+void
+)
+ pvParameters;
+  
+for
+ 
+(
+;;
+)
+ 
+{
+    // Wait for send trigger
+    
+if
+ 
+(
+xQueueReceive
+(
+irSendQueue, &trigger, portMAX_DELAY
+)
+ == pdTRUE
+)
+ 
+{
+      // Acquire mutex to read last command
+      
+if
+ 
+(
+xSemaphoreTake
+(
+xCommandMutex, 
+pdMS_TO_TICKS
+(
+100
+))
+ == pdTRUE
+)
+ 
+{
+        IRCommand cmd = lastIRCommand;
+ // Copy
+        
+xSemaphoreGive
+(
+xCommandMutex
+)
+;
+        // Feedback
+        
+digitalWrite
+(
+STATUS_LED, HIGH
+)
+;
+        
+IrSender
+.
+sendNEC
+(
+cmd
+.
+address
+, 
+cmd
+.
+command
+, 
+cmd
+.
+repeat
+)
+;
+        
+vTaskDelay
+(
+pdMS_TO_TICKS
+(
+150
+))
+;
+        
+digitalWrite
+(
+STATUS_LED, LOW
+)
+;
+        
+digitalWrite
+(
+IR_SEND_PIN, LOW
+)
+;
+        
+Serial
+.
+printf
+(
+"
+✅
+ IR Sent: NEC Addr=0x%04X, Cmd=0x%02X, Repeat=%d\n"
+,
+                      
+cmd
+.
+address
+, 
+cmd
+.
+command
+, 
+cmd
+.
+repeat
+)
+;
+      
+}
+ 
+else
+ 
+{
+        
+Serial
+.
+println
+(
+"
+❌
+ Failed to acquire command lock!"
+)
+;
+      
+}
+    
+}
+  
+}
+}
+// =============================
+// Task: Serial Command Parser
+// =============================
+void
+ 
+taskSerialCommand
+(
+void
+ 
+*
+pvParameters)
+ 
+{
+  
+(
+void
+)
+ pvParameters;
+  
+for
+ 
+(
+;;
+)
+ 
+{
+    
+if
+ 
+(
+Serial
+.
+available
+())
+ 
+{
+      String input = 
+Serial
+.
+readStringUntil
+(
+'
+\n
+'
+)
+;
+      
+input
+.
+trim
+()
+;
+      
+if
+ 
+(
+input
+.
+startsWith
+(
+"F"
+)
+ || 
+input
+.
+startsWith
+(
+"f"
+))
+ 
+{
+        IRCommand cmd = lastIRCommand;
+ // Start with current
+        
+int
+ comma1 = 
+input
+.
+indexOf
+(
+','
+)
+;
+        
+int
+ comma2 = 
+input
+.
+indexOf
+(
+',', comma1 + 
+1
+)
+;
+        
+if
+ 
+(
+comma1 != -
+1
+ && comma2 != -
+1
+)
+ 
+{
+          String addrStr = 
+input
+.
+substring
+(
+comma1 + 
+1
+, comma2
+)
+;
+          String cmdStr  = 
+input
+.
+substring
+(
+comma2 + 
+1
+)
+;
+          
+addrStr
+.
+trim
+()
+; 
+cmdStr
+.
+trim
+()
+;
+          
+cmd
+.
+address
+ = 
+strtoul
+(
+addrStr
+.
+c_str
+()
+, 
+NULL
+, 
+0
+)
+;
+          
+cmd
+.
+command
+ = 
+strtoul
+(
+cmdStr
+.
+c_str
+()
+,  
+NULL
+, 
+0
+)
+;
+          
+cmd
+.
+repeat
+ = 
+1
+;
+          // Update shared last command
+          
+if
+ 
+(
+xSemaphoreTake
+(
+xCommandMutex, 
+pdMS_TO_TICKS
+(
+100
+))
+ == pdTRUE
+)
+ 
+{
+            lastIRCommand = cmd;
+            
+xSemaphoreGive
+(
+xCommandMutex
+)
+;
+            
+Serial
+.
+printf
+(
+"
+📩
+ Updated last command: F, 0x%04X, 0x%02X\n"
+,
+                          
+cmd
+.
+address
+, 
+cmd
+.
+command
+)
+;
+          
+}
+ 
+else
+ 
+{
+            
+Serial
+.
+println
+(
+"
+❌
+ Failed to update command (lock timeout)"
+)
+;
+          
+}
+        
+}
+ 
+else
+ 
+{
+          
+Serial
+.
+println
+(
+"
+📩
+ Triggering last stored command via 'F'"
+)
+;
+        
+}
+        // Trigger IR send immediately
+        
+bool
+ sendTrigger = 
+true
+;
+        
+if
+ 
+(
+xQueueSendToBack
+(
+irSendQueue, &sendTrigger, 
+pdMS_TO_TICKS
+(
+100
+))
+ != pdTRUE
+)
+ 
+{
+          
+Serial
+.
+println
+(
+"
+❌
+ Send queue full!"
+)
+;
+        
+}
+      
+}
+    
+}
+    
+vTaskDelay
+(
+pdMS_TO_TICKS
+(
+10
+))
+;
+  
+}
+}
+// =============================
+// Task: Button Press
+// =============================
+void
+ 
+taskButtonPress
+(
+void
+ 
+*
+pvParameters)
+ 
+{
+  
+bool
+ buttonPressed = 
+false
+;
+  
+bool
+ sendTrigger = 
+true
+;
+  
+(
+void
+)
+ pvParameters;
+  
+for
+ 
+(
+;;
+)
+ 
+{
+    
+if
+ 
+(
+digitalRead
+(
+BUTTON_PIN
+)
+ == LOW && !buttonPressed
+)
+ 
+{
+      buttonPressed = 
+true
+;
+      
+Serial
+.
+println
+(
+"
+🖐️
+  Button Pressed: Sending LAST user command"
+)
+;
+      
+if
+ 
+(
+xQueueSendToBack
+(
+irSendQueue, &sendTrigger, 
+pdMS_TO_TICKS
+(
+100
+))
+ != pdTRUE
+)
+ 
+{
+        
+Serial
+.
+println
+(
+"
+❌
+ Send queue full! Button ignored."
+)
+;
+      
+}
+      // Cooldown
+      
+vTaskDelay
+(
+pdMS_TO_TICKS
+(
+500
+))
+;
+    
+}
+    
+if
+ 
+(
+digitalRead
+(
+BUTTON_PIN
+)
+ == HIGH
+)
+ 
+{
+      buttonPressed = 
+false
+;
+    
+}
+    
+vTaskDelay
+(
+pdMS_TO_TICKS
+(
+20
+))
+;
+  
+}
+}
+Program Receiver Infrared
+#include
+ 
+<Arduino.h>
+#include
+ 
+<IRremote.hpp>
+// Configuration
+#define
+ 
+IR_RECEIVE_PIN
+ 
+4
+     // Pin connected to IR receiver (e.g., VS1838B)
+#define
+ 
+ENABLE_LED_FEEDBACK
+ 
+true
+ // Optional LED feedback for received signals
+void
+ 
+setup
+()
+ 
+{
+  
+Serial
+.
+begin
+(
+9600
+)
+;  
+  
+  // Start the IR receiver
+  
+IrReceiver
+.
+begin
+(
+IR_RECEIVE_PIN, ENABLE_LED_FEEDBACK
+)
+;
+  
+  
+Serial
+.
+println
+(
+"IR Receiver Ready"
+)
+;
+  
+Serial
+.
+println
+(
+"Waiting for NEC IR signals..."
+)
+;
+}
+void
+ 
+loop
+()
+ 
+{
+  // Check if IR signal is received
+  
+if
+ 
+(
+IrReceiver
+.
+decode
+())
+ 
+{
+    
+    // Print basic decoded info
+    
+Serial
+.
+println
+(
+"IR signal received!"
+)
+;
+    // Print full decoded result (for debugging)
+    
+IrReceiver
+.
+printIRResultShort
+(
+&Serial
+)
+;
+    // Check if it's an NEC protocol
+    
+if
+ 
+(
+IrReceiver
+.
+decodedIRData
+.
+protocol
+ == NEC
+)
+ 
+{
+      
+Serial
+.
+print
+(
+"Received NEC Signal | Address: 0x"
+)
+;
+      
+Serial
+.
+print
+(
+IrReceiver
+.
+decodedIRData
+.
+address
+, HEX
+)
+;
+      
+Serial
+.
+print
+(
+" | Command: 0x"
+)
+;
+      
+Serial
+.
+println
+(
+IrReceiver
+.
+decodedIRData
+.
+command
+, HEX
+)
+;
+      // Optional: print usage format (can be used to re-send)
+      
+IrReceiver
+.
+printIRSendUsage
+(
+&Serial
+)
+;
+    
+}
+ 
+    
+else
+ 
+{
+      
+Serial
+.
+print
+(
+"Received unknown protocol: "
+)
+;
+      
+Serial
+.
+println
+(
+IrReceiver
+.
+decodedIRData
+.
+protocol
+)
+;
+    
+}
+    // Resume receiving
+    
+IrReceiver
+.
+resume
+()
+;
+ // Enable receiving of the next IR signal
+  
+}
+}
+Program Heltec
+// heltec_tft_st7735_pages.ino
+#include
+ 
+<Arduino.h>
+#include
+ 
+<SPI.h>
+#include
+ 
+<Adafruit_ST7735.h>
+#include
+ 
+<Adafruit_GFX.h>
+#include
+ 
+"configuration_heltec_tracker_v1x.h"
+// Physical display
+Adafruit_ST7735 tft = 
+Adafruit_ST7735
+(
+TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST
+)
+;
+// Framebuffer (160x80)
+GFXcanvas16 framebuffer = 
+GFXcanvas16
+(
+160
+, 
+80
+)
+;
+ // width=160, height=80 → landscape
+TinyGPSPlus GPS;
+// Global data
+TftPageData 
+g_TftPageData
+[TFT_MAX_PAGES] = 
+{
+    
+{
+"LoRaWAN TTN Status"
+,
+     
+"-"
+,
+     
+"-"
+,
+     
+"-"
+,
+     
+"-"
+,
+     
+"-"
+}
+,
+    
+{
+"GPS Status"
+,
+     
+"Lat: -"
+,
+     
+"Long: -"
+,
+     
+"Alt: -"
+,
+     
+"Sat: -"
+,
+     
+"Time: --:--:--"
+}
+}
+;
+const
+ String LoRaWANEventStrings[] = 
+{
+    
+"JOINING"
+, 
+"JOINED"
+, 
+"JOIN_FAIL"
+, 
+"REJOIN_FAIL"
+,
+    
+"TX_OK"
+, 
+"LOST_TSYNC"
+, 
+"RESET"
+, 
+"RX_OK"
+,
+    
+"LINK_DEAD"
+, 
+"LINK_ALIVE"
+}
+;
+char
+ 
+g_serialText
+[
+50
+];
+GpsPayload g_GpsPayload;
+// LED Blinking
+bool
+ ledBlinkActive = 
+false
+;
+uint32_t
+ ledNextToggle = 
+0
+;
+uint16_t
+ ledOnMs = 
+0
+;
+uint16_t
+ ledOffMs = 
+0
+;
+uint8_t
+ ledBlinkCount = 
+0
+;
+uint8_t
+ ledBlinkRemaining = 
+0
+;
+// Task handles & mutexes
+SemaphoreHandle_t
+ xTftMutex = 
+NULL
+;
+SemaphoreHandle_t
+ xSerialTextMutex = 
+NULL
+;
+SemaphoreHandle_t
+ xGpsDataMutex = 
+NULL
+;
+TaskHandle_t
+ xTftTaskHandle = 
+NULL
+;
+TaskHandle_t
+ xSerialMonitorTaskHandle = 
+NULL
+;
+TaskHandle_t
+ xGpsDataTaskHandle = 
+NULL
+;
+uint8_t
+ g_currentPage = 
+0
+;
+uint32_t
+ g_pageSwitchTime = 
+0
+;
+// Forward declarations
+void
+ 
+updateTftTask
+(
+void
+ 
+*
+pvParameters)
+;
+void
+ 
+updateSerialMonitorTask
+(
+void
+ 
+*
+pvParameters)
+;
+void
+ 
+updateGpsDataTask
+(
+void
+ 
+*
+pvParameters)
+;
+void
+ 
+startLedBlink
+(
+uint16_t
+ 
+onMs
+, 
+uint16_t
+ 
+offMs
+, 
+uint8_t
+ 
+count
+ = 
+0
+)
+;
+void
+ 
+handleLedBlink
+()
+;
+// Helper: Push framebuffer to display
+void
+ 
+flushFramebuffer
+()
+{
+    
+tft
+.
+drawRGBBitmap
+(
+0
+, 
+0
+, 
+framebuffer
+.
+getBuffer
+()
+, 
+160
+, 
+80
+)
+;
+}
+void
+ 
+setup
+()
+{
+    
+pinMode
+(
+Vext_Ctrl, OUTPUT
+)
+;
+    
+digitalWrite
+(
+Vext_Ctrl, HIGH
+)
+;
+ // Power on Vext (TFT, GPS, etc.)
+    
+pinMode
+(
+LED_K, OUTPUT
+)
+;
+    
+digitalWrite
+(
+LED_K, HIGH
+)
+;
+    
+pinMode
+(
+LED_BUILTIN, OUTPUT
+)
+;
+    
+digitalWrite
+(
+LED_BUILTIN, LOW
+)
+;
+    
+delay
+(
+100
+)
+;
+    
+Serial
+.
+begin
+(
+115200
+)
+;
+    // 
+⏳
+ Wait for USB CDC to be ready (critical on ESP32-S3)
+    
+while
+ 
+(
+!Serial
+)
+    
+{
+        
+delay
+(
+10
+)
+;
+    
+}
+    
+Serial
+.
+println
+(
+"\n\n
+✅
+ Heltec Wireless Tracker - TFT Demo Started!"
+)
+;
+    
+Serial
+.
+println
+(
+"USB Serial ready. Waiting for tasks..."
+)
+;
+    
+delay
+(
+100
+)
+;
+    
+Serial
+.
+println
+(
+"Heltec Tracker TFT Demo Started!"
+)
+;
+    
+Serial1
+.
+begin
+(
+115200
+, SERIAL_8N1, GPS_RX_PIN, GPS_TX_PIN
+)
+;
+ // RX=33, TX=34
+    
+Serial
+.
+println
+(
+"GNSS module powered and Serial1 started."
+)
+;
+    // Initialize physical display
+    
+tft
+.
+initR
+(
+INITR_MINI160x80
+)
+;
+    
+tft
+.
+invertDisplay
+(
+false
+)
+;
+    
+tft
+.
+setRotation
+(
+1
+)
+;
+ // Landscape: 160 wide, 80 tall
+    // Clear framebuffer and display
+    
+framebuffer
+.
+fillScreen
+(
+ST7735_BLACK
+)
+;
+    
+tft
+.
+drawRGBBitmap
+(
+0
+, 
+0
+, 
+framebuffer
+.
+getBuffer
+()
+, 
+160
+, 
+80
+)
+;
+    // Mutexes
+    xTftMutex = 
+xSemaphoreCreateMutex
+()
+;
+    xSerialTextMutex = 
+xSemaphoreCreateMutex
+()
+;
+    xGpsDataMutex = 
+xSemaphoreCreateMutex
+()
+;
+    // Tasks
+    
+xTaskCreatePinnedToCore
+(
+updateTftTask, 
+"TFT"
+, 
+4096
+, 
+NULL
+, 
+2
+, &xTftTaskHandle, 
+1
+)
+;
+    
+xTaskCreatePinnedToCore
+(
+updateSerialMonitorTask, 
+"Serial"
+, 
+4096
+, 
+NULL
+, 
+1
+, &xSerialMonitorTaskHandle, 
+0
+)
+;
+    
+xTaskCreatePinnedToCore
+(
+updateGpsDataTask, 
+"GPS"
+, 
+8192
+, 
+NULL
+, 
+2
+, &xGpsDataTaskHandle, 
+1
+)
+;
+    
+randomSeed
+(
+esp_random
+())
+;
+}
+void
+ 
+loop
+()
+{
+    
+handleLedBlink
+()
+;
+    
+delay
+(
+1
+)
+;
+}
+// ─────────────── TFT TASK ───────────────
+void
+ 
+updateTftTask
+(
+void
+ 
+*
+pvParameters)
+{
+    g_pageSwitchTime = 
+millis
+()
+;
+    
+for
+ 
+(
+;;
+)
+    
+{
+        
+if
+ 
+(
+millis
+()
+ - g_pageSwitchTime >= PAGE_DISPLAY_TIME_MS
+)
+        
+{
+            g_currentPage = 
+(
+g_currentPage + 
+1
+)
+ % TFT_MAX_PAGES;
+            g_pageSwitchTime = 
+millis
+()
+;
+        
+}
+        
+if
+ 
+(
+xSemaphoreTake
+(
+xTftMutex, MUTEX_TIMEOUT
+)
+ == pdTRUE
+)
+        
+{
+            
+framebuffer
+.
+fillScreen
+(
+ST7735_BLACK
+)
+;
+            
+framebuffer
+.
+setTextColor
+(
+ST7735_WHITE, ST7735_BLACK
+)
+;
+            
+framebuffer
+.
+setTextSize
+(
+1
+)
+;
+            
+for
+ 
+(
+int
+ i = 
+0
+; i < TFT_ROWS_PER_PAGE; i++
+)
+            
+{
+                
+int
+ y = TFT_TOP_MARGIN + i * TFT_LINE_HEIGHT;
+                
+if
+ 
+(
+y >= 
+80
+)
+ 
+break
+;
+ // Safety guard
+                
+framebuffer
+.
+setCursor
+(
+TFT_LEFT_MARGIN, y
+)
+;
+                
+framebuffer
+.
+print
+(
+g_TftPageData
+[g_currentPage].
+rows
+[i]
+)
+;
+            
+}
+            
+xSemaphoreGive
+(
+xTftMutex
+)
+;
+            
+tft
+.
+drawRGBBitmap
+(
+0
+, 
+0
+, 
+framebuffer
+.
+getBuffer
+()
+, 
+160
+, 
+80
+)
+;
+        
+}
+        
+vTaskDelay
+(
+pdMS_TO_TICKS
+(
+100
+))
+;
+    
+}
+}
+// ─────────────── SERIAL TASK ───────────────
+void
+ 
+updateSerialMonitorTask
+(
+void
+ 
+*
+pvParameters)
+{
+    
+for
+ 
+(
+;;
+)
+    
+{
+        
+if
+ 
+(
+xSemaphoreTake
+(
+xSerialTextMutex, MUTEX_TIMEOUT
+)
+ == pdTRUE
+)
+        
+{
+            
+Serial
+.
+println
+(
+g_serialText
+)
+;
+            
+xSemaphoreGive
+(
+xSerialTextMutex
+)
+;
+        
+}
+        
+vTaskDelay
+(
+pdMS_TO_TICKS
+(
+1000
+))
+;
+    
+}
+}
+// ─────────────── GPS TASK ───────────────
+void
+ 
+updateGpsDataTask
+(
+void
+ 
+*
+pvParameters)
+{
+    
+uint32_t
+ lastBlink = 
+0
+;
+    
+for
+ 
+(
+;;
+)
+    
+{
+        // Simulate LoRaWAN event
+        
+int
+ eventIndex = 
+random
+(
+0
+, sizeof
+(
+LoRaWANEventStrings
+)
+ / sizeof
+(
+LoRaWANEventStrings
+[
+0
+]
+))
+;
+        // Update LoRaWAN page (simulated)
+        
+if
+ 
+(
+xSemaphoreTake
+(
+xTftMutex, MUTEX_TIMEOUT
+)
+ == pdTRUE
+)
+        
+{
+            
+g_TftPageData
+[
+0
+].
+rows
+[
+0
+] = 
+"LoRaWAN TTN Status"
+;
+            
+g_TftPageData
+[
+0
+].
+rows
+[
+1
+] = 
+"LoRa: "
+ + 
+String
+(
+LoRaWANEventStrings
+[eventIndex]
+)
+;
+            
+g_TftPageData
+[
+0
+].
+rows
+[
+2
+] = 
+"RSSI: "
+ + 
+String
+(
+-
+50
+ - 
+random
+(
+0
+, 
+50
+))
+ + 
+" dBm"
+;
+            
+g_TftPageData
+[
+0
+].
+rows
+[
+3
+] = 
+"SNR: "
+ + 
+String
+(
+5.0
+f + 
+random
+(
+0
+, 
+100
+)
+ / 
+10.0
+f, 
+1
+)
+ + 
+" dB"
+;
+            
+g_TftPageData
+[
+0
+].
+rows
+[
+4
+] = 
+"Batt: "
+ + 
+String
+(
+3300
+ + 
+random
+(
+-
+100
+, 
+100
+))
+ + 
+" mV"
+;
+            
+g_TftPageData
+[
+0
+].
+rows
+[
+5
+] = 
+"-"
+;
+            
+xSemaphoreGive
+(
+xTftMutex
+)
+;
+        
+}
+        // Update serial log with LoRa event
+        
+if
+ 
+(
+xSemaphoreTake
+(
+xSerialTextMutex, MUTEX_TIMEOUT
+)
+ == pdTRUE
+)
+        
+{
+            
+snprintf
+(
+g_serialText, sizeof
+(
+g_serialText
+)
+,
+                     
+"LoRa=%s | GPS=waiting..."
+, 
+LoRaWANEventStrings
+[eventIndex]
+)
+;
+            
+xSemaphoreGive
+(
+xSerialTextMutex
+)
+;
+        
+}
+        // --- Read and parse ALL GPS data (do NOT skip \r or \n) ---
+        
+while
+ 
+(
+Serial1
+.
+available
+()
+ > 
+0
+)
+        
+{
+            
+GPS
+.
+encode
+(
+Serial1
+.
+read
+())
+;
+ // TinyGPS++ handles line endings internally
+        
+}
+        // Check validity independently
+        
+bool
+ hasTime = 
+GPS
+.
+time
+.
+isValid
+()
+;
+        
+bool
+ hasLocation = 
+GPS
+.
+location
+.
+isValid
+()
+;
+        
+uint8_t
+ sats = 
+GPS
+.
+satellites
+.
+value
+()
+;
+        
+if
+ 
+(
+hasTime || hasLocation
+)
+        
+{
+            
+float
+ lat = hasLocation ? 
+GPS
+.
+location
+.
+lat
+()
+ : 
+0.0
+f;
+            
+float
+ lon = hasLocation ? 
+GPS
+.
+location
+.
+lng
+()
+ : 
+0.0
+f;
+            
+float
+ alt = hasLocation ? 
+GPS
+.
+altitude
+.
+meters
+()
+ : 
+0.0
+f;
+            
+uint8_t
+ hour = 
+0
+, minute = 
+0
+, second = 
+0
+;
+            
+char
+ 
+timeStr
+[
+12
+] = 
+"--:--:--"
+;
+            
+if
+ 
+(
+hasTime
+)
+            
+{
+                hour = 
+GPS
+.
+time
+.
+hour
+()
+;
+                minute = 
+GPS
+.
+time
+.
+minute
+()
+;
+                second = 
+GPS
+.
+time
+.
+second
+()
+;
+                
+snprintf
+(
+timeStr, sizeof
+(
+timeStr
+)
+, 
+"%02d:%02d:%02d"
+, hour, minute, second
+)
+;
+            
+}
+            // Update TFT GPS page
+            
+if
+ 
+(
+xSemaphoreTake
+(
+xTftMutex, MUTEX_TIMEOUT
+)
+ == pdTRUE &&
+                
+xSemaphoreTake
+(
+xGpsDataMutex, MUTEX_TIMEOUT
+)
+ == pdTRUE
+)
+            
+{
+                
+g_TftPageData
+[
+1
+].
+rows
+[
+0
+] = 
+"GPS Status"
+;
+                
+g_TftPageData
+[
+1
+].
+rows
+[
+1
+] = hasLocation ? 
+(
+"Lat: "
+ + 
+String
+(
+lat, 
+6
+))
+ : 
+"Lat: -"
+;
+                
+g_TftPageData
+[
+1
+].
+rows
+[
+2
+] = hasLocation ? 
+(
+"Long: "
+ + 
+String
+(
+lon, 
+6
+))
+ : 
+"Long: -"
+;
+                
+g_TftPageData
+[
+1
+].
+rows
+[
+3
+] = hasLocation ? 
+(
+"Alt: "
+ + 
+String
+(
+alt, 
+1
+)
+ + 
+" m"
+)
+ : 
+"Alt: -"
+;
+                
+g_TftPageData
+[
+1
+].
+rows
+[
+4
+] = 
+"Sat: "
+ + 
+String
+(
+sats
+)
+;
+                
+g_TftPageData
+[
+1
+].
+rows
+[
+5
+] = 
+"Time: "
+ + 
+String
+(
+timeStr
+)
+;
+                // Update payload (store time always if valid, location only if valid)
+                
+if
+ 
+(
+hasLocation
+)
+                
+{
+                    
+g_GpsPayload
+.
+latitude
+ = lat;
+                    
+g_GpsPayload
+.
+longitude
+ = lon;
+                    
+g_GpsPayload
+.
+altitude
+ = alt;
+                
+}
+                
+g_GpsPayload
+.
+hour
+ = hour;
+                
+g_GpsPayload
+.
+minute
+ = minute;
+                
+g_GpsPayload
+.
+second
+ = second;
+                
+g_GpsPayload
+.
+satellites
+ = sats;
+                
+xSemaphoreGive
+(
+xGpsDataMutex
+)
+;
+                
+xSemaphoreGive
+(
+xTftMutex
+)
+;
+            
+}
+            // Update serial log
+            
+if
+ 
+(
+xSemaphoreTake
+(
+xSerialTextMutex, MUTEX_TIMEOUT
+)
+ == pdTRUE
+)
+            
+{
+                
+if
+ 
+(
+hasLocation
+)
+                
+{
+                    
+snprintf
+(
+g_serialText, sizeof
+(
+g_serialText
+)
+,
+                             
+"LoRa=%s | GPS=(%.6f,%.6f) %.1fm %d sats %s"
+,
+                             
+LoRaWANEventStrings
+[eventIndex], lat, lon, alt, sats, timeStr
+)
+;
+                
+}
+                
+else
+                
+{
+                    
+snprintf
+(
+g_serialText, sizeof
+(
+g_serialText
+)
+,
+                             
+"LoRa=%s | GPS=time only %s (%d sats)"
+,
+                             
+LoRaWANEventStrings
+[eventIndex], timeStr, sats
+)
+;
+                
+}
+                
+xSemaphoreGive
+(
+xSerialTextMutex
+)
+;
+            
+}
+        
+}
+        
+else
+        
+{
+            // No valid GPS data at all
+            
+if
+ 
+(
+xSemaphoreTake
+(
+xTftMutex, MUTEX_TIMEOUT
+)
+ == pdTRUE
+)
+            
+{
+                
+g_TftPageData
+[
+1
+].
+rows
+[
+0
+] = 
+"GPS Status"
+;
+                
+g_TftPageData
+[
+1
+].
+rows
+[
+1
+] = 
+"Lat: -"
+;
+                
+g_TftPageData
+[
+1
+].
+rows
+[
+2
+] = 
+"Long: -"
+;
+                
+g_TftPageData
+[
+1
+].
+rows
+[
+3
+] = 
+"Alt: -"
+;
+                
+g_TftPageData
+[
+1
+].
+rows
+[
+4
+] = 
+"Sat: -"
+;
+                
+g_TftPageData
+[
+1
+].
+rows
+[
+5
+] = 
+"Time: --:--:--"
+;
+                
+xSemaphoreGive
+(
+xTftMutex
+)
+;
+            
+}
+        
+}
+        // Random LED blink
+        
+if
+ 
+(
+millis
+()
+ - lastBlink > 
+(
+3000
+ + 
+random
+(
+0
+, 
+5000
+)))
+        
+{
+            
+uint16_t
+ on = 
+100
+ + 
+random
+(
+0
+, 
+400
+)
+;
+            
+uint16_t
+ off = 
+100
+ + 
+random
+(
+0
+, 
+400
+)
+;
+            
+uint8_t
+ count = 
+random
+(
+0
+, 
+2
+)
+ ? 
+(
+3
+ + 
+random
+(
+0
+, 
+5
+))
+ : 
+0
+;
+            
+startLedBlink
+(
+on, off, count
+)
+;
+            lastBlink = 
+millis
+()
+;
+        
+}
+        
+vTaskDelay
+(
+pdMS_TO_TICKS
+(
+1000
+))
+;
+ // Check GPS every 1s
+    
+}
+}
+// ─────────────── LED BLINKING ───────────────
+void
+ 
+startLedBlink
+(
+uint16_t
+ 
+onMs
+, 
+uint16_t
+ 
+offMs
+, 
+uint8_t
+ 
+count)
+{
+    ledOnMs = onMs;
+    ledOffMs = offMs;
+    ledBlinkCount = count;
+    ledBlinkRemaining = count;
+    ledBlinkActive = 
+true
+;
+    
+digitalWrite
+(
+LED_BUILTIN, HIGH
+)
+;
+    ledNextToggle = 
+millis
+()
+ + onMs;
+}
+void
+ 
+handleLedBlink
+()
+{
+    
+if
+ 
+(
+!ledBlinkActive
+)
+        
+return
+;
+    
+uint32_t
+ now = 
+millis
+()
+;
+    
+if
+ 
+(
+now >= ledNextToggle
+)
+    
+{
+        
+bool
+ currentState = 
+digitalRead
+(
+LED_BUILTIN
+)
+;
+        
+if
+ 
+(
+currentState == HIGH
+)
+        
+{
+            
+digitalWrite
+(
+LED_BUILTIN, LOW
+)
+;
+            ledNextToggle = now + ledOffMs;
+        
+}
+        
+else
+        
+{
+            
+digitalWrite
+(
+LED_BUILTIN, HIGH
+)
+;
+            ledNextToggle = now + ledOnMs;
+            
+if
+ 
+(
+ledBlinkCount > 
+0
+ && ledBlinkRemaining > 
+0
+)
+            
+{
+                ledBlinkRemaining--;
+                
+if
+ 
+(
+ledBlinkRemaining == 
+0
+)
+                
+{
+                    ledBlinkActive = 
+false
+;
+                    
+digitalWrite
+(
+LED_BUILTIN, LOW
+)
+;
+                
+}
+            
+}
+        
+}
+    
+}
+}
+adad

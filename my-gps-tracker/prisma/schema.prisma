@@ -4,15 +4,23 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("LASERTAG_POSTGRES_URL")
 }
 
 model GpsLog {
-  id        Int      @id @default(autoincrement())
-  deviceId  String
-  latitude  Float
-  longitude Float
-  createdAt DateTime @default(now())
+  id              Int      @id @default(autoincrement())
+  source          String   @default("wifi")  // "ttn" atau "wifi"
+  deviceId        String
+  latitude        Float
+  longitude       Float
+  altitude        Float?   @db.Real
+  irStatus        String?  @default("-")
+  battery         Int?     // millivolts
+  satellites      Int?
+  rssi            Int?
+  snr             Float?   @db.Real
+  rawPayload      Json?    // Full payload untuk debugging
+  createdAt       DateTime @default(now())
 
   @@map("gps_logs")
 }
