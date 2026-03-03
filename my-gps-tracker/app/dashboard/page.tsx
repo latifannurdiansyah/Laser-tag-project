@@ -302,7 +302,7 @@ export default function Dashboard() {
                   }}>
                     <div style={{ fontSize: '9px', color: '#737373' }}>CHEAT</div>
                     <div style={{ fontSize: '12px', fontWeight: 600, color: log.cheatDetected ? '#ef4444' : '#22c55e' }}>
-                      {log.cheatDetected ? 'TERDETEKSI' : 'NORMAL'}
+                      {log.cheatDetected ? 'TERDETEKSI' : '-'}
                     </div>
                   </div>
                 </div>
@@ -391,7 +391,7 @@ export default function Dashboard() {
                         color: log.cheatDetected ? '#ef4444' : '#22c55e',
                         background: log.cheatDetected ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)'
                       }}>
-                        {log.cheatDetected ? 'TERDETEKSI' : 'NORMAL'}
+                        {log.cheatDetected ? 'TERDETEKSI' : '-'}
                       </td>
                       <td style={{
                         padding: '10px 12px',
