@@ -10,6 +10,7 @@ Dokumen ini menjelaskan langkah-langkah menghubungkan device Laser Tag ke intern
 4. [Prioritas 3: WiFi → Vercel Langsung](#4-prioritas-3-wifi--vercel-langsung)
 5. [Prioritas 4: SD Card Backup (GPS CSV Logger)](#5-prioritas-4-sd-card-backup-gps-csv-logger)
 6. [Setup Vercel & NeonDB](#6-setup-vercel--neondb)
+   6.6 [Memahami Kolom Dashboard](#66-memahami-kolom-dashboard)
 7. [Troubleshooting](#7-troubleshooting)
 
 ---
@@ -656,6 +657,33 @@ Setelah semua terhubung:
 - **Dashboard**: `https://laser-tag-project.vercel.app/dashboard`
 - **API Track**: `https://laser-tag-project.vercel.app/api/track`
 
+### 6.6 Memahami Kolom Dashboard
+
+Dashboard menampilkan data dengan kolom-kolom berikut:
+
+| Kolom | Deskripsi | Contoh |
+|-------|-----------|--------|
+| ID | Nomor urut data | 1, 2, 3... |
+| SRC | Sumber data | `wifi` (WiFi HTTP), `ttn` (LoRaWAN), `thingspeak` |
+| DEVICE | ID device | Heltec-P1 |
+| LATITUDE | Latitude GPS | -6.208800 |
+| LONGITUDE | Longitude GPS | 106.845600 |
+| ALT (m) | Ketinggian (meter) | 45.5 |
+| SAT | Jumlah satelit | 8 |
+| RSSI | Signal strength | -90 dBm |
+| SNR | Signal quality | 7.5 dB |
+| CHEAT | Status cheat | **TERDETEKSI** (merah) / **-** (kosong) |
+| STATUS | Status IR | HIT (merah) / - (normal) |
+| TIMESTAMP | Waktu data masuk | 2025-01-01 10:30:45 |
+
+**Kolom CHEAT:**
+- **TERDETEKSI** = Sensor IR sensor tertutup >5 detik (indikasi cheat)
+- **-** = Normal (tidak ada cheat)
+
+**Kolom STATUS:**
+- **HIT** = Player tertembak (sensor IR menerima sinyal)
+- **-** = Normal
+
 ---
 
 ## 7. Troubleshooting
@@ -681,13 +709,25 @@ Setelah semua terhubung:
 
 ### 7.3 Troubleshooting WiFi
 
-| Masalah | Solusi |
-|---------|--------|
-| WiFi tidak konek | Cek SSID dan password benar |
-| Upload gagal | Cek URL Vercel benar |
-| Sering disconnect | Cek signal WiFi kuat |
+| Masalah | Penyebab | Solusi |
+|---------|----------|--------|
+| WiFi tidak konek | SSID/password salah | Cek SSID dan password benar |
+| Upload gagal | URL Vercel salah | Cek URL Vercel benar |
+| Sering disconnect | Signal lemah | Cek signal WiFi kuat |
+| WiFi gagal (code:-1) saat GPRS aktif | Routing conflict | WiFi hanya jika GPRS OFF |
 
-### 7.4 Troubleshooting SD Card
+### 7.4 Troubleshooting WiFi + GPRS Bersama
+
+Ketika kedua interface (WiFi dan GPRS) aktif bersamaan, kadang terjadi konflik routing:
+
+| Gejala | Penyebab | Solusi |
+|--------|----------|--------|
+| WiFi: FAIL (code:-1) | ESP32 routing salah | Firmware priority: GPRS, skip WiFi jika GPRS ON |
+| WiFi tidak bisa HTTPS | Default route ke GPRS | Gunakan salah satu saja |
+
+**Catatan**: Firmware V1.5 mengirim data via WiFi hanya jika GPRS tidak terhubung. Ini adalah desain untuk menghindari konflik routing.
+
+### 7.5 Troubleshooting SD Card
 
 | Masalah | Solusi |
 |---------|--------|
@@ -695,7 +735,7 @@ Setelah semua terhubung:
 | File tidak tercipta | Cek SD Card tidak write-protected |
 | Data korup | Cek power supply cukup |
 
-### 7.5 Serial Monitor Output Reference
+### 7.6 Serial Monitor Output Reference
 
 Firmware V1.5 menampilkan berbagai informasi di Serial Monitor:
 
