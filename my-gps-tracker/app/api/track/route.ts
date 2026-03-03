@@ -21,6 +21,7 @@ export async function POST(request: Request) {
     const irStatus = body.irStatus ?? body.hitStatus ?? null
     const command = body.command ?? body.irCommand
     const address = body.address ?? body.irAddress
+    const cheatDetected = body.cheatDetected ?? body.cheat ?? null
 
     console.log('[API] Parsed values - id:', id, 'lat:', lat, 'lng:', lng, 'alt:', alt)
 
@@ -57,6 +58,7 @@ export async function POST(request: Request) {
           satellites: satellites != null ? parseInt(satellites) : null,
           rssi: rssi != null ? parseInt(rssi) : null,
           snr: snr != null ? parseFloat(snr) : null,
+          cheatDetected: cheatDetected != null ? Boolean(cheatDetected) : null,
           rawPayload: body
         }
       })

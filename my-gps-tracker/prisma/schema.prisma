@@ -19,6 +19,7 @@ model GpsLog {
   satellites      Int?
   rssi            Int?
   snr             Float?   @db.Real
+  cheatDetected  Boolean?  // true = terdeteksi cheat, false = normal
   rawPayload      Json?    // Full payload untuk debugging
   createdAt       DateTime @default(now())
 

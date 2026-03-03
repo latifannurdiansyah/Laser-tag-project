@@ -14,6 +14,7 @@ interface GpsLog {
   satellites?: number | null
   rssi?: number | null
   snr?: number | null
+  cheatDetected?: boolean | null
   createdAt: string
 }
 
@@ -264,7 +265,7 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '12px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', marginBottom: '12px' }}>
                   <div style={{ background: '#0a0a0a', padding: '8px', borderRadius: '6px', textAlign: 'center' }}>
                     <div style={{ fontSize: '9px', color: '#737373' }}>ALT</div>
                     <div style={{ fontSize: '12px', color: '#a3a3a3' }}>
@@ -277,15 +278,9 @@ export default function Dashboard() {
                       {log.satellites != null ? log.satellites : '-'}
                     </div>
                   </div>
-                  <div style={{ background: '#0a0a0a', padding: '8px', borderRadius: '6px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '9px', color: '#737373' }}>BATT</div>
-                    <div style={{ fontSize: '12px', color: getBatteryColor(log.battery) }}>
-                      {log.battery != null ? `${(log.battery / 1000).toFixed(2)}V` : '-'}
-                    </div>
-                  </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '12px' }}>
                   <div style={{ background: '#0a0a0a', padding: '8px', borderRadius: '6px', textAlign: 'center' }}>
                     <div style={{ fontSize: '9px', color: '#737373' }}>RSSI</div>
                     <div style={{ fontSize: '12px', color: getSignalColor(log.rssi) }}>
@@ -296,6 +291,18 @@ export default function Dashboard() {
                     <div style={{ fontSize: '9px', color: '#737373' }}>SNR</div>
                     <div style={{ fontSize: '12px', color: log.snr != null && log.snr >= 0 ? '#22c55e' : '#737373' }}>
                       {log.snr != null ? `${log.snr.toFixed(1)} dB` : '-'}
+                    </div>
+                  </div>
+                  <div style={{ 
+                    background: log.cheatDetected ? '#7f1d1d' : '#0a0a0a', 
+                    padding: '8px', 
+                    borderRadius: '6px', 
+                    textAlign: 'center',
+                    border: log.cheatDetected ? '1px solid #ef4444' : '1px solid #262626'
+                  }}>
+                    <div style={{ fontSize: '9px', color: '#737373' }}>CHEAT</div>
+                    <div style={{ fontSize: '12px', fontWeight: 600, color: log.cheatDetected ? '#ef4444' : '#22c55e' }}>
+                      {log.cheatDetected ? 'TERDETEKSI' : 'NORMAL'}
                     </div>
                   </div>
                 </div>
@@ -341,9 +348,9 @@ export default function Dashboard() {
                     <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 600, fontSize: '12px', color: '#3b82f6' }}>LONGITUDE</th>
                     <th style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 600, fontSize: '12px', color: '#a3a3a3', width: '80px' }}>ALT (m)</th>
                     <th style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 600, fontSize: '12px', color: '#a3a3a3', width: '60px' }}>SAT</th>
-                    <th style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 600, fontSize: '12px', color: '#a3a3a3', width: '90px' }}>BATT</th>
                     <th style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 600, fontSize: '12px', color: '#a3a3a3', width: '90px' }}>RSSI</th>
                     <th style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 600, fontSize: '12px', color: '#a3a3a3', width: '80px' }}>SNR</th>
+                    <th style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 600, fontSize: '12px', color: '#a3a3a3', width: '90px' }}>CHEAT</th>
                     <th style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 600, fontSize: '12px', color: '#ef4444', width: '140px' }}>STATUS</th>
                     <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 600, fontSize: '12px', color: '#a3a3a3', width: '150px' }}>TIMESTAMP</th>
                   </tr>
@@ -370,14 +377,21 @@ export default function Dashboard() {
                       <td style={{ padding: '10px 12px', fontSize: '13px', textAlign: 'center', color: '#a3a3a3' }}>
                         {log.satellites != null ? log.satellites : '-'}
                       </td>
-                      <td style={{ padding: '10px 12px', fontSize: '13px', textAlign: 'center', color: getBatteryColor(log.battery) }}>
-                        {log.battery != null ? `${(log.battery / 1000).toFixed(2)}V` : '-'}
-                      </td>
                       <td style={{ padding: '10px 12px', fontSize: '13px', textAlign: 'center', color: getSignalColor(log.rssi) }}>
                         {log.rssi != null ? `${log.rssi} dBm` : '-'}
                       </td>
                       <td style={{ padding: '10px 12px', fontSize: '13px', textAlign: 'center', color: log.snr != null && log.snr >= 0 ? '#22c55e' : '#737373' }}>
                         {log.snr != null ? `${log.snr.toFixed(1)} dB` : '-'}
+                      </td>
+                      <td style={{ 
+                        padding: '10px 12px', 
+                        fontSize: '12px', 
+                        fontWeight: 600,
+                        textAlign: 'center', 
+                        color: log.cheatDetected ? '#ef4444' : '#22c55e',
+                        background: log.cheatDetected ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)'
+                      }}>
+                        {log.cheatDetected ? 'TERDETEKSI' : 'NORMAL'}
                       </td>
                       <td style={{
                         padding: '10px 12px',
