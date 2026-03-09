@@ -1,8 +1,8 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "GPS Tracker",
-  description: "GPS Tracker Dashboard",
+  title: "Laser Tag Dashboard",
+  description: "GPS Tracker Dashboard for Laser Tag System",
 };
 
 export const viewport = {

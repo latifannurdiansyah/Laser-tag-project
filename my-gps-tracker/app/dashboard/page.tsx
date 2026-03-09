@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 interface GpsLog {
   id: number
@@ -19,19 +20,32 @@ interface GpsLog {
 }
 
 export default function Dashboard() {
+  const router = useRouter()
   const [logs, setLogs] = useState<GpsLog[]>([])
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
+    const isLoggedIn = localStorage.getItem('lasertag_logged_in')
+    if (isLoggedIn !== 'true') {
+      router.push('/')
+      return
+    }
+
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 1024)
     }
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
-  }, [])
+  }, [router])
+
+  const handleLogout = () => {
+    localStorage.removeItem('lasertag_logged_in')
+    localStorage.removeItem('lasertag_user')
+    router.push('/')
+  }
 
   const fetchLogs = async () => {
     try {
@@ -150,6 +164,11 @@ export default function Dashboard() {
     background: '#dc2626',
   }
 
+  const logoutButtonStyle: React.CSSProperties = {
+    ...buttonStyle,
+    background: '#7c3aed',
+  }
+
   const loadingButtonStyle: React.CSSProperties = {
     ...buttonStyle,
     background: '#666',
@@ -221,6 +240,12 @@ export default function Dashboard() {
             style={loading ? loadingButtonStyle : clearButtonStyle}
           >
             Clear All
+          </button>
+          <button
+            onClick={handleLogout}
+            style={loading ? loadingButtonStyle : logoutButtonStyle}
+          >
+            Logout
           </button>
         </div>
 
