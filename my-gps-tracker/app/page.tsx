@@ -59,7 +59,69 @@ export default function Home() {
             marginBottom: '10px',
             filter: 'drop-shadow(0 0 10px rgba(34, 197, 94, 0.5))'
           }}>
-            🎯
+            <div style={{
+              width: '60px',
+              height: '60px',
+              margin: '0 auto',
+              position: 'relative',
+            }}>
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '40px',
+                height: '40px',
+                border: '2px solid #22c55e',
+                borderRadius: '50%',
+              }} />
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '10px',
+                height: '10px',
+                background: '#22c55e',
+                borderRadius: '50%',
+              }} />
+              <div style={{
+                position: 'absolute',
+                top: '0',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '2px',
+                height: '15px',
+                background: '#22c55e',
+              }} />
+              <div style={{
+                position: 'absolute',
+                bottom: '0',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '2px',
+                height: '15px',
+                background: '#22c55e',
+              }} />
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '0',
+                transform: 'translateY(-50%)',
+                width: '15px',
+                height: '2px',
+                background: '#22c55e',
+              }} />
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                right: '0',
+                transform: 'translateY(-50%)',
+                width: '15px',
+                height: '2px',
+                background: '#22c55e',
+              }} />
+            </div>
           </div>
           <h1 style={{
             fontSize: '24px',
@@ -206,7 +268,7 @@ export default function Home() {
           fontSize: '11px',
           color: '#444',
         }}>
-          <div style={{ marginBottom: '5px' }}>🎯 TARGETING... READY</div>
+          <div style={{ marginBottom: '5px' }}>🔥 MISSION READY</div>
           <div style={{ color: '#333' }}>v1.0.0</div>
         </div>
       </div>
