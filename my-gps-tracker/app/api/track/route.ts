@@ -19,9 +19,9 @@ export async function POST(request: Request) {
     const rssi = body.rssi
     const snr = body.snr
     const irStatus = body.irStatus ?? body.hitStatus ?? null
-    const command = body.command ?? body.irCommand
-    const address = body.address ?? body.irAddress
-    const cheatDetected = body.cheatDetected ?? body.cheat ?? null
+    const command = body.command ?? body.irCommand ?? body.field10
+    const address = body.address ?? body.irAddress ?? body.field9
+    const cheatDetected = body.cheatDetected ?? body.cheat ?? body.field7
 
     console.log('[API] Parsed values - id:', id, 'lat:', lat, 'lng:', lng, 'alt:', alt)
 
